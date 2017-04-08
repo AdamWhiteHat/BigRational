@@ -107,62 +107,39 @@ namespace ExtendedNumerics
 
 		public static Fraction Add(Fraction augend, Fraction addend)
 		{
-			Fraction result;
-
-			if (augend.Denominator == addend.Denominator)
-			{
-				result = new Fraction(augend.Numerator + addend.Numerator, augend.Denominator);
-			}
-			else
-			{
-				result = new Fraction();
-				result.Denominator = LCM(augend.Denominator, addend.Denominator);
-
-				BigInteger augendNumerator = result.Denominator / augend.Denominator;
-				BigInteger addendNumerator = result.Denominator / addend.Denominator;
-
-				result.Numerator = augendNumerator + addendNumerator;
-			}
-
-			return Fraction.Simplify(result);
+			// a/b + c/d  == (ad + bc)/bd
+			return new Fraction(
+					BigInteger.Add(
+						BigInteger.Multiply(augend.Numerator, addend.Denominator),
+						BigInteger.Multiply(augend.Denominator, addend.Numerator)
+					),
+					BigInteger.Multiply(augend.Denominator, addend.Denominator)
+				);
 		}
 
 		public static Fraction Subtract(Fraction minuend, Fraction subtrahend)
 		{
-			Fraction result;
-
-			if (minuend.Denominator == subtrahend.Denominator)
-			{
-				result = new Fraction(minuend.Numerator - subtrahend.Numerator, minuend.Denominator);
-			}
-			else
-			{
-				result = new Fraction();
-				result.Denominator = LCM(minuend.Denominator, subtrahend.Denominator);
-
-				BigInteger minuendNumerator = result.Denominator / minuend.Denominator;
-				BigInteger subtrahendNumerator = result.Denominator / subtrahend.Denominator;
-
-				result.Numerator = minuendNumerator - subtrahendNumerator;
-			}
-
-			return Fraction.Simplify(result);
+			// a/b - c/d  == (ad - bc)/bd
+			return new Fraction(
+					BigInteger.Subtract(
+						BigInteger.Multiply(minuend.Numerator, subtrahend.Denominator),
+						BigInteger.Multiply(minuend.Denominator, subtrahend.Numerator)
+					),
+					BigInteger.Multiply(minuend.Denominator, subtrahend.Denominator)
+				);
 		}
 
 		public static Fraction Multiply(Fraction multiplicand, Fraction multiplier)
 		{
-			Fraction result = new Fraction(
+			return new Fraction(
 					BigInteger.Multiply(multiplicand.Numerator, multiplier.Numerator),
 					BigInteger.Multiply(multiplicand.Denominator, multiplier.Denominator)
 				);
-
-			return Fraction.Simplify(result);
 		}
 
 		public static Fraction Divide(Fraction dividend, Fraction divisor)
 		{
-			Fraction inverseDivisor = Reciprocal(divisor);
-			return Multiply(dividend, inverseDivisor);
+			return Multiply(dividend, Reciprocal(divisor));
 		}
 
 		public static Fraction Remainder(BigInteger dividend, BigInteger divisor)
@@ -237,7 +214,8 @@ namespace ExtendedNumerics
 		public static Fraction Reciprocal(Fraction fraction)
 		{
 			Fraction result = new Fraction(fraction.Denominator, fraction.Numerator);
-			return Fraction.Simplify(result);
+			Fraction simplified = Fraction.Simplify(result);
+			return simplified;
 		}
 
 		public static Fraction Abs(Fraction fraction)
@@ -287,7 +265,7 @@ namespace ExtendedNumerics
 		int IComparable.CompareTo(Object obj)
 		{
 			if (obj == null) { return 1; }
-			if (!(obj is Fraction)) { throw new ArgumentException("Argument must be of type Fraction", "obj"); }
+			if (!(obj is Fraction)) { throw new ArgumentException($"Argument must be of type {nameof(Fraction)}", nameof(obj)); }
 			return Compare(this, (Fraction)obj);
 		}
 
