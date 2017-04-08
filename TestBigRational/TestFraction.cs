@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using ExtendedNumerics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -14,13 +15,25 @@ namespace TestBigRational
 			Fraction oneFifth = new Fraction(1, 5);
 
 			Fraction expectedValue = new Fraction(8, 15);
-			
+
 			Fraction result = Fraction.Add(oneThird, oneFifth);
 			Assert.AreEqual(expectedValue, result);
 		}
 
 		[TestMethod]
 		public void TestSubtraction()
+		{
+			Fraction oneHalf = new Fraction(1, 2);
+			Fraction oneSixth = new Fraction(1, 6);
+
+			Fraction expectedValue = new Fraction(1, 3);
+
+			Fraction result = Fraction.Subtract(oneHalf, oneSixth);
+			Assert.AreEqual(expectedValue, result);
+		}
+
+		[TestMethod]
+		public void TestImproperSubtraction()
 		{
 			Fraction oneHalf = new Fraction(1, 2);
 			Fraction oneSixth = new Fraction(1, 6);
@@ -71,7 +84,7 @@ namespace TestBigRational
 		{
 			Double fifteenSixteenths = 0.9375d;
 			Fraction expectedValue = new Fraction(15, 16);
-			
+
 			Fraction result = (Fraction)fifteenSixteenths;
 
 			Assert.AreEqual(expectedValue, result);

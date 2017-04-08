@@ -13,29 +13,27 @@ namespace ExtendedNumerics
 		#region Constructors
 
 		public Fraction()
+			: this(new BigInteger(0), new BigInteger(1))
 		{
-			Numerator = new BigInteger(0);
-			Denominator = new BigInteger(1);
-			Simplify();
 		}
 
 		public Fraction(Fraction fraction)
-			: this()
+			: this(fraction.Numerator, fraction.Denominator)
 		{
-			Numerator = fraction.Numerator;
-			Denominator = fraction.Denominator;
-			Simplify();
 		}
 
 		public Fraction(BigInteger value)
-			: this()
+			: this(value, BigInteger.One)
 		{
-			Numerator = value;
-			Simplify();
+		}
+
+		public Fraction(BigInteger numerator, BigInteger denominator)
+		{
+			Numerator = numerator;
+			Denominator = denominator;
 		}
 
 		public Fraction(Double value)
-			: this()
 		{
 			if (Double.IsNaN(value))
 			{
@@ -72,20 +70,14 @@ namespace ExtendedNumerics
 				{
 					Double numerator = value * Math.Pow(10d, exponent);
 					Numerator = (BigInteger)numerator;
+					Denominator = BigInteger.Multiply(Denominator, BigInteger.Pow(10, (int)exponent));
+
 				}
 				else
 				{
 					Numerator = (BigInteger)value;
 				}
-				Simplify();
 			}
-		}
-
-		public Fraction(BigInteger numerator, BigInteger denominator)
-		{
-			Numerator = numerator;
-			Denominator = denominator;
-			Simplify();
 		}
 
 		#endregion
@@ -95,7 +87,7 @@ namespace ExtendedNumerics
 		public BigInteger Numerator { get; private set; }
 		public BigInteger Denominator { get; private set; }
 
-		public Int32 Sign { get { Simplify(); return Numerator.Sign; } }
+		public Int32 Sign { get { return Fraction.Simplify(this).Numerator.Sign; } }
 
 		#region Static Properties
 
@@ -132,9 +124,7 @@ namespace ExtendedNumerics
 				result.Numerator = augendNumerator + addendNumerator;
 			}
 
-			result.Simplify();
-
-			return result;
+			return Fraction.Simplify(result);
 		}
 
 		public static Fraction Subtract(Fraction minuend, Fraction subtrahend)
@@ -156,9 +146,7 @@ namespace ExtendedNumerics
 				result.Numerator = minuendNumerator - subtrahendNumerator;
 			}
 
-			result.Simplify();
-
-			return result;
+			return Fraction.Simplify(result);
 		}
 
 		public static Fraction Multiply(Fraction multiplicand, Fraction multiplier)
@@ -168,8 +156,7 @@ namespace ExtendedNumerics
 					BigInteger.Multiply(multiplicand.Denominator, multiplier.Denominator)
 				);
 
-			result.Simplify();
-			return result;
+			return Fraction.Simplify(result);
 		}
 
 		public static Fraction Divide(Fraction dividend, Fraction divisor)
@@ -250,8 +237,7 @@ namespace ExtendedNumerics
 		public static Fraction Reciprocal(Fraction fraction)
 		{
 			Fraction result = new Fraction(fraction.Denominator, fraction.Numerator);
-			result.Simplify();
-			return result;
+			return Fraction.Simplify(result);
 		}
 
 		public static Fraction Abs(Fraction fraction)
@@ -403,46 +389,45 @@ namespace ExtendedNumerics
 
 		#region Instance Methods
 
-		public BigInteger ReduceToProperFraction()
+		public static BigRational ReduceToProperFraction(Fraction value)
 		{
-			Simplify();
-			
-			if(Numerator>Denominator)
+			Fraction input = Fraction.Simplify(value);
+
+			if (input.Numerator > input.Denominator)
 			{
 				BigInteger remainder = new BigInteger(-1);
-				BigInteger wholeUnits = BigInteger.DivRem(Numerator, Denominator, out remainder);
-				Numerator = remainder;
-				Simplify();
-				return wholeUnits;
+				BigInteger wholeUnits = BigInteger.DivRem(input.Numerator, input.Denominator, out remainder);
+				return new BigRational(wholeUnits, new Fraction(remainder, input.Denominator));
 			}
-						
-			return 0;
+
+			return new BigRational(BigInteger.Zero, input.Numerator, input.Denominator);
 		}
 
-		private void Simplify()
+		public static Fraction Simplify(Fraction value)
 		{
-			if (Numerator.IsZero || Numerator.IsOne || Numerator == BigInteger.MinusOne)
+			if (value.Numerator.IsZero || value.Numerator.IsOne || value.Numerator == BigInteger.MinusOne)
 			{
-				return;
+				return new Fraction(value);
 			}
 
-			BigInteger gcd = GCD(Numerator, Denominator);
+			BigInteger num = value.Numerator;
+			BigInteger denom = value.Denominator;
+			BigInteger gcd = GCD(num, denom);
 			if (gcd > BigInteger.One)
 			{
-				Numerator /= gcd;
-				Denominator /= gcd;
+				return new Fraction(num / gcd, denom / gcd);
 			}
 
-			if (Denominator.Sign < 0)
+			if (denom.Sign < 0)
 			{
-				Denominator = BigInteger.Negate(Denominator);
-				Numerator = BigInteger.Negate(Numerator);
+				return new Fraction(BigInteger.Negate(num), BigInteger.Negate(denom));
 			}
+
+			return new Fraction(value);
 		}
 
 		public override string ToString()
 		{
-			Simplify();
 			return $"{Numerator} / {Denominator}";
 		}
 
