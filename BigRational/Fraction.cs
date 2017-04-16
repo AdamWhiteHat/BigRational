@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace ExtendedNumerics
 {
-	public class Fraction : IComparable, IComparable<Fraction>, IEquatable<Fraction>
+	public class Fraction : IComparable, IComparable<Fraction>, IEquatable<Fraction>, IEqualityComparer<Fraction>
 	{
 		#region Constructors
 
@@ -66,16 +66,20 @@ namespace ExtendedNumerics
 										.TrimEnd('0')
 										.SkipWhile(c => c != '.').Skip(1)
 										.Count();
+				Denominator = 1;
+
 				if (exponent > 0)
 				{
 					Double numerator = value * Math.Pow(10d, exponent);
 					Numerator = (BigInteger)numerator;
-					Denominator = BigInteger.Multiply(Denominator, BigInteger.Pow(10, (int)exponent));
+					Denominator = BigInteger.Pow(10, (int)exponent);
+					int i = 0;
 
 				}
 				else
 				{
 					Numerator = (BigInteger)value;
+					Denominator = 1;
 				}
 			}
 		}
@@ -281,20 +285,30 @@ namespace ExtendedNumerics
 
 		public Boolean Equals(Fraction other)
 		{
-			if (this.Denominator == other.Denominator) { return Numerator == other.Numerator; }
-			else { return (Numerator * other.Denominator) == (Denominator * other.Numerator); }
+			return this.Equals(this, other);
 		}
 
 		public override bool Equals(Object obj)
 		{
 			if (obj == null) { return false; }
 			if (!(obj is Fraction)) { return false; }
-			return this.Equals((Fraction)obj);
+			return this.Equals(this, (Fraction)obj);
 		}
 
 		public override int GetHashCode()
 		{
-			return (Numerator / Denominator).GetHashCode();
+			return this.GetHashCode(this);
+		}
+
+		public bool Equals(Fraction left, Fraction right)
+		{
+			if (left.Denominator == right.Denominator) { return left.Numerator == right.Numerator; }
+			else { return (left.Numerator * right.Denominator) == (left.Denominator * right.Numerator); }
+		}
+
+		public int GetHashCode(Fraction fraction)
+		{
+			return (fraction.Numerator / fraction.Denominator).ToString().GetHashCode();
 		}
 
 		#endregion

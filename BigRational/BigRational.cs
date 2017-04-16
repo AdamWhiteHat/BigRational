@@ -175,7 +175,7 @@ namespace ExtendedNumerics
 
 		public static explicit operator BigRational(Double value)
 		{
-			return new BigRational(value);
+			return new BigRational(BigInteger.Zero, (Fraction)value);
 		}
 
 		public static explicit operator Double(BigRational value)
