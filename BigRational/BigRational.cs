@@ -11,9 +11,20 @@ namespace ExtendedNumerics
 	{
 		#region Constructors
 
+		public BigRational(int value)
+			: this((BigInteger)value)
+		{
+		}
+
 		public BigRational(BigInteger value)
 			: this(value, Fraction.Zero)
 		{
+		}
+
+		public BigRational(Fraction fraction)
+			: this(BigInteger.Zero, fraction)
+		{
+
 		}
 
 		public BigRational(BigInteger whole, Fraction fraction)
@@ -41,7 +52,7 @@ namespace ExtendedNumerics
 			if (value == 0)
 			{
 				WholePart = BigInteger.Zero;
-				FractionalPart = Fraction.Zero;
+				FractionalPart = Fraction.One;
 			}
 			else if (value == 1)
 			{
@@ -56,7 +67,7 @@ namespace ExtendedNumerics
 			else
 			{
 				WholePart = (BigInteger)Math.Truncate(value);
-				Double fract = value % 1;
+				Double fract = Math.Abs(value) % 1;
 				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
 			}
 		}
@@ -67,6 +78,15 @@ namespace ExtendedNumerics
 
 		public BigInteger WholePart { get; private set; }
 		public Fraction FractionalPart { get; private set; }
+
+		public Int32 Sign
+		{
+			get
+			{
+				BigRational normalized = NormalizeSign(this);
+				return normalized.WholePart.Sign;
+			}
+		}
 
 		#endregion
 
@@ -175,7 +195,7 @@ namespace ExtendedNumerics
 
 		public static explicit operator BigRational(Double value)
 		{
-			return new BigRational(BigInteger.Zero, (Fraction)value);
+			return new BigRational(value);
 		}
 
 		public static explicit operator Double(BigRational value)
@@ -221,10 +241,17 @@ namespace ExtendedNumerics
 
 		public static int Compare(BigRational left, BigRational right)
 		{
-			BigRational leftRed = BigRational.Expand(left);
-			BigRational rightRed = BigRational.Expand(right);
+			BigRational leftRed = BigRational.Reduce(left);
+			BigRational rightRed = BigRational.Reduce(right);
 
-			return Fraction.Compare(leftRed.FractionalPart, rightRed.FractionalPart);
+			if (left.WholePart == right.WholePart)
+			{
+				return Fraction.Compare(leftRed.FractionalPart, rightRed.FractionalPart);
+			}
+			else
+			{
+				return BigInteger.Compare(left.WholePart, right.WholePart);
+			}
 		}
 
 
@@ -234,9 +261,16 @@ namespace ExtendedNumerics
 
 		public Boolean Equals(BigRational other)
 		{
-			Fraction fracExpandedThis = BigRational.Expand(this).FractionalPart;
-			Fraction fracExpandedOther = BigRational.Expand(other).FractionalPart;
-			return fracExpandedThis.Equals(fracExpandedOther);
+			BigRational reducedThis = BigRational.Reduce(this);
+			BigRational reducedOther = BigRational.Reduce(other);
+
+			bool result = true;
+
+			result &= reducedThis.WholePart.Equals(reducedOther.WholePart);
+			result &= reducedThis.FractionalPart.Numerator.Equals(reducedOther.FractionalPart.Numerator);
+			result &= reducedThis.FractionalPart.Denominator.Equals(reducedOther.FractionalPart.Denominator);
+
+			return result;
 		}
 
 		public override bool Equals(Object obj)
@@ -256,11 +290,11 @@ namespace ExtendedNumerics
 
 		#endregion
 
-		#region Instance Methods
+		#region Transform Methods
 
 		public static BigRational Expand(BigRational value)
 		{
-			BigRational input = SynchronizeSigns(value);
+			BigRational input = NormalizeSign(value);
 
 			if (value.FractionalPart.Numerator > 0 || value.FractionalPart.Denominator > 1)
 			{
@@ -275,22 +309,23 @@ namespace ExtendedNumerics
 				}
 			}
 
-			return value;
+			return new BigRational(value.WholePart, value.FractionalPart);
 		}
 
 		public static BigRational Reduce(BigRational value)
 		{
-			BigRational input = SynchronizeSigns(value);
-			BigRational result = Fraction.ReduceToProperFraction(input.FractionalPart);
+			BigRational input = NormalizeSign(value);
+			BigRational reduced = Fraction.ReduceToProperFraction(input.FractionalPart);
+			BigRational result = new BigRational(value.WholePart + reduced.WholePart, reduced.FractionalPart);
 			return result;
 		}
 
-		private static BigRational SynchronizeSigns(BigRational value)
+		private static BigRational NormalizeSign(BigRational value)
 		{
 			BigInteger whole;
-			Fraction fract;
+			Fraction fract = Fraction.NormalizeSign(value.FractionalPart);
 
-			if (value.WholePart.Sign > 0 && value.FractionalPart.Sign < 0)
+			if (value.WholePart > 0 && value.WholePart.Sign > 0 && fract.Sign < 0)
 			{
 				whole = BigInteger.Negate(value.WholePart);
 			}
@@ -299,27 +334,31 @@ namespace ExtendedNumerics
 				whole = value.WholePart;
 			}
 
-			if (value.WholePart.Sign < 0 && value.FractionalPart.Sign > 0)
-			{
-				fract = Fraction.Negate(value.FractionalPart);
-			}
-			else
-			{
-				fract = new Fraction(value.FractionalPart.Numerator, value.FractionalPart.Denominator);
-			}
-
 			return new BigRational(whole, fract);
 		}
 
+		#endregion
+
+		#region Overrides
+
 		public override string ToString()
 		{
-			string first = WholePart > 0 ? $"{WholePart}" : "0";
-			string second = FractionalPart.Numerator > 0 ? $"{FractionalPart.Numerator} / {FractionalPart.Denominator}" : string.Empty;
+			BigRational input = BigRational.Reduce(this);
+
+			string first = input.WholePart != 0 ? $"{input.WholePart}" : string.Empty;
+			string second = input.FractionalPart.Numerator != 0 ? input.FractionalPart.ToString() : string.Empty;
 			string join = string.Empty;
 
 			if (!string.IsNullOrWhiteSpace(first) && !string.IsNullOrWhiteSpace(second))
 			{
-				join = " + ";
+				if (input.WholePart.Sign < 0)
+				{
+					join = " - ";
+				}
+				else
+				{
+					join = " + ";
+				}
 			}
 
 			return string.Concat(first, join, second);

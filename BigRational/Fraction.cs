@@ -13,7 +13,7 @@ namespace ExtendedNumerics
 		#region Constructors
 
 		public Fraction()
-			: this(new BigInteger(0), new BigInteger(1))
+			: this(BigInteger.Zero, BigInteger.One)
 		{
 		}
 
@@ -29,8 +29,8 @@ namespace ExtendedNumerics
 
 		public Fraction(BigInteger numerator, BigInteger denominator)
 		{
-			Numerator = numerator;
-			Denominator = denominator;
+			Numerator = new BigInteger(numerator.ToByteArray());
+			Denominator = new BigInteger(denominator.ToByteArray());
 		}
 
 		public Fraction(Double value)
@@ -47,39 +47,52 @@ namespace ExtendedNumerics
 			if (value == 0)
 			{
 				Numerator = BigInteger.Zero;
+				Denominator = BigInteger.One;
 			}
 			else if (value == 1)
 			{
 				Numerator = BigInteger.One;
+				Denominator = BigInteger.One;
 			}
 			else if (value == -1)
 			{
 				Numerator = BigInteger.MinusOne;
+				Denominator = BigInteger.One;
 			}
 			else if (value % 1 == 0)
 			{
 				Numerator = (BigInteger)value;
+				Denominator = BigInteger.One;
 			}
 			else
 			{
-				Double exponent = value.ToString(CultureInfo.InvariantCulture)
-										.TrimEnd('0')
-										.SkipWhile(c => c != '.').Skip(1)
-										.Count();
-				Denominator = 1;
+				double oneover = Math.Round(1 / Math.Abs(value), 13);
+				int sign = Math.Sign(value);
 
-				if (exponent > 0)
+				if (oneover % 1 == 0)
 				{
-					Double numerator = value * Math.Pow(10d, exponent);
-					Numerator = (BigInteger)numerator;
-					Denominator = BigInteger.Pow(10, (int)exponent);
-					int i = 0;
-
+					Numerator = sign;
+					Denominator = (BigInteger)oneover;
 				}
 				else
 				{
-					Numerator = (BigInteger)value;
-					Denominator = 1;
+					Double exponent = value.ToString(CultureInfo.InvariantCulture)
+											.TrimEnd('0')
+											.SkipWhile(c => c != '.').Skip(1)
+											.Count();
+					if (exponent > 0)
+					{
+						Double numerator = value * Math.Pow(10d, exponent);
+						Fraction notReduced = new Fraction((BigInteger)numerator, BigInteger.Pow(10, (int)exponent));
+						Fraction reduced = Simplify(notReduced);
+						Numerator = new BigInteger(reduced.Numerator.ToByteArray());
+						Denominator = new BigInteger(reduced.Denominator.ToByteArray());
+					}
+					else
+					{
+						Numerator = new BigInteger(value);
+						Denominator = new BigInteger(1);
+					}
 				}
 			}
 		}
@@ -385,42 +398,90 @@ namespace ExtendedNumerics
 		{
 			Fraction input = Fraction.Simplify(value);
 
-			if (input.Numerator > input.Denominator)
+			if (input.Numerator.IsZero)
 			{
-				BigInteger remainder = new BigInteger(-1);
-				BigInteger wholeUnits = BigInteger.DivRem(input.Numerator, input.Denominator, out remainder);
-				return new BigRational(wholeUnits, new Fraction(remainder, input.Denominator));
+				return new BigRational(BigInteger.Zero, input);
 			}
+			else if (input.Denominator.IsOne)
+			{
+				return new BigRational(input.Numerator, Fraction.Zero);
+			}
+			else
+			{
+				BigRational result;
+				if (BigInteger.Abs(input.Numerator) > BigInteger.Abs(input.Denominator))
+				{
+					int sign = input.Numerator.Sign;
 
-			return new BigRational(BigInteger.Zero, input.Numerator, input.Denominator);
+					BigInteger remainder = new BigInteger(-1);
+					BigInteger wholeUnits = BigInteger.DivRem(BigInteger.Abs(input.Numerator), input.Denominator, out remainder);
+					if (sign == -1)
+					{
+						wholeUnits = BigInteger.Negate(wholeUnits);
+					}
+					result = new BigRational(wholeUnits, new Fraction(remainder, input.Denominator));
+					return result;
+				}
+				else
+				{
+					result = new BigRational(BigInteger.Zero, input.Numerator, input.Denominator);
+					return result;
+				}
+			}
 		}
 
 		public static Fraction Simplify(Fraction value)
 		{
-			if (value.Numerator.IsZero || value.Numerator.IsOne || value.Numerator == BigInteger.MinusOne)
+			Fraction input = NormalizeSign(value);
+
+			if (input.Numerator.IsZero || input.Numerator.IsOne || input.Numerator == BigInteger.MinusOne)
 			{
-				return new Fraction(value);
+				return new Fraction(input);
 			}
 
-			BigInteger num = value.Numerator;
-			BigInteger denom = value.Denominator;
+			BigInteger num = input.Numerator;
+			BigInteger denom = input.Denominator;
 			BigInteger gcd = GCD(num, denom);
 			if (gcd > BigInteger.One)
 			{
 				return new Fraction(num / gcd, denom / gcd);
 			}
 
-			if (denom.Sign < 0)
-			{
-				return new Fraction(BigInteger.Negate(num), BigInteger.Negate(denom));
-			}
+			return new Fraction(input);
+		}
 
-			return new Fraction(value);
+		internal static Fraction NormalizeSign(Fraction value)
+		{
+			if (value.Denominator.Sign == -1)
+			{
+				BigInteger numer = value.Numerator;
+				BigInteger denom = BigInteger.Negate(value.Denominator);
+				if (value.Numerator.Sign == 1)
+				{
+					numer = BigInteger.Negate(value.Numerator);
+				}
+				return new Fraction(numer, denom);
+			}
+			else
+			{
+				return new Fraction(value);
+			}
 		}
 
 		public override string ToString()
 		{
-			return $"{Numerator} / {Denominator}";
+			if (Numerator.IsZero)
+			{
+				return "0";
+			}
+			else if (Denominator.IsOne)
+			{
+				return Numerator.ToString();
+			}
+			else
+			{
+				return $"{Numerator} / {Denominator}";
+			}
 		}
 
 		#endregion

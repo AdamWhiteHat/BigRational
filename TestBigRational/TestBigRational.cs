@@ -25,11 +25,11 @@ namespace TestBigRational
 		[TestMethod]
 		public void TestSubtraction()
 		{
-			BigRational sevenTwoths = new BigRational(BigInteger.Zero, new Fraction(7, 2));
-			BigRational sevenFourths = new BigRational(BigInteger.Zero, new Fraction(7, 4));
+			BigRational sevenTwoths = new BigRational(3, 1, 2);
+			BigRational sevenFifths = new BigRational(1, 2, 5);
 
-			BigRational expected = new BigRational(BigInteger.Zero, 7, 4);
-			BigRational result = BigRational.Subtract(sevenTwoths, sevenFourths);
+			BigRational expected = new BigRational(2, 1, 10);
+			BigRational result = BigRational.Subtract(sevenTwoths, sevenFifths);
 
 			Assert.AreEqual(expected, result);
 		}
@@ -59,18 +59,7 @@ namespace TestBigRational
 		}
 
 		[TestMethod]
-		public void TestConvertToDouble()
-		{
-			BigRational oneSixteenth = new BigRational(BigInteger.Zero, new Fraction(1, 16));
-
-			Double expectedValue = 0.0625d;
-			Double result = (Double)oneSixteenth;
-
-			Assert.AreEqual(expectedValue, result);
-		}
-
-		[TestMethod]
-		public void TestConvertFromDouble()
+		public void TestConvertFromDecimalPointDouble()
 		{
 			Double fifteenSixteenths = 0.9375d;
 
@@ -78,6 +67,63 @@ namespace TestBigRational
 			BigRational result = (BigRational)fifteenSixteenths;
 
 			Assert.AreEqual(expectedValue, result);
+		}
+
+		[TestMethod]
+		public void TestConvertFromWholeNumberDouble()
+		{
+			Double seven = 7.0d;
+
+			BigRational expectedValue = new BigRational(7, new Fraction(0, 1));
+
+			BigRational result1 = new BigRational(seven);
+			BigRational result2 = (BigRational)seven;
+
+
+			Assert.AreEqual(expectedValue, result1);
+			Assert.AreEqual(expectedValue, result2);
+		}
+
+		[TestMethod]
+		public void TestConvertFromNegativeMixedDouble()
+		{
+			Double negativeOneAndOneThird = -((double)4 / (double)3);
+
+			BigRational expectedValue = new BigRational(-1, new Fraction(1, 3));
+			BigRational result = (BigRational)negativeOneAndOneThird;
+
+			Assert.AreEqual(expectedValue, result);
+		}
+
+		[TestMethod]
+		public void TestConstruction()
+		{
+			BigRational result1 = new BigRational(BigInteger.Zero, new Fraction(182, 26));
+			BigRational result1_2 = new BigRational(new Fraction(182, 26));
+			BigRational result2 = new BigRational(BigInteger.Zero, new Fraction(-7, 5));
+
+			BigRational expected1 = new BigRational(7);
+			BigRational expected2 = new BigRational(-1, 2, 5);
+
+			Assert.AreEqual(expected1, result1);
+			Assert.AreEqual(expected1, result1_2);
+			Assert.AreEqual(expected2, result2);
+		}
+
+		[TestMethod]
+		public void TestExpand()
+		{
+			BigRational threeAndOneThird = new BigRational(3, 1, 3);
+			BigRational oneEightyTwoTwentySixths = new BigRational(new Fraction(182, 26));
+			BigRational negativeThreeAndOneSeventh = new BigRational(-3, 1, 7);
+
+			BigRational expected313 = new BigRational(0, 10, 3);
+			BigRational expected18226 = new BigRational(0, 91, 13);
+			BigRational expectedNeg317 = new BigRational(0, -22, 7);
+
+			Assert.AreEqual(expected313, threeAndOneThird);
+			Assert.AreEqual(expected18226, oneEightyTwoTwentySixths);
+			Assert.AreEqual(expectedNeg317, negativeThreeAndOneSeventh);
 		}
 	}
 }
