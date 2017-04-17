@@ -99,10 +99,10 @@ namespace ExtendedNumerics
 
 		public static BigRational Add(BigRational augend, BigRational addend)
 		{
-			Fraction fracExpandedAugend = BigRational.Expand(augend).FractionalPart;
-			Fraction fracExpandedAddend = BigRational.Expand(addend).FractionalPart;
+			Fraction fracAugend = augend.GetImproperFraction();
+			Fraction fracAddend = addend.GetImproperFraction();
 
-			BigRational result = Add(fracExpandedAugend, fracExpandedAddend);
+			BigRational result = Add(fracAugend, fracAddend);
 			BigRational reduced = BigRational.Reduce(result);
 			return reduced;
 		}
@@ -114,10 +114,10 @@ namespace ExtendedNumerics
 
 		public static BigRational Subtract(BigRational minuend, BigRational subtrahend)
 		{
-			Fraction fracExpandedMinuend = BigRational.Expand(minuend).FractionalPart;
-			Fraction fracExpandedSubtrahend = BigRational.Expand(subtrahend).FractionalPart;
+			Fraction fracMinuend = minuend.GetImproperFraction();
+			Fraction fracSubtrahend = subtrahend.GetImproperFraction();
 
-			BigRational result = Subtract(fracExpandedMinuend, fracExpandedSubtrahend);
+			BigRational result = Subtract(fracMinuend, fracSubtrahend);
 			BigRational reduced = BigRational.Reduce(result);
 			return reduced;
 		}
@@ -129,10 +129,10 @@ namespace ExtendedNumerics
 
 		public static BigRational Multiply(BigRational multiplicand, BigRational multiplier)
 		{
-			Fraction fracExpandedMultiplicand = BigRational.Expand(multiplicand).FractionalPart;
-			Fraction fracExpandedMultiplier = BigRational.Expand(multiplier).FractionalPart;
+			Fraction fracMultiplicand = multiplicand.GetImproperFraction();
+			Fraction fracMultiplier = multiplier.GetImproperFraction();
 
-			BigRational result = Multiply(fracExpandedMultiplicand, fracExpandedMultiplier);
+			BigRational result = Multiply(fracMultiplicand, fracMultiplier);
 			BigRational reduced = BigRational.Reduce(result);
 			return reduced;
 		}
@@ -157,12 +157,20 @@ namespace ExtendedNumerics
 
 		public static BigRational Divide(BigRational dividend, BigRational divisor)
 		{
-			Fraction left = BigRational.Expand(dividend).FractionalPart;
-			Fraction right = BigRational.Expand(divisor).FractionalPart;
+			// a/b / c/d  == (ad)/(bc)			
+			Fraction l =  dividend.GetImproperFraction();
+			Fraction r = divisor.GetImproperFraction();
+			
+			BigInteger ad = BigInteger.Multiply(l.Numerator,r.Denominator);
+			BigInteger bc = BigInteger.Multiply(l.Denominator,r.Numerator);
 
-			BigRational result = Divide(left, right);
-			BigRational reduced = BigRational.Reduce(result);
-			return reduced;
+			return Fraction.ReduceToProperFraction(new Fraction(ad, bc));
+		}
+
+		public static BigRational Pow(BigRational baseValue, BigInteger exponent)
+		{
+			Fraction fractPow = Fraction.Pow(baseValue.GetImproperFraction(), exponent);
+			return new BigRational(fractPow);
 		}
 
 		public static BigRational Remainder(BigInteger dividend, BigInteger divisor)
@@ -175,7 +183,7 @@ namespace ExtendedNumerics
 		{
 			BigRational input = BigRational.Reduce(rational);
 
-			return input.WholePart.Sign < 0
+			return input.WholePart.Sign == -1
 				?
 				new BigRational(BigInteger.Abs(input.WholePart), input.FractionalPart)
 				:
@@ -186,6 +194,22 @@ namespace ExtendedNumerics
 		{
 			BigRational input = rational;
 			return new BigRational(BigInteger.Negate(input.WholePart), input.FractionalPart);
+		}
+
+		public static BigRational LeastCommonDenominator(BigRational left, BigRational right)
+		{
+			Fraction leftFrac = left.GetImproperFraction();
+			Fraction rightFrac = right.GetImproperFraction();
+
+			return BigRational.Reduce(new BigRational(Fraction.LeastCommonDenominator(leftFrac, rightFrac)));
+		}
+
+		public static BigRational GreatestCommonDivisor(BigRational left, BigRational right)
+		{
+			Fraction leftFrac = left.GetImproperFraction();
+			Fraction rightFrac = right.GetImproperFraction();
+
+			return BigRational.Reduce(new BigRational(Fraction.GreatestCommonDivisor(leftFrac, rightFrac)));
 		}
 
 		#endregion
@@ -292,24 +316,43 @@ namespace ExtendedNumerics
 
 		#region Transform Methods
 
+		public Fraction GetImproperFraction()
+		{
+			BigRational input = NormalizeSign(this);
+
+			if (input.FractionalPart.Sign != 0 || input.FractionalPart.Denominator > 1)
+			{
+				if (input.WholePart.Sign != 0)
+				{
+					Fraction newFractional = new Fraction(
+						BigInteger.Add(input.FractionalPart.Numerator, BigInteger.Multiply(input.WholePart, input.FractionalPart.Denominator)),
+						input.FractionalPart.Denominator
+					);
+
+					return newFractional;
+				}
+			}
+			return input.FractionalPart;
+		}
+
 		public static BigRational Expand(BigRational value)
 		{
 			BigRational input = NormalizeSign(value);
 
-			if (value.FractionalPart.Numerator > 0 || value.FractionalPart.Denominator > 1)
+			if (input.FractionalPart.Sign != 0 || input.FractionalPart.Denominator > 1)
 			{
-				if (value.WholePart > 0)
+				if (input.WholePart.Sign != 0)
 				{
 					Fraction newFractional = new Fraction(
-						BigInteger.Add(value.FractionalPart.Numerator, BigInteger.Multiply(value.WholePart, value.FractionalPart.Denominator)),
-						value.FractionalPart.Denominator
+						BigInteger.Add(input.FractionalPart.Numerator, BigInteger.Multiply(input.WholePart, input.FractionalPart.Denominator)),
+						input.FractionalPart.Denominator
 					);
 
 					return new BigRational(BigInteger.Zero, newFractional);
 				}
 			}
 
-			return new BigRational(value.WholePart, value.FractionalPart);
+			return new BigRational(input.WholePart, input.FractionalPart);
 		}
 
 		public static BigRational Reduce(BigRational value)
@@ -325,7 +368,7 @@ namespace ExtendedNumerics
 			BigInteger whole;
 			Fraction fract = Fraction.NormalizeSign(value.FractionalPart);
 
-			if (value.WholePart > 0 && value.WholePart.Sign > 0 && fract.Sign < 0)
+			if (value.WholePart > 0 && value.WholePart.Sign == 1 && fract.Sign == -1)
 			{
 				whole = BigInteger.Negate(value.WholePart);
 			}
@@ -359,6 +402,11 @@ namespace ExtendedNumerics
 				{
 					join = " + ";
 				}
+			}
+
+			if (string.IsNullOrWhiteSpace(first) && string.IsNullOrWhiteSpace(join) && string.IsNullOrWhiteSpace(second))
+			{
+				return "0";
 			}
 
 			return string.Concat(first, join, second);

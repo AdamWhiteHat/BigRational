@@ -22,6 +22,11 @@ namespace ExtendedNumerics
 		{
 		}
 
+		public Fraction(int value)
+			: this((BigInteger)value, BigInteger.One)
+		{
+		}
+
 		public Fraction(BigInteger value)
 			: this(value, BigInteger.One)
 		{
@@ -245,6 +250,22 @@ namespace ExtendedNumerics
 			return new Fraction(BigInteger.Negate(fraction.Numerator), fraction.Denominator);
 		}
 
+		public static Fraction LeastCommonDenominator(Fraction left, Fraction right)
+		{
+			return new Fraction((left.Denominator * right.Denominator), BigInteger.GreatestCommonDivisor(left.Denominator, right.Denominator));
+		}
+
+		public static Fraction GreatestCommonDivisor(Fraction left, Fraction right)
+		{
+			Fraction leftFrac = Fraction.Simplify(left);
+			Fraction rightFrac = Fraction.Simplify(right);
+
+			BigInteger gcd = BigInteger.GreatestCommonDivisor(left.Numerator, right.Numerator);
+			BigInteger lcm = LCM(left.Denominator, right.Denominator);
+
+			return new Fraction(gcd, lcm);
+		}
+
 		#endregion
 
 		#region Arithmetic Operators
@@ -392,7 +413,7 @@ namespace ExtendedNumerics
 
 		#endregion
 
-		#region Instance Methods
+		#region Transform Methods
 
 		public static BigRational ReduceToProperFraction(Fraction value)
 		{
@@ -441,7 +462,7 @@ namespace ExtendedNumerics
 
 			BigInteger num = input.Numerator;
 			BigInteger denom = input.Denominator;
-			BigInteger gcd = GCD(num, denom);
+			BigInteger gcd = BigInteger.GreatestCommonDivisor(num, denom);
 			if (gcd > BigInteger.One)
 			{
 				return new Fraction(num / gcd, denom / gcd);
@@ -468,6 +489,10 @@ namespace ExtendedNumerics
 			}
 		}
 
+		#endregion
+
+		#region Overrides
+
 		public override string ToString()
 		{
 			if (Numerator.IsZero)
@@ -492,27 +517,7 @@ namespace ExtendedNumerics
 		{
 			BigInteger absValue1 = BigInteger.Abs(value1);
 			BigInteger absValue2 = BigInteger.Abs(value2);
-			return (absValue1 * absValue2) / GCD(absValue1, absValue2);
-		}
-
-		private static BigInteger GCD(BigInteger value1, BigInteger value2)
-		{
-			BigInteger absValue1 = BigInteger.Abs(value1);
-			BigInteger absValue2 = BigInteger.Abs(value2);
-
-			while (absValue1 != 0 && absValue2 != 0)
-			{
-				if (absValue1 > absValue2)
-				{
-					absValue1 %= absValue2;
-				}
-				else
-				{
-					absValue2 %= absValue1;
-				}
-			}
-
-			return BigInteger.Max(absValue1, absValue2);
+			return (absValue1 * absValue2) / BigInteger.GreatestCommonDivisor(absValue1, absValue2);
 		}
 
 		#endregion

@@ -117,13 +117,18 @@ namespace TestBigRational
 			BigRational oneEightyTwoTwentySixths = new BigRational(new Fraction(182, 26));
 			BigRational negativeThreeAndOneSeventh = new BigRational(-3, 1, 7);
 
-			BigRational expected313 = new BigRational(0, 10, 3);
-			BigRational expected18226 = new BigRational(0, 91, 13);
-			BigRational expectedNeg317 = new BigRational(0, -22, 7);
+			Fraction expected313 = new Fraction(10, 3);
+			Fraction expected18226 = new Fraction(91, 13);
+			Fraction expectedNeg317 = new Fraction(-20, 7);
 
-			Assert.AreEqual(expected313, threeAndOneThird);
-			Assert.AreEqual(expected18226, oneEightyTwoTwentySixths);
-			Assert.AreEqual(expectedNeg317, negativeThreeAndOneSeventh);
+			Fraction result1 = threeAndOneThird.GetImproperFraction();
+			Fraction result2 = oneEightyTwoTwentySixths.GetImproperFraction();
+			Fraction result3 = negativeThreeAndOneSeventh.GetImproperFraction();
+			
+
+			Assert.AreEqual(expected313, result1);
+			Assert.AreEqual(expected18226,  result2);
+			Assert.AreEqual(expectedNeg317, result3);
 		}
 	}
 }
