@@ -120,7 +120,7 @@ namespace TestBigRational
 
 			Fraction expected313 = new Fraction(10, 3);
 			Fraction expected18226 = new Fraction(91, 13);
-			Fraction expectedNeg317 = new Fraction(-20, 7);
+			Fraction expectedNeg317 = new Fraction(-22, 7);
 			Fraction expected7over1 = new Fraction(7, 1);
 
 			Fraction result1 = threeAndOneThird.GetImproperFraction();

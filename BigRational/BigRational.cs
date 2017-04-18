@@ -161,7 +161,7 @@ namespace ExtendedNumerics
 			Fraction fracMultiplicand = multiplicand.GetImproperFraction();
 			Fraction fracMultiplier = multiplier.GetImproperFraction();
 
-			BigRational result = Multiply(fracMultiplicand, fracMultiplier);
+			BigRational result = Fraction.ReduceToProperFraction(Fraction.Multiply(fracMultiplicand, fracMultiplier));
 			BigRational reduced = BigRational.Reduce(result);
 			return reduced;
 		}
@@ -326,11 +326,17 @@ namespace ExtendedNumerics
 			{
 				if (input.WholePart.Sign != 0)
 				{
-					Fraction newFractional = new Fraction(
-						BigInteger.Add(input.FractionalPart.Numerator, BigInteger.Multiply(input.WholePart, input.FractionalPart.Denominator)),
-						input.FractionalPart.Denominator
-					);
+					BigInteger whole = BigInteger.Multiply(input.WholePart, input.FractionalPart.Denominator);
 
+					BigInteger remainder = input.FractionalPart.Numerator;
+
+					if (input.WholePart.Sign == -1)
+					{
+						remainder = BigInteger.Negate(remainder);
+					}
+
+					BigInteger total = BigInteger.Add(whole, remainder);
+					Fraction newFractional = new Fraction(total, input.FractionalPart.Denominator);
 					return newFractional;
 				}
 				else
