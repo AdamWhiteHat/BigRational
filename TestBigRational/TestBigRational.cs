@@ -111,24 +111,28 @@ namespace TestBigRational
 		}
 
 		[TestMethod]
-		public void TestExpand()
+		public void TestExpandImproperFraction()
 		{
 			BigRational threeAndOneThird = new BigRational(3, 1, 3);
 			BigRational oneEightyTwoTwentySixths = new BigRational(new Fraction(182, 26));
 			BigRational negativeThreeAndOneSeventh = new BigRational(-3, 1, 7);
+			BigRational seven = new BigRational(7);
 
 			Fraction expected313 = new Fraction(10, 3);
 			Fraction expected18226 = new Fraction(91, 13);
 			Fraction expectedNeg317 = new Fraction(-20, 7);
+			Fraction expected7over1 = new Fraction(7, 1);
 
 			Fraction result1 = threeAndOneThird.GetImproperFraction();
 			Fraction result2 = oneEightyTwoTwentySixths.GetImproperFraction();
 			Fraction result3 = negativeThreeAndOneSeventh.GetImproperFraction();
-			
+			Fraction result7 = seven.GetImproperFraction();
+
 
 			Assert.AreEqual(expected313, result1);
-			Assert.AreEqual(expected18226,  result2);
+			Assert.AreEqual(expected18226, result2);
 			Assert.AreEqual(expectedNeg317, result3);
+			Assert.AreEqual(expected7over1, result7);
 		}
 	}
 }

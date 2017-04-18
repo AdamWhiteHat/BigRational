@@ -97,6 +97,45 @@ namespace ExtendedNumerics
 			return new BigRational(BigInteger.Zero, Fraction.Add(augend, addend));
 		}
 
+		public static BigRational Subtract(Fraction minuend, Fraction subtrahend)
+		{
+			return new BigRational(BigInteger.Zero, Fraction.Subtract(minuend, subtrahend));
+		}
+
+		public static BigRational Multiply(Fraction multiplicand, Fraction multiplier)
+		{
+			return new BigRational(BigInteger.Zero, Fraction.Multiply(multiplicand, multiplier));
+		}
+
+		public static BigRational Divide(Fraction dividend, Fraction divisor)
+		{
+			return new BigRational(BigInteger.Zero, Fraction.Divide(dividend, divisor));
+		}
+
+		public static BigRational Abs(BigRational rational)
+		{
+			BigRational input = BigRational.Reduce(rational);
+			return new BigRational(BigInteger.Abs(input.WholePart), input.FractionalPart);
+		}
+
+		public static BigRational Negate(BigRational rational)
+		{
+			BigRational input = BigRational.Reduce(rational);
+			return new BigRational(BigInteger.Negate(input.WholePart), input.FractionalPart);
+		}
+
+		public static BigRational Pow(BigRational baseValue, BigInteger exponent)
+		{
+			Fraction fractPow = Fraction.Pow(baseValue.GetImproperFraction(), exponent);
+			return new BigRational(fractPow);
+		}
+
+		public static BigRational Remainder(BigInteger dividend, BigInteger divisor)
+		{
+			BigInteger remainder = (dividend % divisor);
+			return new BigRational(BigInteger.Zero, new Fraction(remainder, divisor));
+		}
+
 		public static BigRational Add(BigRational augend, BigRational addend)
 		{
 			Fraction fracAugend = augend.GetImproperFraction();
@@ -105,11 +144,6 @@ namespace ExtendedNumerics
 			BigRational result = Add(fracAugend, fracAddend);
 			BigRational reduced = BigRational.Reduce(result);
 			return reduced;
-		}
-
-		public static BigRational Subtract(Fraction minuend, Fraction subtrahend)
-		{
-			return new BigRational(BigInteger.Zero, Fraction.Subtract(minuend, subtrahend));
 		}
 
 		public static BigRational Subtract(BigRational minuend, BigRational subtrahend)
@@ -122,11 +156,6 @@ namespace ExtendedNumerics
 			return reduced;
 		}
 
-		public static BigRational Multiply(Fraction multiplicand, Fraction multiplier)
-		{
-			return new BigRational(BigInteger.Zero, Fraction.Multiply(multiplicand, multiplier));
-		}
-
 		public static BigRational Multiply(BigRational multiplicand, BigRational multiplier)
 		{
 			Fraction fracMultiplicand = multiplicand.GetImproperFraction();
@@ -135,11 +164,6 @@ namespace ExtendedNumerics
 			BigRational result = Multiply(fracMultiplicand, fracMultiplier);
 			BigRational reduced = BigRational.Reduce(result);
 			return reduced;
-		}
-
-		public static BigRational Divide(Fraction dividend, Fraction divisor)
-		{
-			return new BigRational(BigInteger.Zero, Fraction.Divide(dividend, divisor));
 		}
 
 		public static BigRational Divide(BigInteger dividend, BigInteger divisor)
@@ -158,43 +182,16 @@ namespace ExtendedNumerics
 		public static BigRational Divide(BigRational dividend, BigRational divisor)
 		{
 			// a/b / c/d  == (ad)/(bc)			
-			Fraction l =  dividend.GetImproperFraction();
+			Fraction l = dividend.GetImproperFraction();
 			Fraction r = divisor.GetImproperFraction();
-			
-			BigInteger ad = BigInteger.Multiply(l.Numerator,r.Denominator);
-			BigInteger bc = BigInteger.Multiply(l.Denominator,r.Numerator);
+
+			BigInteger ad = BigInteger.Multiply(l.Numerator, r.Denominator);
+			BigInteger bc = BigInteger.Multiply(l.Denominator, r.Numerator);
 
 			return Fraction.ReduceToProperFraction(new Fraction(ad, bc));
 		}
 
-		public static BigRational Pow(BigRational baseValue, BigInteger exponent)
-		{
-			Fraction fractPow = Fraction.Pow(baseValue.GetImproperFraction(), exponent);
-			return new BigRational(fractPow);
-		}
-
-		public static BigRational Remainder(BigInteger dividend, BigInteger divisor)
-		{
-			BigInteger remainder = dividend % divisor;
-			return new BigRational(BigInteger.Zero, new Fraction(remainder, divisor));
-		}
-
-		public static BigRational Abs(BigRational rational)
-		{
-			BigRational input = BigRational.Reduce(rational);
-
-			return input.WholePart.Sign == -1
-				?
-				new BigRational(BigInteger.Abs(input.WholePart), input.FractionalPart)
-				:
-				input;
-		}
-
-		public static BigRational Negate(BigRational rational)
-		{
-			BigRational input = rational;
-			return new BigRational(BigInteger.Negate(input.WholePart), input.FractionalPart);
-		}
+		// LCD & GCD
 
 		public static BigRational LeastCommonDenominator(BigRational left, BigRational right)
 		{
@@ -320,6 +317,11 @@ namespace ExtendedNumerics
 		{
 			BigRational input = NormalizeSign(this);
 
+			if (input.WholePart == 0 && input.FractionalPart.Sign == 0)
+			{
+				return Fraction.Zero;
+			}
+
 			if (input.FractionalPart.Sign != 0 || input.FractionalPart.Denominator > 1)
 			{
 				if (input.WholePart.Sign != 0)
@@ -331,28 +333,15 @@ namespace ExtendedNumerics
 
 					return newFractional;
 				}
-			}
-			return input.FractionalPart;
-		}
-
-		public static BigRational Expand(BigRational value)
-		{
-			BigRational input = NormalizeSign(value);
-
-			if (input.FractionalPart.Sign != 0 || input.FractionalPart.Denominator > 1)
-			{
-				if (input.WholePart.Sign != 0)
+				else
 				{
-					Fraction newFractional = new Fraction(
-						BigInteger.Add(input.FractionalPart.Numerator, BigInteger.Multiply(input.WholePart, input.FractionalPart.Denominator)),
-						input.FractionalPart.Denominator
-					);
-
-					return new BigRational(BigInteger.Zero, newFractional);
+					return input.FractionalPart;
 				}
 			}
-
-			return new BigRational(input.WholePart, input.FractionalPart);
+			else
+			{
+				return new Fraction(input.WholePart, BigInteger.One);
+			}
 		}
 
 		public static BigRational Reduce(BigRational value)

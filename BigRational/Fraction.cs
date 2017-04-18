@@ -153,15 +153,26 @@ namespace ExtendedNumerics
 
 		public static Fraction Multiply(Fraction multiplicand, Fraction multiplier)
 		{
-			return new Fraction(
-					BigInteger.Multiply(multiplicand.Numerator, multiplier.Numerator),
-					BigInteger.Multiply(multiplicand.Denominator, multiplier.Denominator)
-				);
+			Fraction frac1 =
+			   new Fraction(
+				   BigInteger.Multiply(multiplicand.Numerator, multiplier.Numerator),
+				   BigInteger.Multiply(multiplicand.Denominator, multiplier.Denominator)
+			   );
+
+			Fraction frac2 = Simplify(frac1);
+
+			if (frac1 != frac2)
+			{
+				throw new ArithmeticException("Multiply methods needs to simplify result. Please add this behavior to this method.");
+			}
+
+
+			return frac1;
 		}
 
 		public static Fraction Divide(Fraction dividend, Fraction divisor)
 		{
-			return Multiply(dividend, Reciprocal(divisor));
+			return Simplify(Multiply(dividend, Reciprocal(divisor)));
 		}
 
 		public static Fraction Remainder(BigInteger dividend, BigInteger divisor)
