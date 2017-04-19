@@ -88,6 +88,14 @@ namespace ExtendedNumerics
 			}
 		}
 
+		public bool IsZero
+		{
+			get
+			{
+				return (WholePart.IsZero && FractionalPart.IsZero);
+			}
+		}
+
 		#endregion
 
 		#region Arithmetic Methods
@@ -128,6 +136,14 @@ namespace ExtendedNumerics
 		{
 			Fraction fractPow = Fraction.Pow(baseValue.GetImproperFraction(), exponent);
 			return new BigRational(fractPow);
+		}
+
+		public static BigRational Mod(BigRational number, BigRational mod)
+		{
+			Fraction num = number.GetImproperFraction();
+			Fraction modulus = mod.GetImproperFraction();
+
+			return new BigRational(Fraction.Remainder(num, modulus));
 		}
 
 		public static BigRational Remainder(BigInteger dividend, BigInteger divisor)

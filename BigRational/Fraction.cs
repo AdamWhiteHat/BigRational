@@ -111,6 +111,10 @@ namespace ExtendedNumerics
 
 		public Int32 Sign { get { return Fraction.Simplify(this).Numerator.Sign; } }
 
+		public bool IsZero { get { return (this == Fraction.Zero); } }
+
+		public bool IsOne { get { return (this == Fraction.One); } }
+
 		#region Static Properties
 
 		public static Fraction Zero { get { return _zero; } }
@@ -281,15 +285,15 @@ namespace ExtendedNumerics
 
 		#region Arithmetic Operators
 
-		public static Fraction operator +(Fraction fraction) { return Abs(fraction); }
-		public static Fraction operator -(Fraction fraction) { return Negate(fraction); }
-		public static Fraction operator ++(Fraction fraction) { return Add(fraction, Fraction.One); }
-		public static Fraction operator --(Fraction fraction) { return Subtract(fraction, Fraction.One); }
-		public static Fraction operator +(Fraction left, Fraction right) { return Add(left, right); }
-		public static Fraction operator -(Fraction left, Fraction right) { return Subtract(left, right); }
-		public static Fraction operator *(Fraction left, Fraction right) { return Multiply(left, right); }
-		public static Fraction operator /(Fraction left, Fraction right) { return Divide(left, right); }
-		public static Fraction operator %(Fraction left, Fraction right) { return Remainder(left, right); }
+		//public static Fraction operator +(Fraction fraction) { return Abs(fraction); }
+		//public static Fraction operator -(Fraction fraction) { return Negate(fraction); }
+		//public static Fraction operator ++(Fraction fraction) { return Add(fraction, Fraction.One); }
+		//public static Fraction operator --(Fraction fraction) { return Subtract(fraction, Fraction.One); }
+		//public static Fraction operator +(Fraction left, Fraction right) { return Add(left, right); }
+		//public static Fraction operator -(Fraction left, Fraction right) { return Subtract(left, right); }
+		//public static Fraction operator *(Fraction left, Fraction right) { return Multiply(left, right); }
+		//public static Fraction operator /(Fraction left, Fraction right) { return Divide(left, right); }
+		//public static Fraction operator %(Fraction left, Fraction right) { return Remainder(left, right); }
 
 		#endregion
 
