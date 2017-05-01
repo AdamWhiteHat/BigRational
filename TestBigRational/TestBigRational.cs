@@ -14,12 +14,17 @@ namespace TestBigRational
 			BigRational threeHalfs = new BigRational(BigInteger.Zero, new Fraction(3, 2));
 			BigRational tenEighths = new BigRational(BigInteger.Zero, new Fraction(10, 8));
 
-			BigRational expected = BigRational.Reduce(new BigRational(BigInteger.Zero, new Fraction(11, 4)));
-			BigRational result = BigRational.Add(threeHalfs, tenEighths);
+			BigRational oneHundred = new BigRational(100);
+			BigRational oneHalf = new BigRational(BigInteger.Zero, new Fraction(1, 2));
 
-			BigRational reducedResult = BigRational.Reduce(result);
+			BigRational expected1 = BigRational.Reduce(new BigRational(BigInteger.Zero, new Fraction(11, 4)));
+			BigRational expected2 = BigRational.Reduce(new BigRational(BigInteger.Zero, new Fraction(201, 2)));
 
-			Assert.AreEqual(expected, result);
+			BigRational result1 = BigRational.Add(threeHalfs, tenEighths);
+			BigRational result2 = BigRational.Add(oneHundred, oneHalf);
+
+			Assert.AreEqual(expected1, result1);
+			Assert.AreEqual(expected2, result2);
 		}
 
 		[TestMethod]

@@ -14,14 +14,21 @@ namespace TestBigRational
 			Fraction oneThird = new Fraction(1, 3);
 			Fraction oneFifth = new Fraction(1, 5);
 
+			Fraction ninety = new Fraction(90 / 1);
+
 			Fraction expectedValueEightFifteenths = new Fraction(8, 15);
 			Fraction expectedValueThirtysixTwentyfifths = new Fraction(2, 15);
+
+			Fraction expected271Thirds = new Fraction(271, 3);
 
 			Fraction resultEightFifteenths = Fraction.Add(oneThird, oneFifth);
 			Fraction resultThirtysixTwentyfifths = Fraction.Add(oneThird, Fraction.Negate(oneFifth));
 
+			Fraction result271Thirds = Fraction.Add(ninety, oneThird);
+
 			Assert.AreEqual(expectedValueEightFifteenths, resultEightFifteenths);
 			Assert.AreEqual(expectedValueThirtysixTwentyfifths, resultThirtysixTwentyfifths);
+			Assert.AreEqual(expected271Thirds, result271Thirds);
 		}
 
 		[TestMethod]
