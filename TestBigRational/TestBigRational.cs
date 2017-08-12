@@ -51,6 +51,16 @@ namespace TestBigRational
 			Assert.AreEqual(expected, result);
 		}
 
+
+		[TestMethod]
+		public void TestDivisionNegative()
+		{
+			BigRational expected = BigRational.One;
+			BigRational result = BigRational.Divide(BigRational.MinusOne, BigRational.MinusOne);
+
+			Assert.AreEqual(expected, result);
+		}
+
 		[TestMethod]
 		public void TestDivision()
 		{
