@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 using System.Numerics;
 using System.Globalization;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 
 namespace ExtendedNumerics
@@ -519,17 +517,41 @@ namespace ExtendedNumerics
 
 		public override string ToString()
 		{
+			return this.ToString(CultureInfo.CurrentCulture);
+		}
+
+		public String ToString(String format)
+		{
+			return this.ToString(format, CultureInfo.CurrentCulture);
+		}
+
+		public String ToString(IFormatProvider provider)
+		{
+			return this.ToString("R", provider);
+		}
+
+		public String ToString(String format, IFormatProvider provider)
+		{
+			NumberFormatInfo numberFormatProvider = (NumberFormatInfo)provider.GetFormat(typeof(NumberFormatInfo));
+			if (numberFormatProvider == null)
+			{
+				numberFormatProvider = CultureInfo.CurrentCulture.NumberFormat;
+			}
+
+			string zeroString = numberFormatProvider.NativeDigits[0];
+			char zeroChar = zeroString.First();
+
 			if (Numerator.IsZero)
 			{
-				return "0";
+				return zeroString;
 			}
 			else if (Denominator.IsOne)
 			{
-				return Numerator.ToString();
+				return String.Format(provider, "{0}", Numerator.ToString(format, provider));
 			}
 			else
 			{
-				return $"{Numerator} / {Denominator}";
+				return String.Format(provider, "{0} / {1}", Numerator.ToString(format, provider), Denominator.ToString(format, provider));
 			}
 		}
 

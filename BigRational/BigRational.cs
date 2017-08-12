@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 using System.Numerics;
-using System.Threading.Tasks;
+using System.Globalization;
 using System.Collections.Generic;
 
 namespace ExtendedNumerics
@@ -78,6 +77,14 @@ namespace ExtendedNumerics
 
 		public BigInteger WholePart { get; private set; }
 		public Fraction FractionalPart { get; private set; }
+
+		public static BigRational One { get { return _one; } }
+		public static BigRational Zero { get { return _zero; } }
+		public static BigRational MinusOne { get { return _minusOne; } }
+
+		private static BigRational _one { get { return new BigRational(1); } }
+		private static BigRational _zero { get { return new BigRational(0); } }
+		private static BigRational _minusOne { get { return new BigRational(-1); } }
 
 		public Int32 Sign
 		{
@@ -402,32 +409,55 @@ namespace ExtendedNumerics
 
 		public override string ToString()
 		{
+			return this.ToString(CultureInfo.CurrentCulture);
+		}
+
+		public String ToString(String format)
+		{
+			return this.ToString(CultureInfo.CurrentCulture);
+		}
+
+		public String ToString(IFormatProvider provider)
+		{
+			return this.ToString("R", provider);
+		}
+
+		public String ToString(String format, IFormatProvider provider)
+		{
+			NumberFormatInfo numberFormatProvider = (NumberFormatInfo)provider.GetFormat(typeof(NumberFormatInfo));
+			if (numberFormatProvider == null)
+			{
+				numberFormatProvider = CultureInfo.CurrentCulture.NumberFormat;
+			}
+
+			string zeroString = numberFormatProvider.NativeDigits[0];
+
 			BigRational input = BigRational.Reduce(this);
 
-			string first = input.WholePart != 0 ? $"{input.WholePart}" : string.Empty;
-			string second = input.FractionalPart.Numerator != 0 ? input.FractionalPart.ToString() : string.Empty;
+			string first = input.WholePart != 0 ? String.Format(provider, "{0}", input.WholePart.ToString(format, provider)) : string.Empty;
+			string second = input.FractionalPart.Numerator != 0 ? String.Format(provider, "{0}", input.FractionalPart.ToString(format, provider)) : string.Empty;
 			string join = string.Empty;
 
 			if (!string.IsNullOrWhiteSpace(first) && !string.IsNullOrWhiteSpace(second))
 			{
 				if (input.WholePart.Sign < 0)
 				{
-					join = " - ";
+					join = numberFormatProvider.NegativeSign;
 				}
 				else
 				{
-					join = " + ";
+					join = numberFormatProvider.PositiveSign;
 				}
 			}
 
 			if (string.IsNullOrWhiteSpace(first) && string.IsNullOrWhiteSpace(join) && string.IsNullOrWhiteSpace(second))
 			{
-				return "0";
+				return zeroString;
 			}
 
 			return string.Concat(first, join, second);
 		}
-
+		
 		#endregion
 
 	}
