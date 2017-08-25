@@ -495,20 +495,29 @@ namespace ExtendedNumerics
 
 		internal static Fraction NormalizeSign(Fraction value)
 		{
-			if (value.Denominator.Sign == -1)
+			BigInteger numer = value.Numerator;
+			BigInteger denom = value.Denominator;
+			
+			if (numer.Sign == 1 && denom.Sign == 1)
 			{
-				BigInteger numer = value.Numerator;
-				BigInteger denom = BigInteger.Negate(value.Denominator);
-				if (value.Numerator.Sign == 1)
-				{
-					numer = BigInteger.Negate(value.Numerator);
-				}
-				return new Fraction(numer, denom);
+				return value;
 			}
-			else
+			else if (numer.Sign == -1 && denom.Sign == 1)
 			{
-				return new Fraction(value);
+				return value;
 			}
+			else if(numer.Sign == 1 && denom.Sign == -1)
+			{
+				numer = BigInteger.Negate(numer);
+				denom = BigInteger.Negate(denom);
+			}
+			else if (numer.Sign == -1 && denom.Sign == -1)
+			{
+				numer = BigInteger.Negate(numer);
+				denom = BigInteger.Negate(denom);
+			}
+				
+			return new Fraction(numer, denom);
 		}
 
 		#endregion

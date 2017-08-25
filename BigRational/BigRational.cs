@@ -216,7 +216,9 @@ namespace ExtendedNumerics
 			BigInteger ad = BigInteger.Multiply(l.Numerator, r.Denominator);
 			BigInteger bc = BigInteger.Multiply(l.Denominator, r.Numerator);
 
-			return Fraction.ReduceToProperFraction(new Fraction(ad, bc));
+			Fraction newFraction = new Fraction(ad, bc);
+			BigRational result = Fraction.ReduceToProperFraction(newFraction);
+			return result;
 		}
 
 		// LCD & GCD
