@@ -135,16 +135,19 @@ namespace TestBigRational
 		public void TestSimplify()
 		{
 			Fraction eighteenTwos = new Fraction(18, 2);
+			Fraction eighteenFours = new Fraction(18, 4);
 			Fraction noChange = new Fraction(1, 8);
 			Fraction reduced = new Fraction(2, 6);
 			Fraction reducedNegative = new Fraction(-2, 8);
 
 			Fraction expectedValueEighteenTwos = new Fraction(9, 1);
+			Fraction expectedValueEighteenFours = new Fraction(9, 2);
 			Fraction expectedValueNoChange = new Fraction(1, 8);
 			Fraction expectedValueReduced = new Fraction(1, 3);
 			Fraction expectedValueReducedNegative = new Fraction(-1, 4);
 
 			Assert.AreEqual(expectedValueEighteenTwos, eighteenTwos);
+			Assert.AreEqual(expectedValueEighteenFours, eighteenFours);
 			Assert.AreEqual(expectedValueNoChange, noChange);
 			Assert.AreEqual(expectedValueReduced, reduced);
 			Assert.AreEqual(expectedValueReducedNegative, reducedNegative);
