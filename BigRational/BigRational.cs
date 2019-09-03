@@ -71,6 +71,30 @@ namespace ExtendedNumerics
 			}
 		}
 
+		public BigRational(Decimal value)
+		{
+			switch (value)
+			{
+				case Decimal.Zero:
+					WholePart = BigInteger.Zero;
+					FractionalPart = Fraction.One;
+					break;
+				case Decimal.One:
+					WholePart = BigInteger.Zero;
+					FractionalPart = Fraction.One;
+					break;
+				case Decimal.MinusOne:
+					WholePart = BigInteger.Zero;
+					FractionalPart = Fraction.MinusOne;
+					break;
+				default:
+					WholePart = (BigInteger)Math.Truncate(value);
+					Decimal fract = Math.Abs(value) % 1;
+					FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
+					break;
+			}
+		}
+
 		#endregion
 
 		#region Properties
@@ -243,8 +267,17 @@ namespace ExtendedNumerics
 
 		#region Conversion
 
+		public static explicit operator BigRational(Int32 value)
+		{
+			return new BigRational(value);
+		}
 
 		public static explicit operator BigRational(Double value)
+		{
+			return new BigRational(value);
+		}
+
+		public static explicit operator BigRational(Decimal value)
 		{
 			return new BigRational(value);
 		}

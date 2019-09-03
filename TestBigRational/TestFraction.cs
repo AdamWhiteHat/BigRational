@@ -132,6 +132,39 @@ namespace TestBigRational
 		}
 
 		[TestMethod]
+		public void TestConvertToDecimal()
+		{
+			Fraction oneSixteenth = new Fraction(1, 16);
+			Fraction negativeOneThird = new Fraction(-1, 3);
+
+			Decimal expectedValueOneSixteenth = 0.0625m;
+			Decimal expectedValueNegativeOneThird = -1m / 3m;
+
+			Decimal resultOneSixteenth = (Decimal)oneSixteenth;
+			Decimal resultNegativeOneThird = (Decimal)negativeOneThird;
+
+			Assert.AreEqual(expectedValueOneSixteenth, resultOneSixteenth);
+			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
+		}
+
+		[TestMethod]
+		public void TestConvertFromDecimal()
+		{
+			// Decimal converts best with a fixed number of decimal points
+			Decimal fifteenSixteenths = 0.9375m;
+			Decimal negativeOneOneHundredAndTwentyEight = -1m / 128m;
+
+			Fraction expectedValueFifteenSixteenths = new Fraction(15, 16);
+			Fraction expectedValueNegativeOneThird = new Fraction(-1, 128);
+
+			Fraction result1516 = (Fraction)fifteenSixteenths;
+			Fraction resultNeg1128 = (Fraction)negativeOneOneHundredAndTwentyEight;
+
+			Assert.AreEqual(expectedValueFifteenSixteenths, result1516);
+			Assert.AreEqual(expectedValueNegativeOneThird, resultNeg1128);
+		}
+
+		[TestMethod]
 		public void TestSimplify()
 		{
 			Fraction eighteenTwos = new Fraction(18, 2);
