@@ -497,7 +497,7 @@ namespace ExtendedNumerics
 		{
 			BigInteger numer = value.Numerator;
 			BigInteger denom = value.Denominator;
-			
+
 			if (numer.Sign == 1 && denom.Sign == 1)
 			{
 				return value;
@@ -506,7 +506,7 @@ namespace ExtendedNumerics
 			{
 				return value;
 			}
-			else if(numer.Sign == 1 && denom.Sign == -1)
+			else if (numer.Sign == 1 && denom.Sign == -1)
 			{
 				numer = BigInteger.Negate(numer);
 				denom = BigInteger.Negate(denom);
@@ -516,7 +516,7 @@ namespace ExtendedNumerics
 				numer = BigInteger.Negate(numer);
 				denom = BigInteger.Negate(denom);
 			}
-				
+
 			return new Fraction(numer, denom);
 		}
 
@@ -578,3 +578,4 @@ namespace ExtendedNumerics
 		#endregion
 	}
 }
+
