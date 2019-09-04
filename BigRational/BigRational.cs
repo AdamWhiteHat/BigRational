@@ -264,27 +264,27 @@ namespace ExtendedNumerics
 					value.FractionalPart.Denominator
 				));
 		}
-		
+
 		public static BigRational Parse(string value)
 		{
-		    string[] parts = value.Split('/');
-		    if (parts.Length != 2)
-		    {
-			throw new Exception("Invalid fraction given as string to parse.");
-		    }
+			string[] parts = value.Split('/');
+			if (parts.Length != 2)
+			{
+				throw new Exception("Invalid fraction given as string to parse.");
+			}
 
-		    BigInteger numerator, denominator;
-		    try
-		    {
-			numerator = BigInteger.Parse(parts[0]);
-			denominator = BigInteger.Parse(parts[1]);
-		    }
-		    catch
-		    {
-			throw new Exception("Invalid string given for numerator or denominator.");
-		    }
+			BigInteger numerator, denominator;
+			try
+			{
+				numerator = BigInteger.Parse(parts[0]);
+				denominator = BigInteger.Parse(parts[1]);
+			}
+			catch
+			{
+				throw new Exception("Invalid string given for numerator or denominator.");
+			}
 
-		    return new BigRational(BigInteger.Zero, numerator, denominator);
+			return new BigRational(BigInteger.Zero, numerator, denominator);
 		}
 
 		#endregion
@@ -481,8 +481,9 @@ namespace ExtendedNumerics
 
 			return string.Concat(first, join, second);
 		}
-		
+
 		#endregion
 
 	}
 }
+
