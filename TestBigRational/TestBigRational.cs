@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Numerics;
 using ExtendedNumerics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -149,5 +150,46 @@ namespace TestBigRational
 			Assert.AreEqual(expectedNeg317, result3);
 			Assert.AreEqual(expected7over1, result7);
 		}
+
+		[TestMethod]
+		public void TestMullersRecurrenceConvergesOnFive()
+		{
+			// Set an upper limit to the number of iterations to be tried
+			int n = 100;
+
+			// Precreate some constants to use in the calculations
+			BigRational c108 = new BigRational(108);
+			BigRational c815 = new BigRational(815);
+			BigRational c1500 = new BigRational(1500);
+			BigRational convergencePoint = new BigRational(5);
+
+			// Seed the initial values
+			BigRational X0 = new BigRational(4);
+			BigRational X1 = new BigRational(new Fraction(17, 4));
+			BigRational Xprevious = X0;
+			BigRational Xn = X1;
+
+			// Get the current distance to the convergence point, this should be constantly
+			// decreasing with each iteration
+			BigRational distanceToConvergence = BigRational.Subtract(convergencePoint, X1);
+
+			int count = 1;
+			for (int i = 1; i < n; ++i)
+			{
+				BigRational Xnext = c108 - (c815 - c1500 / Xprevious) / Xn;
+				BigRational nextDistanceToConvergence = BigRational.Subtract(convergencePoint, Xnext);
+				Assert.IsTrue(nextDistanceToConvergence < distanceToConvergence);
+
+				Xprevious = Xn;
+				Xn = Xnext;
+				distanceToConvergence = nextDistanceToConvergence;
+				if ((Double)Xn == 5d)
+					break;
+				++count;
+			}
+			Assert.AreEqual((Double)Xn, 5d);
+			Assert.IsTrue(count == 70);
+		}
+
 	}
 }

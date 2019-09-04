@@ -164,6 +164,8 @@ namespace ExtendedNumerics
 			return new BigRational(BigInteger.Zero, new Fraction(remainder, divisor));
 		}
 
+		public static BigRational operator +(BigRational augend, BigRational addend) => Add(augend, addend);
+
 		public static BigRational Add(BigRational augend, BigRational addend)
 		{
 			Fraction fracAugend = augend.GetImproperFraction();
@@ -174,6 +176,8 @@ namespace ExtendedNumerics
 			return reduced;
 		}
 
+		public static BigRational operator -(BigRational minuend, BigRational subtrahend) => Subtract(minuend, subtrahend);
+
 		public static BigRational Subtract(BigRational minuend, BigRational subtrahend)
 		{
 			Fraction fracMinuend = minuend.GetImproperFraction();
@@ -183,6 +187,8 @@ namespace ExtendedNumerics
 			BigRational reduced = BigRational.Reduce(result);
 			return reduced;
 		}
+
+		public static BigRational operator *(BigRational multiplicand, BigRational multiplier) => Multiply(multiplicand, multiplier);
 
 		public static BigRational Multiply(BigRational multiplicand, BigRational multiplier)
 		{
@@ -206,6 +212,8 @@ namespace ExtendedNumerics
 
 			return result;
 		}
+
+		public static BigRational operator /(BigRational dividend, BigRational divisor) => Divide(dividend, divisor);
 
 		public static BigRational Divide(BigRational dividend, BigRational divisor)
 		{
