@@ -114,26 +114,29 @@ namespace ExtendedNumerics
 				throw new ArgumentException("invalid Decimal", "value");
 			}
 
-			switch (value)
+			if (value == Decimal.Zero)
 			{
-				case Decimal.Zero:
-					Numerator = BigInteger.Zero;
-					Denominator = BigInteger.One;
-					return;
-				case Decimal.One:
-					Numerator = BigInteger.One;
-					Denominator = BigInteger.One;
-					return;
-				case Decimal.MinusOne:
-					Numerator = BigInteger.MinusOne;
-					Denominator = BigInteger.One;
-					return;
-				case var n when n % 1 == Decimal.Zero:
-					Numerator = (BigInteger)value;
-					Denominator = BigInteger.One;
-					return;
-				default:
-					break;
+				Numerator = BigInteger.Zero;
+				Denominator = BigInteger.One;
+				return;
+			}
+			else if (value == Decimal.One)
+			{
+				Numerator = BigInteger.One;
+				Denominator = BigInteger.One;
+				return;
+			}
+			else if (value == Decimal.MinusOne)
+			{
+				Numerator = BigInteger.MinusOne;
+				Denominator = BigInteger.One;
+				return;
+			}
+			else if (value % 1 == Decimal.Zero)
+			{
+				Numerator = (BigInteger)value;
+				Denominator = BigInteger.One;
+				return;
 			}
 
 			// build up the numerator

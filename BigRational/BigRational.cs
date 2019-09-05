@@ -73,25 +73,26 @@ namespace ExtendedNumerics
 
 		public BigRational(Decimal value)
 		{
-			switch (value)
+			if (value == Decimal.Zero)
 			{
-				case Decimal.Zero:
-					WholePart = BigInteger.Zero;
-					FractionalPart = Fraction.One;
-					break;
-				case Decimal.One:
-					WholePart = BigInteger.Zero;
-					FractionalPart = Fraction.One;
-					break;
-				case Decimal.MinusOne:
-					WholePart = BigInteger.Zero;
-					FractionalPart = Fraction.MinusOne;
-					break;
-				default:
-					WholePart = (BigInteger)Math.Truncate(value);
-					Decimal fract = Math.Abs(value) % 1;
-					FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
-					break;
+				WholePart = BigInteger.Zero;
+				FractionalPart = Fraction.One;
+			}
+			else if (value == Decimal.One)
+			{
+				WholePart = BigInteger.Zero;
+				FractionalPart = Fraction.One;
+			}
+			else if (value == Decimal.MinusOne)
+			{
+				WholePart = BigInteger.Zero;
+				FractionalPart = Fraction.MinusOne;
+			}
+			else
+			{
+				WholePart = (BigInteger)Math.Truncate(value);
+				Decimal fract = Math.Abs(value) % 1;
+				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
 			}
 		}
 
