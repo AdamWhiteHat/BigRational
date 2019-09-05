@@ -3,6 +3,7 @@ using System.Linq;
 using System.Numerics;
 using System.Globalization;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace ExtendedNumerics
 {
@@ -98,6 +99,61 @@ namespace ExtendedNumerics
 					}
 				}
 			}
+		}
+
+		// Fraction(Decimal)
+		//
+		// The Decimal type represents floating point numbers exactly, with no rounding error.
+		// Values such as "0.1" in Decimal are actually representable, and convert cleanly
+		// to Fraction as "1/10"
+		public Fraction(Decimal value)
+		{
+			int[] bits = Decimal.GetBits(value);
+			if (bits == null || bits.Length != 4 || (bits[3] & ~(DecimalSignMask | DecimalScaleMask)) != 0 || (bits[3] & DecimalScaleMask) > (28 << 16))
+			{
+				throw new ArgumentException("invalid Decimal", "value");
+			}
+
+			switch (value)
+			{
+				case Decimal.Zero:
+					Numerator = BigInteger.Zero;
+					Denominator = BigInteger.One;
+					return;
+				case Decimal.One:
+					Numerator = BigInteger.One;
+					Denominator = BigInteger.One;
+					return;
+				case Decimal.MinusOne:
+					Numerator = BigInteger.MinusOne;
+					Denominator = BigInteger.One;
+					return;
+				case var n when n % 1 == Decimal.Zero:
+					Numerator = (BigInteger)value;
+					Denominator = BigInteger.One;
+					return;
+				default:
+					break;
+			}
+
+			// build up the numerator
+			ulong ul = (((ulong)(uint)bits[2]) << 32) | ((ulong)(uint)bits[1]);  // (hi    << 32) | (mid)
+			BigInteger numerator = (new BigInteger(ul) << 32) | (uint)bits[0];   // (hiMid << 32) | (low)
+
+			bool isNegative = (bits[3] & DecimalSignMask) != 0;
+			if (isNegative)
+			{
+				numerator = BigInteger.Negate(numerator);
+			}
+
+			// build up the denominator
+			int scale = (bits[3] & DecimalScaleMask) >> 16;     // 0-28, power of 10 to divide numerator by
+			BigInteger denominator = BigInteger.Pow(10, scale);
+
+			Fraction notReduced = new Fraction(numerator, denominator);
+			Fraction reduced = Simplify(notReduced);
+			Numerator = reduced.Numerator;
+			Denominator = reduced.Denominator;
 		}
 
 		#endregion
@@ -381,6 +437,11 @@ namespace ExtendedNumerics
 			return new Fraction(value);
 		}
 
+		public static explicit operator Fraction(Decimal value)
+		{
+			return new Fraction(value);
+		}
+
 		public static explicit operator Double(Fraction value)
 		{
 			if (IsInRangeDouble(value.Numerator) && IsInRangeDouble(value.Denominator))
@@ -432,6 +493,59 @@ namespace ExtendedNumerics
 		}
 		private static readonly int _doubleMaxScale = 308;
 		private static readonly BigInteger _doublePrecision = BigInteger.Pow(10, _doubleMaxScale);
+
+		public static explicit operator Decimal(Fraction value)
+		{
+			// The Decimal value type represents decimal numbers ranging
+			// from +79,228,162,514,264,337,593,543,950,335 to -79,228,162,514,264,337,593,543,950,335
+			// the binary representation of a Decimal value is of the form, ((-2^96 to 2^96) / 10^(0 to 28))
+			if (IsInRangeDecimal(value.Numerator) && IsInRangeDecimal(value.Denominator))
+			{
+				return (Decimal)value.Numerator / (Decimal)value.Denominator;
+			}
+
+			// scale the numerator to preseve the fraction part through the integer division
+			BigInteger denormalized = (value.Numerator * _decimalPrecision) / value.Denominator;
+			if (denormalized.IsZero)
+			{
+				return Decimal.Zero; // underflow - fraction is too small to fit in a decimal
+			}
+			for (int scale = DecimalMaxScale; scale >= 0; scale--)
+			{
+				if (!IsInRangeDecimal(denormalized))
+				{
+					denormalized = denormalized / 10;
+				}
+				else
+				{
+					DecimalUInt32 dec = new DecimalUInt32();
+					dec.dec = (Decimal)denormalized;
+					dec.flags = (dec.flags & ~DecimalScaleMask) | (scale << 16);
+					return dec.dec;
+				}
+			}
+			throw new OverflowException("Value was either too large or too small for a Decimal.");
+		}
+		private static bool IsInRangeDecimal(BigInteger number)
+		{
+			return (_decimalMinValue <= number && number <= _decimalMaxValue);
+		}
+
+		[StructLayout(LayoutKind.Explicit)]
+		internal struct DecimalUInt32
+		{
+			[FieldOffset(0)]
+			public Decimal dec;
+			[FieldOffset(0)]
+			public int flags;
+		}
+
+		private static readonly BigInteger _decimalPrecision = BigInteger.Pow(10, DecimalMaxScale);
+		private static readonly BigInteger _decimalMaxValue = (BigInteger)Decimal.MaxValue;
+		private static readonly BigInteger _decimalMinValue = (BigInteger)Decimal.MinValue;
+		private const int DecimalScaleMask = 0x00FF0000;
+		private const int DecimalSignMask = unchecked((int)0x80000000);
+		private const int DecimalMaxScale = 28;
 
 		#endregion
 
