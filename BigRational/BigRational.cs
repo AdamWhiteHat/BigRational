@@ -299,6 +299,14 @@ namespace ExtendedNumerics
 			return result;
 		}
 
+		public static explicit operator Decimal(BigRational value)
+		{
+			Decimal fract = (Decimal)value.FractionalPart;
+			Decimal whole = (Decimal)value.WholePart;
+			Decimal result = whole + (fract);
+			return result;
+		}
+
 		public static explicit operator Fraction(BigRational value)
 		{
 			return Fraction.Simplify(new Fraction(
