@@ -507,7 +507,7 @@ namespace ExtendedNumerics
 				return (Decimal)value.Numerator / (Decimal)value.Denominator;
 			}
 
-			// scale the numerator to preseve the fraction part through the integer division
+			// scale the numerator to preserve the fraction part through the integer division
 			BigInteger denormalized = (value.Numerator * _decimalPrecision) / value.Denominator;
 			if (denormalized.IsZero)
 			{
