@@ -101,11 +101,6 @@ namespace ExtendedNumerics
 			}
 		}
 
-		// Fraction(Decimal)
-		//
-		// The Decimal type represents floating point numbers exactly, with no rounding error.
-		// Values such as "0.1" in Decimal are actually representable, and convert cleanly
-		// to Fraction as "1/10"
 		public Fraction(Decimal value)
 		{
 			int[] bits = Decimal.GetBits(value);
@@ -166,10 +161,8 @@ namespace ExtendedNumerics
 		public BigInteger Numerator { get; private set; }
 		public BigInteger Denominator { get; private set; }
 
-		public Int32 Sign { get { return Fraction.Simplify(this).Numerator.Sign; } }
-
+		public Int32 Sign { get { return Fraction.NormalizeSign(this).Numerator.Sign; } }
 		public bool IsZero { get { return (this == Fraction.Zero); } }
-
 		public bool IsOne { get { return (this == Fraction.One); } }
 
 		#region Static Properties
@@ -331,6 +324,8 @@ namespace ExtendedNumerics
 			return new Fraction(BigInteger.Negate(fraction.Numerator), fraction.Denominator);
 		}
 
+		#region GCD & LCM
+
 		public static Fraction LeastCommonDenominator(Fraction left, Fraction right)
 		{
 			return new Fraction((left.Denominator * right.Denominator), BigInteger.GreatestCommonDivisor(left.Denominator, right.Denominator));
@@ -347,30 +342,44 @@ namespace ExtendedNumerics
 			return new Fraction(gcd, lcm);
 		}
 
+		private static BigInteger LCM(BigInteger value1, BigInteger value2)
+		{
+			BigInteger absValue1 = BigInteger.Abs(value1);
+			BigInteger absValue2 = BigInteger.Abs(value2);
+			return (absValue1 * absValue2) / BigInteger.GreatestCommonDivisor(absValue1, absValue2);
+		}
+
+		#endregion
+
 		#endregion
 
 		#region Arithmetic Operators
 
-		//public static Fraction operator +(Fraction fraction) { return Abs(fraction); }
-		//public static Fraction operator -(Fraction fraction) { return Negate(fraction); }
-		//public static Fraction operator ++(Fraction fraction) { return Add(fraction, Fraction.One); }
-		//public static Fraction operator --(Fraction fraction) { return Subtract(fraction, Fraction.One); }
-		//public static Fraction operator +(Fraction left, Fraction right) { return Add(left, right); }
-		//public static Fraction operator -(Fraction left, Fraction right) { return Subtract(left, right); }
-		//public static Fraction operator *(Fraction left, Fraction right) { return Multiply(left, right); }
-		//public static Fraction operator /(Fraction left, Fraction right) { return Divide(left, right); }
-		//public static Fraction operator %(Fraction left, Fraction right) { return Remainder(left, right); }
+		public static Fraction operator +(Fraction left, Fraction right) => Add(left, right);
+		public static Fraction operator -(Fraction left, Fraction right) => Subtract(left, right);
+		public static Fraction operator *(Fraction left, Fraction right) => Multiply(left, right);
+		public static Fraction operator /(Fraction left, Fraction right) => Divide(left, right);
+		public static Fraction operator %(Fraction left, Fraction right) => Remainder(left, right);
+		// Unitary operators
+		public static Fraction operator +(Fraction fraction) => Abs(fraction);
+		public static Fraction operator -(Fraction fraction) => Negate(fraction);
+		public static Fraction operator ++(Fraction fraction) => Add(fraction, Fraction.One);
+		public static Fraction operator --(Fraction fraction) => Subtract(fraction, Fraction.One);
 
 		#endregion
 
 		#region Comparison Operators
 
-		public static bool operator ==(Fraction left, Fraction right) { return Compare(left, right) == 0; }
-		public static bool operator !=(Fraction left, Fraction right) { return Compare(left, right) != 0; }
-		public static bool operator <(Fraction left, Fraction right) { return Compare(left, right) < 0; }
-		public static bool operator <=(Fraction left, Fraction right) { return Compare(left, right) <= 0; }
-		public static bool operator >(Fraction left, Fraction right) { return Compare(left, right) > 0; }
-		public static bool operator >=(Fraction left, Fraction right) { return Compare(left, right) >= 0; }
+		public static bool operator ==(Fraction left, Fraction right) => Compare(left, right) == 0;
+		public static bool operator !=(Fraction left, Fraction right) => Compare(left, right) != 0;
+		public static bool operator <(Fraction left, Fraction right) => Compare(left, right) < 0;
+		public static bool operator <=(Fraction left, Fraction right) => Compare(left, right) <= 0;
+		public static bool operator >(Fraction left, Fraction right) => Compare(left, right) > 0;
+		public static bool operator >=(Fraction left, Fraction right) => Compare(left, right) >= 0;
+
+		#endregion
+
+		#region Compare
 
 		public static int Compare(Fraction left, Fraction right)
 		{
@@ -392,38 +401,6 @@ namespace ExtendedNumerics
 		public int CompareTo(Fraction other)
 		{
 			return Compare(this, other);
-		}
-
-		#endregion
-
-		#region Equality Methods
-
-		public Boolean Equals(Fraction other)
-		{
-			return this.Equals(this, other);
-		}
-
-		public override bool Equals(Object obj)
-		{
-			if (obj == null) { return false; }
-			if (!(obj is Fraction)) { return false; }
-			return this.Equals(this, (Fraction)obj);
-		}
-
-		public override int GetHashCode()
-		{
-			return this.GetHashCode(this);
-		}
-
-		public bool Equals(Fraction left, Fraction right)
-		{
-			if (left.Denominator == right.Denominator) { return left.Numerator == right.Numerator; }
-			else { return (left.Numerator * right.Denominator) == (left.Denominator * right.Numerator); }
-		}
-
-		public int GetHashCode(Fraction fraction)
-		{
-			return (fraction.Numerator / fraction.Denominator).ToString().GetHashCode();
 		}
 
 		#endregion
@@ -490,13 +467,6 @@ namespace ExtendedNumerics
 			}
 		}
 
-		private static bool IsInRangeDouble(BigInteger number)
-		{
-			return ((BigInteger)Double.MinValue < number && number < (BigInteger)Double.MaxValue);
-		}
-		private static readonly int _doubleMaxScale = 308;
-		private static readonly BigInteger _doublePrecision = BigInteger.Pow(10, _doubleMaxScale);
-
 		public static explicit operator Decimal(Fraction value)
 		{
 			// The Decimal value type represents decimal numbers ranging
@@ -529,6 +499,20 @@ namespace ExtendedNumerics
 			}
 			throw new OverflowException("Value was either too large or too small for a Decimal.");
 		}
+
+		private static bool IsInRangeDouble(BigInteger number)
+		{
+			return ((BigInteger)Double.MinValue < number && number < (BigInteger)Double.MaxValue);
+		}
+		private static readonly int _doubleMaxScale = 308;
+		private static readonly BigInteger _doublePrecision = BigInteger.Pow(10, _doubleMaxScale);
+		private static readonly BigInteger _decimalPrecision = BigInteger.Pow(10, DecimalMaxScale);
+		private static readonly BigInteger _decimalMaxValue = (BigInteger)Decimal.MaxValue;
+		private static readonly BigInteger _decimalMinValue = (BigInteger)Decimal.MinValue;
+		private const int DecimalScaleMask = 0x00FF0000;
+		private const int DecimalSignMask = unchecked((int)0x80000000);
+		private const int DecimalMaxScale = 28;
+
 		private static bool IsInRangeDecimal(BigInteger number)
 		{
 			return (_decimalMinValue <= number && number <= _decimalMaxValue);
@@ -543,12 +527,37 @@ namespace ExtendedNumerics
 			public int flags;
 		}
 
-		private static readonly BigInteger _decimalPrecision = BigInteger.Pow(10, DecimalMaxScale);
-		private static readonly BigInteger _decimalMaxValue = (BigInteger)Decimal.MaxValue;
-		private static readonly BigInteger _decimalMinValue = (BigInteger)Decimal.MinValue;
-		private const int DecimalScaleMask = 0x00FF0000;
-		private const int DecimalSignMask = unchecked((int)0x80000000);
-		private const int DecimalMaxScale = 28;
+		#endregion
+
+		#region Equality Methods
+
+		public override bool Equals(Object obj)
+		{
+			if (obj == null) { return false; }
+			if (!(obj is Fraction)) { return false; }
+			return this.Equals(this, (Fraction)obj);
+		}
+
+		public bool Equals(Fraction other)
+		{
+			return this.Equals(this, other);
+		}
+
+		public bool Equals(Fraction left, Fraction right)
+		{
+			if (left.Denominator == right.Denominator) { return left.Numerator == right.Numerator; }
+			else { return (left.Numerator * right.Denominator) == (left.Denominator * right.Numerator); }
+		}
+
+		public override int GetHashCode()
+		{
+			return this.GetHashCode(this);
+		}
+
+		public int GetHashCode(Fraction fraction)
+		{
+			return BigRational.CombineHashCodes(fraction.Numerator.GetHashCode(), fraction.Denominator.GetHashCode());
+		}
 
 		#endregion
 
@@ -679,17 +688,6 @@ namespace ExtendedNumerics
 			{
 				return String.Format(provider, "{0} / {1}", Numerator.ToString(format, provider), Denominator.ToString(format, provider));
 			}
-		}
-
-		#endregion
-
-		#region LCM & GCD
-
-		private static BigInteger LCM(BigInteger value1, BigInteger value2)
-		{
-			BigInteger absValue1 = BigInteger.Abs(value1);
-			BigInteger absValue2 = BigInteger.Abs(value2);
-			return (absValue1 * absValue2) / BigInteger.GreatestCommonDivisor(absValue1, absValue2);
 		}
 
 		#endregion

@@ -8,163 +8,10 @@ namespace TestBigRational
 	[TestClass]
 	public class TestFraction
 	{
-		[TestMethod]
-		public void TestAddition()
-		{
-			Fraction oneThird = new Fraction(1, 3);
-			Fraction oneFifth = new Fraction(1, 5);
+		public TestContext TestContext { get { return m_testContext; } set { m_testContext = value; } }
+		private TestContext m_testContext;
 
-			Fraction ninety = new Fraction(90 / 1);
-
-			Fraction expectedValueEightFifteenths = new Fraction(8, 15);
-			Fraction expectedValueThirtysixTwentyfifths = new Fraction(2, 15);
-
-			Fraction expected271Thirds = new Fraction(271, 3);
-
-			Fraction resultEightFifteenths = Fraction.Add(oneThird, oneFifth);
-			Fraction resultThirtysixTwentyfifths = Fraction.Add(oneThird, Fraction.Negate(oneFifth));
-
-			Fraction result271Thirds = Fraction.Add(ninety, oneThird);
-
-			Assert.AreEqual(expectedValueEightFifteenths, resultEightFifteenths);
-			Assert.AreEqual(expectedValueThirtysixTwentyfifths, resultThirtysixTwentyfifths);
-			Assert.AreEqual(expected271Thirds, result271Thirds);
-		}
-
-		[TestMethod]
-		public void TestSubtraction()
-		{
-			Fraction oneHalf = new Fraction(1, 2);
-			Fraction oneSixth = new Fraction(1, 6);
-
-			Fraction expectedValueOneThird = new Fraction(1, 3);
-			Fraction expectedValueNegativeTwoThirds = new Fraction(2, 3);
-
-			Fraction resultOneThird = Fraction.Subtract(oneHalf, oneSixth);
-			Fraction resultNegativeTwoThirds = Fraction.Subtract(oneHalf, Fraction.Negate(oneSixth));
-
-			Assert.AreEqual(expectedValueOneThird, resultOneThird);
-			Assert.AreEqual(expectedValueNegativeTwoThirds, resultNegativeTwoThirds);
-		}
-
-		[TestMethod]
-		public void TestImproperSubtraction()
-		{
-			Fraction oneHalf = new Fraction(1, 2);
-			Fraction oneSixth = new Fraction(1, 6);
-
-			Fraction expectedValueOneThird = new Fraction(1, 3);
-
-			Fraction resultOneThird = Fraction.Subtract(oneHalf, oneSixth);
-
-			Assert.AreEqual(expectedValueOneThird, resultOneThird);
-		}
-
-		[TestMethod]
-		public void TestMultiplication()
-		{
-			Fraction oneHalf = new Fraction(1, 2);
-			Fraction twoFifths = new Fraction(2, 5);
-
-			Fraction expectedValueOneFifth = new Fraction(1, 5);
-			Fraction expectedValueNegativeFourTwentyFifths = new Fraction(-4, 25);
-
-			Fraction resultOneFifth = Fraction.Multiply(oneHalf, twoFifths);
-			Fraction resultNegativeFourTwentyFifths = Fraction.Multiply(twoFifths, Fraction.Negate(twoFifths));
-
-			Assert.AreEqual(expectedValueOneFifth, resultOneFifth);
-			Assert.AreEqual(expectedValueNegativeFourTwentyFifths, resultNegativeFourTwentyFifths);
-		}
-
-		[TestMethod]
-		public void TestDivision()
-		{
-			Fraction oneHalf = new Fraction(1, 2);
-			Fraction oneSixth = new Fraction(1, 6);
-			Fraction negativeOneSixth = new Fraction(-1, 6);
-
-			Fraction expectedValueThree = new Fraction(3, 1);
-			Fraction expectedValueOneThird = new Fraction(1, 3);
-			Fraction expectedValueNegativeThree = new Fraction(-3, 1);
-			Fraction expectedValueNegativeOneThird = new Fraction(-1, 3);
-
-			Fraction resultThree = Fraction.Divide(oneHalf, oneSixth);
-			Fraction resultNegativeThree = Fraction.Divide(oneHalf, negativeOneSixth);
-			Fraction resultOneThird = Fraction.Divide(oneSixth, oneHalf);
-			Fraction resultNegativeOneThird = Fraction.Divide(oneSixth, Fraction.Negate(oneHalf));
-
-			Assert.AreEqual(expectedValueThree, resultThree);
-			Assert.AreEqual(expectedValueNegativeThree, resultNegativeThree);
-			Assert.AreEqual(expectedValueOneThird, resultOneThird);
-			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
-		}
-
-		[TestMethod]
-		public void TestConvertToDouble()
-		{
-			Fraction oneSixteenth = new Fraction(1, 16);
-			Fraction negativeOneThird = new Fraction(-1, 3);
-
-			Double expectedValueOneSixteenth = 0.0625d;
-			Double expectedValueNegativeOneThird = -1d / 3d;
-
-			Double resultOneSixteenth = (Double)oneSixteenth;
-			Double resultNegativeOneThird = (Double)negativeOneThird;
-
-			Assert.AreEqual(expectedValueOneSixteenth, resultOneSixteenth);
-			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
-		}
-
-		[TestMethod]
-		public void TestConvertFromDouble()
-		{
-			Double fifteenSixteenths = 0.9375d;
-			Double negativeOneThird = -1d / 3d;
-
-			Fraction expectedValueFifteenSixteenths = new Fraction(15, 16);
-			Fraction expectedValueNegativeOneThird = new Fraction(-1, 3);
-
-			Fraction result1516 = (Fraction)fifteenSixteenths;
-			Fraction resultNeg13 = (Fraction)negativeOneThird;
-
-			Assert.AreEqual(expectedValueFifteenSixteenths, result1516);
-			Assert.AreEqual(expectedValueNegativeOneThird, resultNeg13);
-		}
-
-		[TestMethod]
-		public void TestConvertToDecimal()
-		{
-			Fraction oneSixteenth = new Fraction(1, 16);
-			Fraction negativeOneThird = new Fraction(-1, 3);
-
-			Decimal expectedValueOneSixteenth = 0.0625m;
-			Decimal expectedValueNegativeOneThird = -1m / 3m;
-
-			Decimal resultOneSixteenth = (Decimal)oneSixteenth;
-			Decimal resultNegativeOneThird = (Decimal)negativeOneThird;
-
-			Assert.AreEqual(expectedValueOneSixteenth, resultOneSixteenth);
-			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
-		}
-
-		[TestMethod]
-		public void TestConvertFromDecimal()
-		{
-			// Decimal converts best with a fixed number of decimal points
-			Decimal fifteenSixteenths = 0.9375m;
-			Decimal negativeOneOneHundredAndTwentyEight = -1m / 128m;
-
-			Fraction expectedValueFifteenSixteenths = new Fraction(15, 16);
-			Fraction expectedValueNegativeOneThird = new Fraction(-1, 128);
-
-			Fraction result1516 = (Fraction)fifteenSixteenths;
-			Fraction resultNeg1128 = (Fraction)negativeOneOneHundredAndTwentyEight;
-
-			Assert.AreEqual(expectedValueFifteenSixteenths, result1516);
-			Assert.AreEqual(expectedValueNegativeOneThird, resultNeg1128);
-		}
-
-		[TestMethod]
+		[TestMethod, TestCategory("Core")]
 		public void TestSimplify()
 		{
 			Fraction eighteenTwos = new Fraction(18, 2);
@@ -186,7 +33,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueReducedNegative, reducedNegative);
 		}
 
-		[TestMethod]
+		[TestMethod, TestCategory("Core")]
 		public void TestNormalizeSign()
 		{
 			Fraction noChange1 = new Fraction(3, 11);
@@ -202,7 +49,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueNormalized, normalized);
 		}
 
-		[TestMethod]
+		[TestMethod, TestCategory("Core")]
 		public void TestReduceToProperFraction()
 		{
 			BigRational reducedNegative = Fraction.ReduceToProperFraction(new Fraction(-3, 2));
@@ -216,6 +63,49 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueReducedNegative, reducedNegative);
 			Assert.AreEqual(expectedValueReduced, reduced);
 			Assert.AreEqual(expectedValueNoChange, noChange);
+		}
+
+		[TestMethod, TestCategory("Core")]
+		public void TestGetHashCode()
+		{
+			/*
+				4919/2 = 2459.5
+				9839/4 = 2459.75
+			 */
+			Fraction testA1 = new Fraction(1, 31);
+			Fraction testA2 = new Fraction(2, 31);
+
+			Fraction testB1 = new Fraction(4919, 2);
+			Fraction testB2 = new Fraction(9839, 4);
+
+			Assert.AreNotEqual(testA1.GetHashCode(), testA2.GetHashCode());
+			Assert.AreNotEqual(testB1.GetHashCode(), testB2.GetHashCode());
+		}
+
+		[TestMethod, TestCategory("Core")]
+		public void TestCompare()
+		{
+			Fraction toCompareAgainst = new Fraction(3, 5);
+
+			Fraction same = new Fraction(6, 10);
+			Fraction larger = new Fraction(61, 100);
+			Fraction smaller = new Fraction(59, 100);
+			Fraction negative = new Fraction(-3, 5);
+
+			int expected_Same = 0;
+			int expected_Larger = -1;
+			int expected_Smaller = 1;
+			int expected_Negative = 1;
+
+			int result_Same = Fraction.Compare(toCompareAgainst, same);
+			int result_Larger = Fraction.Compare(toCompareAgainst, larger);
+			int result_Smaller = Fraction.Compare(toCompareAgainst, smaller);
+			int resultl_Negative = Fraction.Compare(toCompareAgainst, negative);
+
+			Assert.AreEqual(expected_Same, result_Same);
+			Assert.AreEqual(expected_Larger, result_Larger);
+			Assert.AreEqual(expected_Smaller, result_Smaller);
+			Assert.AreEqual(expected_Negative, resultl_Negative);
 		}
 	}
 }

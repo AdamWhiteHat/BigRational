@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Numerics;
 using ExtendedNumerics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,148 +8,10 @@ namespace TestBigRational
 	[TestClass]
 	public class TestBigRational
 	{
-		[TestMethod]
-		public void TestAddition()
-		{
-			BigRational threeHalfs = new BigRational(BigInteger.Zero, new Fraction(3, 2));
-			BigRational tenEighths = new BigRational(BigInteger.Zero, new Fraction(10, 8));
+		public TestContext TestContext { get { return m_testContext; } set { m_testContext = value; } }
+		private TestContext m_testContext;
 
-			BigRational oneHundred = new BigRational(100);
-			BigRational oneHalf = new BigRational(BigInteger.Zero, new Fraction(1, 2));
-
-			BigRational expected1 = BigRational.Reduce(new BigRational(BigInteger.Zero, new Fraction(11, 4)));
-			BigRational expected2 = BigRational.Reduce(new BigRational(BigInteger.Zero, new Fraction(201, 2)));
-
-			BigRational result1 = BigRational.Add(threeHalfs, tenEighths);
-			BigRational result2 = BigRational.Add(oneHundred, oneHalf);
-
-			Assert.AreEqual(expected1, result1);
-			Assert.AreEqual(expected2, result2);
-		}
-
-		[TestMethod]
-		public void TestSubtraction()
-		{
-			BigRational sevenTwoths = new BigRational(3, 1, 2);
-			BigRational sevenFifths = new BigRational(1, 2, 5);
-
-			BigRational expected = new BigRational(2, 1, 10);
-			BigRational result = BigRational.Subtract(sevenTwoths, sevenFifths);
-
-			Assert.AreEqual(expected, result);
-		}
-
-		[TestMethod]
-		public void TestMultiplication()
-		{
-			BigRational sevenTwoths = new BigRational(BigInteger.Zero, new Fraction(7, 2));
-			BigRational sevenFifths = new BigRational(BigInteger.Zero, new Fraction(7, 5));
-
-			BigRational expected = BigRational.Reduce(new BigRational(BigInteger.Zero, 49, 10));
-			BigRational result = BigRational.Multiply(sevenTwoths, sevenFifths);
-
-			Assert.AreEqual(expected, result);
-		}
-
-
-		[TestMethod]
-		public void TestDivisionNegative()
-		{
-			BigRational expected = BigRational.One;
-			BigRational result = BigRational.Divide(BigRational.MinusOne, BigRational.MinusOne);
-
-			Assert.AreEqual(expected, result);
-		}
-
-		[TestMethod]
-		public void TestDivision()
-		{
-			BigRational sevenTwoths = new BigRational(BigInteger.Zero, new Fraction(7, 2));
-			BigRational sevenFifths = new BigRational(BigInteger.Zero, new Fraction(7, 5));
-
-			BigRational expected = BigRational.Reduce(new BigRational(BigInteger.Zero, 5, 2));
-			BigRational result = BigRational.Divide(sevenTwoths, sevenFifths);
-
-			Assert.AreEqual(expected, result);
-		}
-
-		[TestMethod]
-		public void TestConvertFromDecimalPointDouble()
-		{
-			Double fifteenSixteenths = 0.9375d;
-
-			BigRational expectedValue = new BigRational(BigInteger.Zero, new Fraction(15, 16));
-			BigRational result = (BigRational)fifteenSixteenths;
-
-			Assert.AreEqual(expectedValue, result);
-		}
-
-		[TestMethod]
-		public void TestConvertFromWholeNumberDouble()
-		{
-			Double seven = 7.0d;
-
-			BigRational expectedValue = new BigRational(7, new Fraction(0, 1));
-
-			BigRational result1 = new BigRational(seven);
-			BigRational result2 = (BigRational)seven;
-
-
-			Assert.AreEqual(expectedValue, result1);
-			Assert.AreEqual(expectedValue, result2);
-		}
-
-		[TestMethod]
-		public void TestConvertFromNegativeMixedDouble()
-		{
-			Double negativeOneAndOneThird = -4d / 3d;
-
-			BigRational expectedValue = new BigRational(-1, new Fraction(1, 3));
-			BigRational result = (BigRational)negativeOneAndOneThird;
-
-			Assert.AreEqual(expectedValue, result);
-		}
-
-		[TestMethod]
-		public void TestConvertFromDecimalPointDecimal()
-		{
-			Decimal fifteenSixteenths = 0.9375m;
-
-			BigRational expectedValue = new BigRational(BigInteger.Zero, new Fraction(15, 16));
-			BigRational result = (BigRational)fifteenSixteenths;
-
-			Assert.AreEqual(expectedValue, result);
-		}
-
-		[TestMethod]
-		public void TestConvertFromWholeNumberDecimal()
-		{
-			Decimal seven = 7.0m;
-
-			BigRational expectedValue = new BigRational(7, new Fraction(0, 1));
-
-			BigRational result1 = new BigRational(seven);
-			BigRational result2 = (BigRational)seven;
-
-
-			Assert.AreEqual(expectedValue, result1);
-			Assert.AreEqual(expectedValue, result2);
-		}
-
-		[TestMethod]
-		public void TestConvertFromNegativeMixedDecimal()
-		{
-			// Note that Decimal works best with a fixed number of decimal points
-			// This will fail if we use the same numbers as used with the double test
-			Decimal negativeOneAndOneHundredAndTwentyEigth = -129m / 128m;
-
-			BigRational expectedValue = new BigRational(-1, new Fraction(1, 128));
-			BigRational result = (BigRational)negativeOneAndOneHundredAndTwentyEigth;
-
-			Assert.AreEqual(expectedValue, result);
-		}
-
-		[TestMethod]
+		[TestMethod, TestCategory("Core")]
 		public void TestConstruction()
 		{
 			BigRational result1 = new BigRational(BigInteger.Zero, new Fraction(182, 26));
@@ -165,7 +26,7 @@ namespace TestBigRational
 			Assert.AreEqual(expected2, result2);
 		}
 
-		[TestMethod]
+		[TestMethod, TestCategory("Core")]
 		public void TestExpandImproperFraction()
 		{
 			BigRational threeAndOneThird = new BigRational(3, 1, 3);
@@ -190,7 +51,7 @@ namespace TestBigRational
 			Assert.AreEqual(expected7over1, result7);
 		}
 
-		[TestMethod]
+		[TestMethod, TestCategory("Core")]
 		public void TestMullersRecurrenceConvergesOnFive()
 		{
 			// Set an upper limit to the number of iterations to be tried
@@ -230,5 +91,39 @@ namespace TestBigRational
 			Assert.IsTrue(count == 70);
 		}
 
+		[TestMethod, TestCategory("Core")]
+		public void TestGetHashCode()
+		{
+			BigRational testA1 = new BigRational(0, 1, 31);
+			BigRational testA2 = new BigRational(0, 2, 31);
+
+			Assert.AreNotEqual(testA1.GetHashCode(), testA2.GetHashCode());
+		}
+
+		[TestMethod, TestCategory("Core")]
+		public void TestCompare()
+		{
+			BigRational toCompareAgainst = new BigRational(0, 3, 5);
+
+			BigRational same = new BigRational(0, 6, 10);
+			BigRational larger = new BigRational(0, 61, 100);
+			BigRational smaller = new BigRational(0, 59, 100);
+			BigRational negative = new BigRational(0, -3, 5);
+
+			int expected_Same = 0;
+			int expected_Larger = -1;
+			int expected_Smaller = 1;
+			int expected_Negative = 1;
+
+			int result_Same = BigRational.Compare(toCompareAgainst, same);
+			int result_Larger = BigRational.Compare(toCompareAgainst, larger);
+			int result_Smaller = BigRational.Compare(toCompareAgainst, smaller);
+			int resultl_Negative = BigRational.Compare(toCompareAgainst, negative);
+
+			Assert.AreEqual(expected_Same, result_Same);
+			Assert.AreEqual(expected_Larger, result_Larger);
+			Assert.AreEqual(expected_Smaller, result_Smaller);
+			Assert.AreEqual(expected_Negative, resultl_Negative);
+		}
 	}
 }

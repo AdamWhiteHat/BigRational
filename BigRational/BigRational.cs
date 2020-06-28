@@ -23,7 +23,6 @@ namespace ExtendedNumerics
 		public BigRational(Fraction fraction)
 			: this(BigInteger.Zero, fraction)
 		{
-
 		}
 
 		public BigRational(BigInteger whole, Fraction fraction)
@@ -103,6 +102,11 @@ namespace ExtendedNumerics
 		public BigInteger WholePart { get; private set; }
 		public Fraction FractionalPart { get; private set; }
 
+		public Int32 Sign { get { return NormalizeSign(this).WholePart.Sign; } }
+		public bool IsZero { get { return (WholePart.IsZero && FractionalPart.IsZero); } }
+
+		#region Static Properties
+
 		public static BigRational One { get { return _one; } }
 		public static BigRational Zero { get { return _zero; } }
 		public static BigRational MinusOne { get { return _minusOne; } }
@@ -111,85 +115,11 @@ namespace ExtendedNumerics
 		private static BigRational _zero { get { return new BigRational(0); } }
 		private static BigRational _minusOne { get { return new BigRational(-1); } }
 
-		public Int32 Sign
-		{
-			get
-			{
-				BigRational normalized = NormalizeSign(this);
-				return normalized.WholePart.Sign;
-			}
-		}
-
-		public bool IsZero
-		{
-			get
-			{
-				return (WholePart.IsZero && FractionalPart.IsZero);
-			}
-		}
+		#endregion
 
 		#endregion
 
 		#region Arithmetic Methods
-
-		public static BigRational Add(Fraction augend, Fraction addend)
-		{
-			return new BigRational(BigInteger.Zero, Fraction.Add(augend, addend));
-		}
-
-		public static BigRational Subtract(Fraction minuend, Fraction subtrahend)
-		{
-			return new BigRational(BigInteger.Zero, Fraction.Subtract(minuend, subtrahend));
-		}
-
-		public static BigRational Multiply(Fraction multiplicand, Fraction multiplier)
-		{
-			return new BigRational(BigInteger.Zero, Fraction.Multiply(multiplicand, multiplier));
-		}
-
-		public static BigRational Divide(Fraction dividend, Fraction divisor)
-		{
-			return new BigRational(BigInteger.Zero, Fraction.Divide(dividend, divisor));
-		}
-
-		public static BigRational Abs(BigRational rational)
-		{
-			BigRational input = BigRational.Reduce(rational);
-			return new BigRational(BigInteger.Abs(input.WholePart), input.FractionalPart);
-		}
-
-		public static BigRational Negate(BigRational rational)
-		{
-			BigRational input = BigRational.Reduce(rational);
-			return new BigRational(BigInteger.Negate(input.WholePart), input.FractionalPart);
-		}
-
-		public static BigRational Pow(BigRational baseValue, BigInteger exponent)
-		{
-			Fraction fractPow = Fraction.Pow(baseValue.GetImproperFraction(), exponent);
-			return new BigRational(fractPow);
-		}
-
-		public static double Log(BigRational rational)
-		{
-			return Fraction.Log(rational.GetImproperFraction());
-		}
-
-		public static BigRational Mod(BigRational number, BigRational mod)
-		{
-			Fraction num = number.GetImproperFraction();
-			Fraction modulus = mod.GetImproperFraction();
-
-			return new BigRational(Fraction.Remainder(num, modulus));
-		}
-
-		public static BigRational Remainder(BigInteger dividend, BigInteger divisor)
-		{
-			BigInteger remainder = (dividend % divisor);
-			return new BigRational(BigInteger.Zero, new Fraction(remainder, divisor));
-		}
-
-		public static BigRational operator +(BigRational augend, BigRational addend) => Add(augend, addend);
 
 		public static BigRational Add(BigRational augend, BigRational addend)
 		{
@@ -201,8 +131,6 @@ namespace ExtendedNumerics
 			return reduced;
 		}
 
-		public static BigRational operator -(BigRational minuend, BigRational subtrahend) => Subtract(minuend, subtrahend);
-
 		public static BigRational Subtract(BigRational minuend, BigRational subtrahend)
 		{
 			Fraction fracMinuend = minuend.GetImproperFraction();
@@ -212,8 +140,6 @@ namespace ExtendedNumerics
 			BigRational reduced = BigRational.Reduce(result);
 			return reduced;
 		}
-
-		public static BigRational operator *(BigRational multiplicand, BigRational multiplier) => Multiply(multiplicand, multiplier);
 
 		public static BigRational Multiply(BigRational multiplicand, BigRational multiplier)
 		{
@@ -238,8 +164,6 @@ namespace ExtendedNumerics
 			return result;
 		}
 
-		public static BigRational operator /(BigRational dividend, BigRational divisor) => Divide(dividend, divisor);
-
 		public static BigRational Divide(BigRational dividend, BigRational divisor)
 		{
 			// a/b / c/d  == (ad)/(bc)			
@@ -254,7 +178,64 @@ namespace ExtendedNumerics
 			return result;
 		}
 
-		// LCD & GCD
+		public static BigRational Remainder(BigInteger dividend, BigInteger divisor)
+		{
+			BigInteger remainder = (dividend % divisor);
+			return new BigRational(BigInteger.Zero, new Fraction(remainder, divisor));
+		}
+
+		public static BigRational Mod(BigRational number, BigRational mod)
+		{
+			Fraction num = number.GetImproperFraction();
+			Fraction modulus = mod.GetImproperFraction();
+
+			return new BigRational(Fraction.Remainder(num, modulus));
+		}
+
+		public static BigRational Pow(BigRational baseValue, BigInteger exponent)
+		{
+			Fraction fractPow = Fraction.Pow(baseValue.GetImproperFraction(), exponent);
+			return new BigRational(fractPow);
+		}
+
+		public static double Log(BigRational rational)
+		{
+			return Fraction.Log(rational.GetImproperFraction());
+		}
+
+		public static BigRational Abs(BigRational rational)
+		{
+			BigRational input = BigRational.Reduce(rational);
+			return new BigRational(BigInteger.Abs(input.WholePart), input.FractionalPart);
+		}
+
+		public static BigRational Negate(BigRational rational)
+		{
+			BigRational input = BigRational.Reduce(rational);
+			return new BigRational(BigInteger.Negate(input.WholePart), input.FractionalPart);
+		}
+
+		public static BigRational Add(Fraction augend, Fraction addend)
+		{
+			return new BigRational(BigInteger.Zero, Fraction.Add(augend, addend));
+		}
+
+		public static BigRational Subtract(Fraction minuend, Fraction subtrahend)
+		{
+			return new BigRational(BigInteger.Zero, Fraction.Subtract(minuend, subtrahend));
+		}
+
+		public static BigRational Multiply(Fraction multiplicand, Fraction multiplier)
+		{
+			return new BigRational(BigInteger.Zero, Fraction.Multiply(multiplicand, multiplier));
+		}
+
+		public static BigRational Divide(Fraction dividend, Fraction divisor)
+		{
+			return new BigRational(BigInteger.Zero, Fraction.Divide(dividend, divisor));
+		}
+
+		#region GCD & LCM
 
 		public static BigRational LeastCommonDenominator(BigRational left, BigRational right)
 		{
@@ -270,6 +251,66 @@ namespace ExtendedNumerics
 			Fraction rightFrac = right.GetImproperFraction();
 
 			return BigRational.Reduce(new BigRational(Fraction.GreatestCommonDivisor(leftFrac, rightFrac)));
+		}
+
+		#endregion
+
+		#endregion
+
+		#region Arithmetic Operators
+
+		public static BigRational operator +(BigRational augend, BigRational addend) => Add(augend, addend);
+		public static BigRational operator -(BigRational minuend, BigRational subtrahend) => Subtract(minuend, subtrahend);
+		public static BigRational operator *(BigRational multiplicand, BigRational multiplier) => Multiply(multiplicand, multiplier);
+		public static BigRational operator /(BigRational dividend, BigRational divisor) => Divide(dividend, divisor);
+		// Unitary operators
+		public static BigRational operator +(BigRational rational) => Abs(rational);
+		public static BigRational operator -(BigRational rational) => Negate(rational);
+		public static BigRational operator ++(BigRational rational) => Add(rational, BigRational.One);
+		public static BigRational operator --(BigRational rational) => Subtract(rational, BigRational.One);
+
+		#endregion
+
+		#region Comparison Operators
+
+		public static bool operator ==(BigRational left, BigRational right) { return Compare(left, right) == 0; }
+		public static bool operator !=(BigRational left, BigRational right) { return Compare(left, right) != 0; }
+		public static bool operator <(BigRational left, BigRational right) { return Compare(left, right) < 0; }
+		public static bool operator <=(BigRational left, BigRational right) { return Compare(left, right) <= 0; }
+		public static bool operator >(BigRational left, BigRational right) { return Compare(left, right) > 0; }
+		public static bool operator >=(BigRational left, BigRational right) { return Compare(left, right) >= 0; }
+
+		#endregion
+
+		#region Compare
+
+		public static int Compare(BigRational left, BigRational right)
+		{
+			BigRational leftRed = BigRational.Reduce(left);
+			BigRational rightRed = BigRational.Reduce(right);
+
+			if (leftRed.WholePart == rightRed.WholePart)
+			{
+				return Fraction.Compare(leftRed.FractionalPart, rightRed.FractionalPart);
+			}
+			else
+			{
+				return BigInteger.Compare(leftRed.WholePart, rightRed.WholePart);
+			}
+		}
+
+		// IComparable
+		int IComparable.CompareTo(Object obj)
+		{
+			if (obj == null) { return 1; }
+			if (!(obj is BigRational)) { throw new ArgumentException($"Argument must be of type {nameof(BigRational)}", nameof(obj)); }
+			return Compare(this, (BigRational)obj);
+		}
+
+		// IComparable<Fraction>
+		public int CompareTo(BigRational other)
+		{
+			return Compare(this, other);
 		}
 
 		#endregion
@@ -339,50 +380,9 @@ namespace ExtendedNumerics
 
 		#endregion
 
-		#region Comparison Operators
-
-		public static bool operator ==(BigRational left, BigRational right) { return Compare(left, right) == 0; }
-		public static bool operator !=(BigRational left, BigRational right) { return Compare(left, right) != 0; }
-		public static bool operator <(BigRational left, BigRational right) { return Compare(left, right) < 0; }
-		public static bool operator <=(BigRational left, BigRational right) { return Compare(left, right) <= 0; }
-		public static bool operator >(BigRational left, BigRational right) { return Compare(left, right) > 0; }
-		public static bool operator >=(BigRational left, BigRational right) { return Compare(left, right) >= 0; }
-
-		// IComparable
-		int IComparable.CompareTo(Object obj)
-		{
-			if (obj == null) { return 1; }
-			if (!(obj is BigRational)) { throw new ArgumentException($"Argument must be of type {nameof(BigRational)}", nameof(obj)); }
-			return Compare(this, (BigRational)obj);
-		}
-
-		// IComparable<Fraction>
-		public int CompareTo(BigRational other)
-		{
-			return Compare(this, other);
-		}
-
-		public static int Compare(BigRational left, BigRational right)
-		{
-			BigRational leftRed = BigRational.Reduce(left);
-			BigRational rightRed = BigRational.Reduce(right);
-
-			if (left.WholePart == right.WholePart)
-			{
-				return Fraction.Compare(leftRed.FractionalPart, rightRed.FractionalPart);
-			}
-			else
-			{
-				return BigInteger.Compare(left.WholePart, right.WholePart);
-			}
-		}
-
-
-		#endregion
-
 		#region Equality Methods
 
-		public Boolean Equals(BigRational other)
+		public bool Equals(BigRational other)
 		{
 			BigRational reducedThis = BigRational.Reduce(this);
 			BigRational reducedOther = BigRational.Reduce(other);
@@ -405,10 +405,12 @@ namespace ExtendedNumerics
 
 		public override int GetHashCode()
 		{
-			unchecked
-			{
-				return WholePart.GetHashCode() * FractionalPart.GetHashCode();
-			}
+			return CombineHashCodes(WholePart.GetHashCode(), FractionalPart.GetHashCode());
+		}
+
+		internal static int CombineHashCodes(int h1, int h2)
+		{
+			return (((h1 << 5) + h1) ^ h2);
 		}
 
 		#endregion
@@ -533,7 +535,6 @@ namespace ExtendedNumerics
 		}
 
 		#endregion
-
 	}
 }
 
