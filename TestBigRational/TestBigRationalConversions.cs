@@ -12,9 +12,25 @@ namespace TestBigRational
 		private TestContext m_testContext;
 
 		[TestMethod, TestCategory("Conversions")]
+		public void TestConvertFromDecimalPointFloat()
+		{
+			float negativeOneAndOneHalf = -3f / 2f;
+			float oneThird = 1f / 3f;
+
+			BigRational expectedValue1 = new BigRational(-1, new Fraction(1, 2));
+			BigRational result1 = (BigRational)negativeOneAndOneHalf;
+
+			BigRational expectedValue2 = new BigRational(0, new Fraction(1, 3));
+			BigRational result2 = (BigRational)oneThird;
+
+			Assert.AreEqual(expectedValue1, result1);
+			Assert.AreEqual(expectedValue2, result2);
+		}
+
+		[TestMethod, TestCategory("Conversions")]
 		public void TestConvertFromDecimalPointDouble()
 		{
-			Double fifteenSixteenths = 0.9375d;
+			double fifteenSixteenths = 0.9375d;
 
 			BigRational expectedValue = new BigRational(BigInteger.Zero, new Fraction(15, 16));
 			BigRational result = (BigRational)fifteenSixteenths;
@@ -25,7 +41,7 @@ namespace TestBigRational
 		[TestMethod, TestCategory("Conversions")]
 		public void TestConvertFromWholeNumberDouble()
 		{
-			Double seven = 7.0d;
+			double seven = 7.0d;
 
 			BigRational expectedValue = new BigRational(7, new Fraction(0, 1));
 
@@ -40,7 +56,7 @@ namespace TestBigRational
 		[TestMethod, TestCategory("Conversions")]
 		public void TestConvertFromNegativeMixedDouble()
 		{
-			Double negativeOneAndOneThird = -4d / 3d;
+			double negativeOneAndOneThird = -4d / 3d;
 
 			BigRational expectedValue = new BigRational(-1, new Fraction(1, 3));
 			BigRational result = (BigRational)negativeOneAndOneThird;
@@ -51,7 +67,7 @@ namespace TestBigRational
 		[TestMethod, TestCategory("Conversions")]
 		public void TestConvertFromDecimalPointDecimal()
 		{
-			Decimal fifteenSixteenths = 0.9375m;
+			decimal fifteenSixteenths = 0.9375m;
 
 			BigRational expectedValue = new BigRational(BigInteger.Zero, new Fraction(15, 16));
 			BigRational result = (BigRational)fifteenSixteenths;
@@ -62,7 +78,7 @@ namespace TestBigRational
 		[TestMethod, TestCategory("Conversions")]
 		public void TestConvertFromWholeNumberDecimal()
 		{
-			Decimal seven = 7.0m;
+			decimal seven = 7.0m;
 
 			BigRational expectedValue = new BigRational(7, new Fraction(0, 1));
 
@@ -77,12 +93,22 @@ namespace TestBigRational
 		[TestMethod, TestCategory("Conversions")]
 		public void TestConvertFromNegativeMixedDecimal()
 		{
-			// Note that Decimal works best with a fixed number of decimal points
+			// Note that decimal works best with a fixed number of decimal points
 			// This will fail if we use the same numbers as used with the double test
-			Decimal negativeOneAndOneHundredAndTwentyEigth = -129m / 128m;
+			decimal negativeOneAndOneHundredAndTwentyEigth = -129m / 128m;
 
 			BigRational expectedValue = new BigRational(-1, new Fraction(1, 128));
 			BigRational result = (BigRational)negativeOneAndOneHundredAndTwentyEigth;
+
+			Assert.AreEqual(expectedValue, result);
+		}
+
+		[TestMethod, TestCategory("Conversions")]
+		public void TestCastZeroFromFloat()
+		{
+			float zero = 0;
+			BigRational result = (BigRational)zero;
+			BigRational expectedValue = BigRational.Zero;
 
 			Assert.AreEqual(expectedValue, result);
 		}
@@ -103,6 +129,39 @@ namespace TestBigRational
 			decimal zero = 0;
 			BigRational result = (BigRational)zero;
 			BigRational expectedValue = BigRational.Zero;
+
+			Assert.AreEqual(expectedValue, result);
+		}
+
+		[TestMethod, TestCategory("Conversions")]
+		public void TestParseWholeNumber()
+		{
+			string toParse = "3";
+
+			BigRational result = BigRational.Parse(toParse);
+			BigRational expectedValue = new BigRational(3, 0, 1);
+
+			Assert.AreEqual(expectedValue, result);
+		}
+
+		[TestMethod, TestCategory("Conversions")]
+		public void TestParseFraction()
+		{
+			string toParse = "1/3";
+
+			BigRational result = BigRational.Parse(toParse);
+			BigRational expectedValue = new BigRational(0, 1, 3);
+
+			Assert.AreEqual(expectedValue, result);
+		}
+
+		[TestMethod, TestCategory("Conversions")]
+		public void TestParseMixedNumber()
+		{
+			string toParse = "-1 + 1/3";
+
+			BigRational result = BigRational.Parse(toParse);
+			BigRational expectedValue = new BigRational(-1, 1, 3);
 
 			Assert.AreEqual(expectedValue, result);
 		}

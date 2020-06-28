@@ -37,13 +37,104 @@ namespace ExtendedNumerics
 			Denominator = new BigInteger(denominator.ToByteArray());
 		}
 
-		public Fraction(Double value)
+		public Fraction(float value)
 		{
-			if (Double.IsNaN(value))
+			Initialize(value, 7);
+		}
+
+		public Fraction(double value)
+		{
+			Initialize(value, 13);
+		}
+
+		private void Initialize(double value, int precision)
+		{
+			if (!CheckForWholeValues(value))
+			{
+				int sign = Math.Sign(value);
+				int exponent = value.ToString(CultureInfo.InvariantCulture)
+										.TrimEnd('0')
+										.SkipWhile(c => c != '.').Skip(1)
+										.Count();
+
+				double oneOver = Math.Round(1 / Math.Abs(value), precision);
+
+				bool isWholeNumber = false;
+				BigInteger denom;
+
+				if (precision == 7)
+				{
+					float floatVal = (float)oneOver;
+					isWholeNumber = (floatVal % 1 == 0);
+					denom = (BigInteger)floatVal;
+				}
+				else
+				{
+					isWholeNumber = (oneOver % 1 == 0);
+					denom = (BigInteger)oneOver;
+				}
+
+				if (isWholeNumber)
+				{
+					Numerator = sign;
+					Denominator = denom;
+					return;
+				}
+
+				if (exponent > 0)
+				{
+					double pow = value * Math.Pow(10, exponent);
+					Fraction notReduced = new Fraction((BigInteger)pow, BigInteger.Pow(10, (int)exponent));
+					Fraction reduced = Simplify(notReduced);
+					Numerator = reduced.Numerator;
+					Denominator = reduced.Denominator;
+				}
+				else
+				{
+					Numerator = new BigInteger(value);
+					Denominator = BigInteger.One;
+				}
+			}
+		}
+
+		public Fraction(decimal value)
+		{
+			int[] bits = decimal.GetBits(value);
+			if (bits == null || bits.Length != 4 || (bits[3] & ~(DecimalSignMask | DecimalScaleMask)) != 0 || (bits[3] & DecimalScaleMask) > (28 << 16))
+			{
+				throw new ArgumentException("invalid decimal", "value");
+			}
+
+			if (!CheckForWholeValues((double)value))
+			{
+				// build up the numerator
+				ulong ul = (((ulong)(uint)bits[2]) << 32) | ((ulong)(uint)bits[1]);  // (hi    << 32) | (mid)
+				BigInteger numerator = (new BigInteger(ul) << 32) | (uint)bits[0];   // (hiMid << 32) | (low)
+
+				bool isNegative = (bits[3] & DecimalSignMask) != 0;
+				if (isNegative)
+				{
+					numerator = BigInteger.Negate(numerator);
+				}
+
+				// build up the denominator
+				int scale = (bits[3] & DecimalScaleMask) >> 16;     // 0-28, power of 10 to divide numerator by
+				BigInteger denominator = BigInteger.Pow(10, scale);
+
+				Fraction notReduced = new Fraction(numerator, denominator);
+				Fraction reduced = Simplify(notReduced);
+				Numerator = reduced.Numerator;
+				Denominator = reduced.Denominator;
+			}
+		}
+
+		private bool CheckForWholeValues(double value)
+		{
+			if (double.IsNaN(value))
 			{
 				throw new ArgumentException("Value is not a number", nameof(value));
 			}
-			if (Double.IsInfinity(value))
+			if (double.IsInfinity(value))
 			{
 				throw new ArgumentException("Cannot represent infinity", nameof(value));
 			}
@@ -52,106 +143,27 @@ namespace ExtendedNumerics
 			{
 				Numerator = BigInteger.Zero;
 				Denominator = BigInteger.One;
+				return true;
 			}
 			else if (value == 1)
 			{
 				Numerator = BigInteger.One;
 				Denominator = BigInteger.One;
+				return true;
 			}
 			else if (value == -1)
 			{
 				Numerator = BigInteger.MinusOne;
 				Denominator = BigInteger.One;
+				return true;
 			}
 			else if (value % 1 == 0)
 			{
 				Numerator = (BigInteger)value;
 				Denominator = BigInteger.One;
+				return true;
 			}
-			else
-			{
-				double oneover = Math.Round(1 / Math.Abs(value), 13);
-				int sign = Math.Sign(value);
-
-				if (oneover % 1 == 0)
-				{
-					Numerator = sign;
-					Denominator = (BigInteger)oneover;
-				}
-				else
-				{
-					Double exponent = value.ToString(CultureInfo.InvariantCulture)
-											.TrimEnd('0')
-											.SkipWhile(c => c != '.').Skip(1)
-											.Count();
-					if (exponent > 0)
-					{
-						Double numerator = value * Math.Pow(10d, exponent);
-						Fraction notReduced = new Fraction((BigInteger)numerator, BigInteger.Pow(10, (int)exponent));
-						Fraction reduced = Simplify(notReduced);
-						Numerator = new BigInteger(reduced.Numerator.ToByteArray());
-						Denominator = new BigInteger(reduced.Denominator.ToByteArray());
-					}
-					else
-					{
-						Numerator = new BigInteger(value);
-						Denominator = new BigInteger(1);
-					}
-				}
-			}
-		}
-
-		public Fraction(Decimal value)
-		{
-			int[] bits = Decimal.GetBits(value);
-			if (bits == null || bits.Length != 4 || (bits[3] & ~(DecimalSignMask | DecimalScaleMask)) != 0 || (bits[3] & DecimalScaleMask) > (28 << 16))
-			{
-				throw new ArgumentException("invalid Decimal", "value");
-			}
-
-			if (value == Decimal.Zero)
-			{
-				Numerator = BigInteger.Zero;
-				Denominator = BigInteger.One;
-				return;
-			}
-			else if (value == Decimal.One)
-			{
-				Numerator = BigInteger.One;
-				Denominator = BigInteger.One;
-				return;
-			}
-			else if (value == Decimal.MinusOne)
-			{
-				Numerator = BigInteger.MinusOne;
-				Denominator = BigInteger.One;
-				return;
-			}
-			else if (value % 1 == Decimal.Zero)
-			{
-				Numerator = (BigInteger)value;
-				Denominator = BigInteger.One;
-				return;
-			}
-
-			// build up the numerator
-			ulong ul = (((ulong)(uint)bits[2]) << 32) | ((ulong)(uint)bits[1]);  // (hi    << 32) | (mid)
-			BigInteger numerator = (new BigInteger(ul) << 32) | (uint)bits[0];   // (hiMid << 32) | (low)
-
-			bool isNegative = (bits[3] & DecimalSignMask) != 0;
-			if (isNegative)
-			{
-				numerator = BigInteger.Negate(numerator);
-			}
-
-			// build up the denominator
-			int scale = (bits[3] & DecimalScaleMask) >> 16;     // 0-28, power of 10 to divide numerator by
-			BigInteger denominator = BigInteger.Pow(10, scale);
-
-			Fraction notReduced = new Fraction(numerator, denominator);
-			Fraction reduced = Simplify(notReduced);
-			Numerator = reduced.Numerator;
-			Denominator = reduced.Denominator;
+			return false;
 		}
 
 		#endregion
@@ -161,7 +173,7 @@ namespace ExtendedNumerics
 		public BigInteger Numerator { get; private set; }
 		public BigInteger Denominator { get; private set; }
 
-		public Int32 Sign { get { return Fraction.NormalizeSign(this).Numerator.Sign; } }
+		public int Sign { get { return Fraction.NormalizeSign(this).Numerator.Sign; } }
 		public bool IsZero { get { return (this == Fraction.Zero); } }
 		public bool IsOne { get { return (this == Fraction.One); } }
 
@@ -412,21 +424,26 @@ namespace ExtendedNumerics
 			return new BigRational(BigInteger.Zero, value);
 		}
 
-		public static explicit operator Fraction(Double value)
+		public static explicit operator Fraction(float value)
 		{
 			return new Fraction(value);
 		}
 
-		public static explicit operator Fraction(Decimal value)
+		public static explicit operator Fraction(double value)
 		{
 			return new Fraction(value);
 		}
 
-		public static explicit operator Double(Fraction value)
+		public static explicit operator Fraction(decimal value)
+		{
+			return new Fraction(value);
+		}
+
+		public static explicit operator double(Fraction value)
 		{
 			if (IsInRangeDouble(value.Numerator) && IsInRangeDouble(value.Denominator))
 			{
-				return (Double)value.Numerator / (Double)value.Denominator;
+				return (double)value.Numerator / (double)value.Denominator;
 			}
 
 			BigInteger scaledup = BigInteger.Multiply(value.Numerator, _doublePrecision) / value.Denominator;
@@ -436,7 +453,7 @@ namespace ExtendedNumerics
 			}
 
 			bool isDone = false;
-			Double result = 0;
+			double result = 0;
 			int scale = _doubleMaxScale;
 			while (scale > 0)
 			{
@@ -444,7 +461,7 @@ namespace ExtendedNumerics
 				{
 					if (IsInRangeDouble(scaledup))
 					{
-						result = (Double)scaledup;
+						result = (double)scaledup;
 						isDone = true;
 					}
 					else
@@ -463,25 +480,25 @@ namespace ExtendedNumerics
 			}
 			else
 			{
-				return (value.Sign < 0) ? Double.NegativeInfinity : Double.PositiveInfinity;
+				return (value.Sign < 0) ? double.NegativeInfinity : double.PositiveInfinity;
 			}
 		}
 
-		public static explicit operator Decimal(Fraction value)
+		public static explicit operator decimal(Fraction value)
 		{
-			// The Decimal value type represents decimal numbers ranging
+			// The decimal value type represents decimal numbers ranging
 			// from +79,228,162,514,264,337,593,543,950,335 to -79,228,162,514,264,337,593,543,950,335
-			// the binary representation of a Decimal value is of the form, ((-2^96 to 2^96) / 10^(0 to 28))
+			// the binary representation of a decimal value is of the form, ((-2^96 to 2^96) / 10^(0 to 28))
 			if (IsInRangeDecimal(value.Numerator) && IsInRangeDecimal(value.Denominator))
 			{
-				return (Decimal)value.Numerator / (Decimal)value.Denominator;
+				return (decimal)value.Numerator / (decimal)value.Denominator;
 			}
 
 			// scale the numerator to preserve the fraction part through the integer division
 			BigInteger denormalized = (value.Numerator * _decimalPrecision) / value.Denominator;
 			if (denormalized.IsZero)
 			{
-				return Decimal.Zero; // underflow - fraction is too small to fit in a decimal
+				return decimal.Zero; // underflow - fraction is too small to fit in a decimal
 			}
 			for (int scale = DecimalMaxScale; scale >= 0; scale--)
 			{
@@ -492,23 +509,25 @@ namespace ExtendedNumerics
 				else
 				{
 					DecimalUInt32 dec = new DecimalUInt32();
-					dec.dec = (Decimal)denormalized;
+					dec.dec = (decimal)denormalized;
 					dec.flags = (dec.flags & ~DecimalScaleMask) | (scale << 16);
 					return dec.dec;
 				}
 			}
-			throw new OverflowException("Value was either too large or too small for a Decimal.");
+			throw new OverflowException("Value was either too large or too small for a decimal.");
 		}
+
+		#region Private Members
 
 		private static bool IsInRangeDouble(BigInteger number)
 		{
-			return ((BigInteger)Double.MinValue < number && number < (BigInteger)Double.MaxValue);
+			return ((BigInteger)double.MinValue < number && number < (BigInteger)double.MaxValue);
 		}
 		private static readonly int _doubleMaxScale = 308;
 		private static readonly BigInteger _doublePrecision = BigInteger.Pow(10, _doubleMaxScale);
 		private static readonly BigInteger _decimalPrecision = BigInteger.Pow(10, DecimalMaxScale);
-		private static readonly BigInteger _decimalMaxValue = (BigInteger)Decimal.MaxValue;
-		private static readonly BigInteger _decimalMinValue = (BigInteger)Decimal.MinValue;
+		private static readonly BigInteger _decimalMaxValue = (BigInteger)decimal.MaxValue;
+		private static readonly BigInteger _decimalMinValue = (BigInteger)decimal.MinValue;
 		private const int DecimalScaleMask = 0x00FF0000;
 		private const int DecimalSignMask = unchecked((int)0x80000000);
 		private const int DecimalMaxScale = 28;
@@ -522,10 +541,12 @@ namespace ExtendedNumerics
 		internal struct DecimalUInt32
 		{
 			[FieldOffset(0)]
-			public Decimal dec;
+			public decimal dec;
 			[FieldOffset(0)]
 			public int flags;
 		}
+
+		#endregion
 
 		#endregion
 

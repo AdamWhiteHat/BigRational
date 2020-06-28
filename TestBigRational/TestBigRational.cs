@@ -83,11 +83,11 @@ namespace TestBigRational
 				Xprevious = Xn;
 				Xn = Xnext;
 				distanceToConvergence = nextDistanceToConvergence;
-				if ((Double)Xn == 5d)
+				if ((double)Xn == 5d)
 					break;
 				++count;
 			}
-			Assert.AreEqual((Double)Xn, 5d);
+			Assert.AreEqual((double)Xn, 5d);
 			Assert.IsTrue(count == 70);
 		}
 

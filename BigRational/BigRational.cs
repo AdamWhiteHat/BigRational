@@ -11,7 +11,7 @@ namespace ExtendedNumerics
 		#region Constructors
 
 		public BigRational(int value)
-			: this((BigInteger)value)
+			: this((BigInteger)value, Fraction.Zero)
 		{
 		}
 
@@ -36,13 +36,43 @@ namespace ExtendedNumerics
 			FractionalPart = new Fraction(numerator, denominator);
 		}
 
-		public BigRational(Double value)
+		public BigRational(float value)
 		{
-			if (Double.IsNaN(value))
+			if (!CheckForWholeValues(value))
+			{
+				WholePart = (BigInteger)Math.Truncate(value);
+				float fract = Math.Abs(value) % 1;
+				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
+			}
+		}
+
+		public BigRational(double value)
+		{
+			if (!CheckForWholeValues(value))
+			{
+				WholePart = (BigInteger)Math.Truncate(value);
+				double fract = Math.Abs(value) % 1;
+				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
+			}
+		}
+
+		public BigRational(decimal value)
+		{
+			if (!CheckForWholeValues((double)value))
+			{
+				WholePart = (BigInteger)Math.Truncate(value);
+				decimal fract = Math.Abs(value) % 1;
+				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
+			}
+		}
+
+		private bool CheckForWholeValues(double value)
+		{
+			if (double.IsNaN(value))
 			{
 				throw new ArgumentException("Value is not a number", nameof(value));
 			}
-			if (Double.IsInfinity(value))
+			if (double.IsInfinity(value))
 			{
 				throw new ArgumentException("Cannot represent infinity", nameof(value));
 			}
@@ -51,49 +81,23 @@ namespace ExtendedNumerics
 			{
 				WholePart = BigInteger.Zero;
 				FractionalPart = Fraction.Zero;
+				return true;
 			}
 			else if (value == 1)
 			{
 				WholePart = BigInteger.Zero;
 				FractionalPart = Fraction.One;
+				return true;
 			}
 			else if (value == -1)
 			{
 				WholePart = BigInteger.Zero;
 				FractionalPart = Fraction.MinusOne;
+				return true;
 			}
-			else
-			{
-				WholePart = (BigInteger)Math.Truncate(value);
-				Double fract = Math.Abs(value) % 1;
-				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
-			}
+			return false;
 		}
 
-		public BigRational(Decimal value)
-		{
-			if (value == Decimal.Zero)
-			{
-				WholePart = BigInteger.Zero;
-				FractionalPart = Fraction.Zero;
-			}
-			else if (value == Decimal.One)
-			{
-				WholePart = BigInteger.Zero;
-				FractionalPart = Fraction.One;
-			}
-			else if (value == Decimal.MinusOne)
-			{
-				WholePart = BigInteger.Zero;
-				FractionalPart = Fraction.MinusOne;
-			}
-			else
-			{
-				WholePart = (BigInteger)Math.Truncate(value);
-				Decimal fract = Math.Abs(value) % 1;
-				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
-			}
-		}
 
 		#endregion
 
@@ -102,7 +106,7 @@ namespace ExtendedNumerics
 		public BigInteger WholePart { get; private set; }
 		public Fraction FractionalPart { get; private set; }
 
-		public Int32 Sign { get { return NormalizeSign(this).WholePart.Sign; } }
+		public int Sign { get { return NormalizeSign(this).WholePart.Sign; } }
 		public bool IsZero { get { return (WholePart.IsZero && FractionalPart.IsZero); } }
 
 		#region Static Properties
@@ -111,9 +115,9 @@ namespace ExtendedNumerics
 		public static BigRational Zero { get { return _zero; } }
 		public static BigRational MinusOne { get { return _minusOne; } }
 
-		private static BigRational _one { get { return new BigRational(1); } }
-		private static BigRational _zero { get { return new BigRational(0); } }
-		private static BigRational _minusOne { get { return new BigRational(-1); } }
+		private static BigRational _one { get { return new BigRational(BigInteger.One); } }
+		private static BigRational _zero { get { return new BigRational(BigInteger.Zero); } }
+		private static BigRational _minusOne { get { return new BigRational(BigInteger.MinusOne); } }
 
 		#endregion
 
@@ -317,34 +321,79 @@ namespace ExtendedNumerics
 
 		#region Conversion
 
+		public static explicit operator BigRational(byte value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
+		public static explicit operator BigRational(SByte value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
+		public static explicit operator BigRational(Int16 value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
+		public static explicit operator BigRational(UInt16 value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
 		public static explicit operator BigRational(Int32 value)
 		{
-			return new BigRational(value);
+			return new BigRational((BigInteger)value);
 		}
 
-		public static explicit operator BigRational(Double value)
+		public static explicit operator BigRational(UInt32 value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
+		public static explicit operator BigRational(Int64 value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
+		public static explicit operator BigRational(UInt64 value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
+		public static explicit operator BigRational(BigInteger value)
 		{
 			return new BigRational(value);
 		}
 
-		public static explicit operator BigRational(Decimal value)
+		public static explicit operator BigRational(float value)
 		{
 			return new BigRational(value);
 		}
 
-		public static explicit operator Double(BigRational value)
+		public static explicit operator BigRational(double value)
 		{
-			Double fract = (Double)value.FractionalPart;
-			Double whole = (Double)value.WholePart;
-			Double result = whole + (fract);
+			return new BigRational(value);
+		}
+
+		public static explicit operator BigRational(decimal value)
+		{
+			return new BigRational(value);
+		}
+
+		public static explicit operator double(BigRational value)
+		{
+			double fract = (double)value.FractionalPart;
+			double whole = (double)value.WholePart;
+			double result = whole + (fract);
 			return result;
 		}
 
-		public static explicit operator Decimal(BigRational value)
+		public static explicit operator decimal(BigRational value)
 		{
-			Decimal fract = (Decimal)value.FractionalPart;
-			Decimal whole = (Decimal)value.WholePart;
-			Decimal result = whole + (fract);
+			decimal fract = (decimal)value.FractionalPart;
+			decimal whole = (decimal)value.WholePart;
+			decimal result = whole + (fract);
 			return result;
 		}
 
@@ -358,24 +407,59 @@ namespace ExtendedNumerics
 
 		public static BigRational Parse(string value)
 		{
-			string[] parts = value.Split('/');
-			if (parts.Length != 2)
+			if (string.IsNullOrWhiteSpace(value))
 			{
-				throw new Exception("Invalid fraction given as string to parse.");
+				throw new ArgumentException("Argument cannot be null, empty or whitespace.");
 			}
 
-			BigInteger numerator, denominator;
-			try
+			string[] parts = value.Trim().Split('/');
+			if (parts.Length == 1)
 			{
-				numerator = BigInteger.Parse(parts[0]);
-				denominator = BigInteger.Parse(parts[1]);
+				BigInteger whole;
+				if (!BigInteger.TryParse(parts[0], out whole))
+				{
+					throw new ArgumentException("Invalid string given for number.");
+				}
+				return new BigRational(whole);
 			}
-			catch
+			else if (parts.Length == 2)
 			{
-				throw new Exception("Invalid string given for numerator or denominator.");
-			}
+				BigInteger whole = BigInteger.Zero, numerator, denominator;
 
-			return new BigRational(BigInteger.Zero, numerator, denominator);
+				string[] firstParts = parts[0].Trim().Split(new char[] { '+', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+				if (firstParts.Length == 1)
+				{
+					if (!BigInteger.TryParse(parts[0].Trim(), out numerator))
+					{
+						throw new ArgumentException("Invalid string given for numerator.");
+					}
+				}
+				else if (firstParts.Length == 2)
+				{
+					if (!BigInteger.TryParse(firstParts[0].Trim(), out whole))
+					{
+						throw new ArgumentException("Invalid string given for whole number.");
+					}
+					if (!BigInteger.TryParse(firstParts[1].Trim(), out numerator))
+					{
+						throw new ArgumentException("Invalid string given for numerator.");
+					}
+				}
+				else
+				{
+					throw new ArgumentException("Invalid fraction given as string to parse.");
+				}
+
+				if (!BigInteger.TryParse(parts[1].Trim(), out denominator))
+				{
+					throw new ArgumentException("Invalid string given for denominator.");
+				}
+				return new BigRational(whole, numerator, denominator);
+			}
+			else
+			{
+				throw new ArgumentException("Invalid fraction given as string to parse.");
+			}
 		}
 
 		#endregion
