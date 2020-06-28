@@ -86,5 +86,25 @@ namespace TestBigRational
 
 			Assert.AreEqual(expectedValue, result);
 		}
+
+		[TestMethod, TestCategory("Conversions")]
+		public void TestCastZeroFromDouble()
+		{
+			double zero = 0;
+			BigRational result = (BigRational)zero;
+			BigRational expectedValue = BigRational.Zero;
+
+			Assert.AreEqual(expectedValue, result);
+		}
+
+		[TestMethod, TestCategory("Conversions")]
+		public void TestCastZeroFromDecimal()
+		{
+			decimal zero = 0;
+			BigRational result = (BigRational)zero;
+			BigRational expectedValue = BigRational.Zero;
+
+			Assert.AreEqual(expectedValue, result);
+		}
 	}
 }

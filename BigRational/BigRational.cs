@@ -50,7 +50,7 @@ namespace ExtendedNumerics
 			if (value == 0)
 			{
 				WholePart = BigInteger.Zero;
-				FractionalPart = Fraction.One;
+				FractionalPart = Fraction.Zero;
 			}
 			else if (value == 1)
 			{
@@ -75,7 +75,7 @@ namespace ExtendedNumerics
 			if (value == Decimal.Zero)
 			{
 				WholePart = BigInteger.Zero;
-				FractionalPart = Fraction.One;
+				FractionalPart = Fraction.Zero;
 			}
 			else if (value == Decimal.One)
 			{

@@ -75,5 +75,25 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueFifteenSixteenths, result1516);
 			Assert.AreEqual(expectedValueNegativeOneThird, resultNeg1128);
 		}
+
+		[TestMethod, TestCategory("Conversions")]
+		public void TestCastZeroFromDouble()
+		{
+			double zero = 0;
+			Fraction result = (Fraction)zero;
+			Fraction expectedValue = Fraction.Zero;
+
+			Assert.AreEqual(expectedValue, result);
+		}
+
+		[TestMethod, TestCategory("Conversions")]
+		public void TestCastZeroFromDecimal()
+		{
+			decimal zero = 0;
+			Fraction result = (Fraction)zero;
+			Fraction expectedValue = Fraction.Zero;
+
+			Assert.AreEqual(expectedValue, result);
+		}
 	}
 }
