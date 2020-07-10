@@ -51,6 +51,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="HelperMethods.cs" />
     <Compile Include="TestFractionConversions.cs" />
     <Compile Include="TestFractionArithmetic.cs" />
     <Compile Include="TestBigRationalConversions.cs" />

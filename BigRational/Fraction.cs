@@ -33,8 +33,8 @@ namespace ExtendedNumerics
 
 		public Fraction(BigInteger numerator, BigInteger denominator)
 		{
-			Numerator = new BigInteger(numerator.ToByteArray());
-			Denominator = new BigInteger(denominator.ToByteArray());
+			Numerator = numerator;
+			Denominator = denominator;
 		}
 
 		public Fraction(float value)

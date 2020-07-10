@@ -113,5 +113,47 @@ namespace TestBigRational
 
 			Assert.AreEqual(expected, result);
 		}
+
+		[TestMethod, TestCategory("Arithmetic")]
+		public void TestBitShifting()
+		{
+			BigInteger a = new BigInteger(255); // two to the power of 8
+
+			BigInteger b = new BigInteger(65537); // close to power of 2
+			BigInteger q = new BigInteger(65539); // prime
+
+			BigInteger p = new BigInteger(524309); // prime
+			BigInteger c = new BigInteger(32768);  // power of two
+
+			Fraction oldFrac1 = new Fraction(a, 1);
+			Fraction oldFrac2 = new Fraction(b, q);
+			Fraction oldFrac3 = Fraction.Pow(oldFrac1, 2);
+			Fraction oldFrac4 = new Fraction(p, a);
+			Fraction oldFrac5 = new Fraction(p, c);
+
+			BigInteger someResult1n = oldFrac1.Numerator >> 1;
+			BigInteger someResult2n = oldFrac2.Numerator >> 2;
+			BigInteger someResult3n = oldFrac3.Numerator << 2;
+			BigInteger someResult4n = oldFrac4.Numerator << 2;
+			BigInteger someResult7n = oldFrac5.Numerator << 2;
+
+			BigInteger someResult1d = oldFrac1.Denominator >> 2;
+			BigInteger someResult2d = oldFrac2.Denominator >> 2;
+			BigInteger someResult3d = oldFrac3.Denominator << 2;
+			BigInteger someResult4d = oldFrac4.Denominator >> 3;
+			BigInteger someResult6d = oldFrac5.Denominator >> 1;
+
+			Fraction newFrac1 = new Fraction(a, 1);
+			Fraction newFrac2 = new Fraction(b, q);
+			Fraction newFrac3 = Fraction.Pow(oldFrac1, 2);
+			Fraction newFrac4 = new Fraction(p, a);
+			Fraction newFrac5 = new Fraction(p, c);
+
+			Assert.AreEqual(oldFrac1, newFrac1);
+			Assert.AreEqual(oldFrac2, newFrac2);
+			Assert.AreEqual(oldFrac3, newFrac3);
+			Assert.AreEqual(oldFrac4, newFrac4);
+			Assert.AreEqual(oldFrac5, newFrac5);
+		}
 	}
 }
