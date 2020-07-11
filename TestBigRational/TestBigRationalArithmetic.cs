@@ -44,6 +44,23 @@ namespace TestBigRational
 		}
 
 		[TestMethod, TestCategory("Arithmetic")]
+		public void TestAddingNegative()
+		{
+			var low = new BigRational(-7);
+			var high = new BigRational(-6);
+
+			BigRational sumLowHigh = (low + high);
+			BigRational sumHighLow = (high + low);
+			BigRational subtractLowHigh = (low - high);
+			BigRational subtractHightLow = (high - low);
+
+			Assert.AreEqual(new BigRational(-13), sumLowHigh, $"{low} + {high} = {sumLowHigh}");
+			Assert.AreEqual(new BigRational(-13), sumHighLow, $"{high} + {low} = {sumHighLow}");
+			Assert.AreEqual(new BigRational(-1), subtractLowHigh, $"{low} + {high} = {subtractLowHigh}");
+			Assert.AreEqual(new BigRational(1), subtractHightLow, $"{high} + {low} = {subtractHightLow}");
+		}
+
+		[TestMethod, TestCategory("Arithmetic")]
 		public void TestSubtraction()
 		{
 			BigRational sevenTwoths = new BigRational(3, 1, 2);
@@ -97,6 +114,30 @@ namespace TestBigRational
 			BigRational result = BigRational.Pow(nineFifths, 2);
 
 			Assert.AreEqual(expected, result);
+		}
+
+		[TestMethod, TestCategory("Arithmetic")]
+		public void TestMidPoint()
+		{
+			var low = (BigRational)(-7);
+			var high = (BigRational)(-6);
+
+			// Take the mid point of the above 2 numbers
+			BigRational sum = (low + high);
+			BigRational mid = sum / (BigRational)2;
+
+			double expectedSum = -13d;
+			double actualSum = (double)sum;
+			Assert.AreEqual(expectedSum, actualSum, $"{low} + {high} = {sum}");
+
+			double expectedMid = -6.5d;
+			double actualMid = (double)mid;
+			Assert.AreEqual(expectedMid, actualMid, $"({low} + {high})/2 = mid");
+
+			TestContext.WriteLine($"{low} < {mid} < {high}");
+
+			Assert.IsTrue(mid > low, "mid > low");
+			Assert.IsTrue(mid < high, "mid < high");
 		}
 	}
 }

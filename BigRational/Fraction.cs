@@ -395,10 +395,9 @@ namespace ExtendedNumerics
 
 		public static int Compare(Fraction left, Fraction right)
 		{
-			return BigInteger.Compare(
-					BigInteger.Multiply(left.Numerator, right.Denominator),
-					BigInteger.Multiply(right.Numerator, left.Denominator)
-				);
+			var l = BigInteger.Multiply(left.Numerator, right.Denominator);
+			var r = BigInteger.Multiply(right.Numerator, left.Denominator);
+			return BigInteger.Compare(l, r);
 		}
 
 		// IComparable
@@ -707,7 +706,7 @@ namespace ExtendedNumerics
 			}
 			else
 			{
-				return String.Format(provider, "{0} / {1}", Numerator.ToString(format, provider), Denominator.ToString(format, provider));
+				return String.Format(provider, "{0}/{1}", Numerator.ToString(format, provider), Denominator.ToString(format, provider));
 			}
 		}
 
