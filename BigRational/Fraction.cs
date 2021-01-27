@@ -47,6 +47,45 @@ namespace ExtendedNumerics
 			Initialize(value, 13);
 		}
 
+		public Fraction(decimal value)
+		{
+			int[] bits = decimal.GetBits(value);
+			if (bits == null || bits.Length != 4 || (bits[3] & ~(DecimalSignMask | DecimalScaleMask)) != 0 || (bits[3] & DecimalScaleMask) > (28 << 16))
+			{
+				throw new ArgumentException("invalid decimal", "value");
+			}
+
+			if (!CheckForWholeValues((double)value))
+			{
+				// build up the numerator
+				ulong ul = (((ulong)(uint)bits[2]) << 32) | ((ulong)(uint)bits[1]);  // (hi    << 32) | (mid)
+				BigInteger numerator = (new BigInteger(ul) << 32) | (uint)bits[0];   // (hiMid << 32) | (low)
+
+				bool isNegative = (bits[3] & DecimalSignMask) != 0;
+				if (isNegative)
+				{
+					numerator = BigInteger.Negate(numerator);
+				}
+
+				// build up the denominator
+				int scale = (bits[3] & DecimalScaleMask) >> 16;     // 0-28, power of 10 to divide numerator by
+				BigInteger denominator = BigInteger.Pow(10, scale);
+
+				Fraction notReduced = new Fraction(numerator, denominator);
+				Fraction reduced = Simplify(notReduced);
+				Numerator = reduced.Numerator;
+				Denominator = reduced.Denominator;
+			}
+		}
+
+		static Fraction()
+		{
+			Zero = new Fraction(BigInteger.Zero, BigInteger.One);
+			One = new Fraction(BigInteger.One, BigInteger.One);
+			MinusOne = new Fraction(BigInteger.MinusOne, BigInteger.One);
+			OneHalf = new Fraction(BigInteger.One, new BigInteger(2));
+		}
+
 		private void Initialize(double value, int precision)
 		{
 			if (!CheckForWholeValues(value))
@@ -94,37 +133,6 @@ namespace ExtendedNumerics
 					Numerator = new BigInteger(value);
 					Denominator = BigInteger.One;
 				}
-			}
-		}
-
-		public Fraction(decimal value)
-		{
-			int[] bits = decimal.GetBits(value);
-			if (bits == null || bits.Length != 4 || (bits[3] & ~(DecimalSignMask | DecimalScaleMask)) != 0 || (bits[3] & DecimalScaleMask) > (28 << 16))
-			{
-				throw new ArgumentException("invalid decimal", "value");
-			}
-
-			if (!CheckForWholeValues((double)value))
-			{
-				// build up the numerator
-				ulong ul = (((ulong)(uint)bits[2]) << 32) | ((ulong)(uint)bits[1]);  // (hi    << 32) | (mid)
-				BigInteger numerator = (new BigInteger(ul) << 32) | (uint)bits[0];   // (hiMid << 32) | (low)
-
-				bool isNegative = (bits[3] & DecimalSignMask) != 0;
-				if (isNegative)
-				{
-					numerator = BigInteger.Negate(numerator);
-				}
-
-				// build up the denominator
-				int scale = (bits[3] & DecimalScaleMask) >> 16;     // 0-28, power of 10 to divide numerator by
-				BigInteger denominator = BigInteger.Pow(10, scale);
-
-				Fraction notReduced = new Fraction(numerator, denominator);
-				Fraction reduced = Simplify(notReduced);
-				Numerator = reduced.Numerator;
-				Denominator = reduced.Denominator;
 			}
 		}
 
@@ -179,15 +187,10 @@ namespace ExtendedNumerics
 
 		#region Static Properties
 
-		public static Fraction Zero { get { return _zero; } }
-		public static Fraction One { get { return _one; } }
-		public static Fraction MinusOne { get { return _minusOne; } }
-		public static Fraction OneHalf { get { return _oneHalf; } }
-
-		private static readonly Fraction _zero = new Fraction(BigInteger.Zero, BigInteger.One);
-		private static readonly Fraction _one = new Fraction(BigInteger.One, BigInteger.One);
-		private static readonly Fraction _minusOne = new Fraction(BigInteger.MinusOne, BigInteger.One);
-		private static readonly Fraction _oneHalf = new Fraction(new BigInteger(1), new BigInteger(2));
+		public static Fraction Zero = null;
+		public static Fraction One = null;
+		public static Fraction MinusOne = null;
+		public static Fraction OneHalf = null;
 
 		#endregion
 

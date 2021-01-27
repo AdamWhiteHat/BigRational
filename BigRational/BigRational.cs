@@ -10,6 +10,11 @@ namespace ExtendedNumerics
 	{
 		#region Constructors
 
+		public BigRational()
+			: this(BigInteger.Zero, Fraction.Zero)
+		{
+		}
+
 		public BigRational(int value)
 			: this((BigInteger)value, Fraction.Zero)
 		{
@@ -34,7 +39,7 @@ namespace ExtendedNumerics
 		{
 			WholePart = whole;
 			FractionalPart = new Fraction(numerator, denominator);
-			this.NormalizeSign();
+			NormalizeSign();
 		}
 
 		public BigRational(float value)
@@ -44,7 +49,7 @@ namespace ExtendedNumerics
 				WholePart = (BigInteger)Math.Truncate(value);
 				float fract = Math.Abs(value) % 1;
 				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
-				this.NormalizeSign();
+				NormalizeSign();
 			}
 		}
 
@@ -55,7 +60,7 @@ namespace ExtendedNumerics
 				WholePart = (BigInteger)Math.Truncate(value);
 				double fract = Math.Abs(value) % 1;
 				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
-				this.NormalizeSign();
+				NormalizeSign();
 			}
 		}
 
@@ -66,8 +71,15 @@ namespace ExtendedNumerics
 				WholePart = (BigInteger)Math.Truncate(value);
 				decimal fract = Math.Abs(value) % 1;
 				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
-				this.NormalizeSign();
+				NormalizeSign();
 			}
+		}
+
+		static BigRational()
+		{
+			One = new BigRational(BigInteger.One);
+			Zero = new BigRational(BigInteger.Zero);
+			MinusOne = new BigRational(BigInteger.MinusOne);
 		}
 
 		private bool CheckForWholeValues(double value)
@@ -115,13 +127,9 @@ namespace ExtendedNumerics
 
 		#region Static Properties
 
-		public static BigRational One { get { return _one; } }
-		public static BigRational Zero { get { return _zero; } }
-		public static BigRational MinusOne { get { return _minusOne; } }
-
-		private static BigRational _one { get { return new BigRational(BigInteger.One); } }
-		private static BigRational _zero { get { return new BigRational(BigInteger.Zero); } }
-		private static BigRational _minusOne { get { return new BigRational(BigInteger.MinusOne); } }
+		public static BigRational One = null;
+		public static BigRational Zero = null;
+		public static BigRational MinusOne = null;
 
 		#endregion
 
