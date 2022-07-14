@@ -35,6 +35,11 @@ namespace ExtendedNumerics
 		{
 		}
 
+		public BigRational(BigInteger numerator, BigInteger denominator)
+			: this(new Fraction(numerator, denominator))
+		{
+		}
+
 		public BigRational(BigInteger whole, BigInteger numerator, BigInteger denominator)
 		{
 			WholePart = whole;
@@ -279,6 +284,7 @@ namespace ExtendedNumerics
 		public static BigRational operator -(BigRational minuend, BigRational subtrahend) => Subtract(minuend, subtrahend);
 		public static BigRational operator *(BigRational multiplicand, BigRational multiplier) => Multiply(multiplicand, multiplier);
 		public static BigRational operator /(BigRational dividend, BigRational divisor) => Divide(dividend, divisor);
+		public static BigRational operator %(BigRational dividend, BigRational divisor) => Mod(dividend, divisor);
 		// Unitary operators
 		public static BigRational operator +(BigRational rational) => Abs(rational);
 		public static BigRational operator -(BigRational rational) => Negate(rational);

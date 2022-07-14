@@ -86,6 +86,31 @@ namespace ExtendedNumerics
 			OneHalf = new Fraction(BigInteger.One, new BigInteger(2));
 		}
 
+		public static Fraction Parse(string value)
+		{
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				throw new ArgumentException("Argument cannot be null, empty or whitespace.");
+			}
+
+			string[] parts = value.Trim().Split('/');
+
+			if (parts.Length == 1)
+			{
+				return new Fraction(BigInteger.Parse(parts[0]));
+			}
+
+			if (parts.Length > 2)
+			{
+				throw new ArgumentException("String should either be an integer (e.g. '34') or a fraction (e.g. '7/12').");
+			}
+
+			BigInteger num = BigInteger.Parse(parts[0]);
+			BigInteger denom = BigInteger.Parse(parts[1]);
+
+			return new Fraction(num, denom);
+		}
+
 		private void Initialize(double value, int precision)
 		{
 			if (!CheckForWholeValues(value))

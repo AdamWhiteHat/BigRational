@@ -107,5 +107,33 @@ namespace TestBigRational
 			Assert.AreEqual(expected_Smaller, result_Smaller);
 			Assert.AreEqual(expected_Negative, resultl_Negative);
 		}
+
+		[Test]
+		public void TestParse()
+		{
+			string expected0 = "0";
+			string expected1 = "34";
+			string expected2 = "7/12";
+			string expected3 = "-1";
+			string expected4 = "-1/2";
+
+			Fraction frac0 = Fraction.Parse(expected0);
+			Fraction frac1 = Fraction.Parse(expected1);
+			Fraction frac2 = Fraction.Parse(expected2);
+			Fraction frac3 = Fraction.Parse(expected3);
+			Fraction frac4 = Fraction.Parse(expected4);
+
+			string actual0 = frac0.ToString();
+			string actual1 = frac1.ToString();
+			string actual2 = frac2.ToString();
+			string actual3 = frac3.ToString();
+			string actual4 = frac4.ToString();
+
+			Assert.AreEqual(expected0, actual0);
+			Assert.AreEqual(expected1, actual1);
+			Assert.AreEqual(expected2, actual2);
+			Assert.AreEqual(expected3, actual3);
+			Assert.AreEqual(expected4, actual4);
+		}
 	}
 }
