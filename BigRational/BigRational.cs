@@ -411,7 +411,7 @@ namespace ExtendedNumerics
 			return result;
 		}
 
-		public static explicit operator Fraction(BigRational value)
+		public static implicit operator Fraction(BigRational value)
 		{
 			return Fraction.Simplify(new Fraction(
 					BigInteger.Add(value.FractionalPart.Numerator, BigInteger.Multiply(value.WholePart, value.FractionalPart.Denominator)),
@@ -498,7 +498,7 @@ namespace ExtendedNumerics
 		{
 			if (obj == null) { return false; }
 			if (!(obj is BigRational)) { return false; }
-			return this.Equals((BigRational)obj);
+			return Equals((BigRational)obj);
 		}
 
 		public override int GetHashCode()
@@ -567,11 +567,11 @@ namespace ExtendedNumerics
 
 		internal BigRational NormalizeSign()
 		{
-			this.FractionalPart = Fraction.NormalizeSign(this.FractionalPart);
-			if (this.WholePart > 0 && this.WholePart.Sign == 1 && this.FractionalPart.Sign == -1)
+			FractionalPart = Fraction.NormalizeSign(FractionalPart);
+			if (WholePart > 0 && WholePart.Sign == 1 && FractionalPart.Sign == -1)
 			{
-				this.WholePart = BigInteger.Negate(this.WholePart);
-				this.FractionalPart = Fraction.Negate(this.FractionalPart);
+				WholePart = BigInteger.Negate(WholePart);
+				FractionalPart = Fraction.Negate(FractionalPart);
 			}
 			return this;
 		}
@@ -582,17 +582,17 @@ namespace ExtendedNumerics
 
 		public override string ToString()
 		{
-			return this.ToString(CultureInfo.CurrentCulture);
+			return ToString(CultureInfo.CurrentCulture);
 		}
 
 		public String ToString(String format)
 		{
-			return this.ToString(CultureInfo.CurrentCulture);
+			return ToString(CultureInfo.CurrentCulture);
 		}
 
 		public String ToString(IFormatProvider provider)
 		{
-			return this.ToString("R", provider);
+			return ToString("R", provider);
 		}
 
 		public String ToString(String format, IFormatProvider provider)

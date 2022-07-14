@@ -421,9 +421,54 @@ namespace ExtendedNumerics
 
 		#region Conversion Operators
 
-		public static explicit operator BigRational(Fraction value)
+		public static implicit operator Fraction(BigInteger value)
+		{
+			return new Fraction(value);
+		}
+
+		public static implicit operator BigRational(Fraction value)
 		{
 			return new BigRational(BigInteger.Zero, value);
+		}
+
+		public static implicit operator Fraction(byte value)
+		{
+			return new Fraction((BigInteger)value);
+		}
+
+		public static implicit operator Fraction(SByte value)
+		{
+			return new Fraction((BigInteger)value);
+		}
+
+		public static implicit operator Fraction(Int16 value)
+		{
+			return new Fraction((BigInteger)value);
+		}
+
+		public static implicit operator Fraction(UInt16 value)
+		{
+			return new Fraction((BigInteger)value);
+		}
+
+		public static implicit operator Fraction(Int32 value)
+		{
+			return new Fraction(value);
+		}
+
+		public static implicit operator Fraction(UInt32 value)
+		{
+			return new Fraction((BigInteger)value);
+		}
+
+		public static implicit operator Fraction(Int64 value)
+		{
+			return new Fraction((BigInteger)value);
+		}
+
+		public static implicit operator Fraction(UInt64 value)
+		{
+			return new Fraction((BigInteger)value);
 		}
 
 		public static explicit operator Fraction(float value)
@@ -558,12 +603,12 @@ namespace ExtendedNumerics
 		{
 			if (obj == null) { return false; }
 			if (!(obj is Fraction)) { return false; }
-			return this.Equals(this, (Fraction)obj);
+			return Equals(this, (Fraction)obj);
 		}
 
 		public bool Equals(Fraction other)
 		{
-			return this.Equals(this, other);
+			return Equals(this, other);
 		}
 
 		public bool Equals(Fraction left, Fraction right)
@@ -574,7 +619,7 @@ namespace ExtendedNumerics
 
 		public override int GetHashCode()
 		{
-			return this.GetHashCode(this);
+			return GetHashCode(this);
 		}
 
 		public int GetHashCode(Fraction fraction)
@@ -675,17 +720,17 @@ namespace ExtendedNumerics
 
 		public override string ToString()
 		{
-			return this.ToString(CultureInfo.CurrentCulture);
+			return ToString(CultureInfo.CurrentCulture);
 		}
 
 		public String ToString(String format)
 		{
-			return this.ToString(format, CultureInfo.CurrentCulture);
+			return ToString(format, CultureInfo.CurrentCulture);
 		}
 
 		public String ToString(IFormatProvider provider)
 		{
-			return this.ToString("R", provider);
+			return ToString("R", provider);
 		}
 
 		public String ToString(String format, IFormatProvider provider)
