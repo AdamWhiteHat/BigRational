@@ -2,18 +2,18 @@
 using System.Numerics;
 using System.Diagnostics;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ExtendedNumerics;
+using NUnit.Framework;
 
 namespace TestBigRational
 {
-	[TestClass]
+	[TestFixture(Category = "Misc")]
 	public class TestBigRationalMisc
 	{
 		public TestContext TestContext { get { return m_testContext; } set { m_testContext = value; } }
 		private TestContext m_testContext;
 
-		[TestMethod, TestCategory("Misc")]
+		[Test]
 		public void TestIteratingOnInsertionIndexDownDirectionAlternate2()
 		{
 			int _iterations = 1000;

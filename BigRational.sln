@@ -1,28 +1,31 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BigRational", "BigRational\BigRational.csproj", "{777EA875-CC5B-48B0-B968-A5555C3DC412}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BigRational", "BigRational\BigRational.csproj", "{777EA875-CC5B-48B0-B968-A5555C3DC412}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBigRational", "TestBigRational\TestBigRational.csproj", "{F1589DA8-F936-43A5-AFDD-00431C955262}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBigRational", "TestBigRational\TestBigRational.csproj", "{F1589DA8-F936-43A5-AFDD-00431C955262}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{777EA875-CC5B-48B0-B968-A5555C3DC412}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{777EA875-CC5B-48B0-B968-A5555C3DC412}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{777EA875-CC5B-48B0-B968-A5555C3DC412}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{777EA875-CC5B-48B0-B968-A5555C3DC412}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F1589DA8-F936-43A5-AFDD-00431C955262}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F1589DA8-F936-43A5-AFDD-00431C955262}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F1589DA8-F936-43A5-AFDD-00431C955262}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F1589DA8-F936-43A5-AFDD-00431C955262}.Release|Any CPU.Build.0 = Release|Any CPU
+		{777EA875-CC5B-48B0-B968-A5555C3DC412}.Debug|x64.ActiveCfg = Debug|x64
+		{777EA875-CC5B-48B0-B968-A5555C3DC412}.Debug|x64.Build.0 = Debug|x64
+		{777EA875-CC5B-48B0-B968-A5555C3DC412}.Release|x64.ActiveCfg = Release|x64
+		{777EA875-CC5B-48B0-B968-A5555C3DC412}.Release|x64.Build.0 = Release|x64
+		{F1589DA8-F936-43A5-AFDD-00431C955262}.Debug|x64.ActiveCfg = Debug|x64
+		{F1589DA8-F936-43A5-AFDD-00431C955262}.Debug|x64.Build.0 = Debug|x64
+		{F1589DA8-F936-43A5-AFDD-00431C955262}.Release|x64.ActiveCfg = Release|x64
+		{F1589DA8-F936-43A5-AFDD-00431C955262}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8DB64EAA-4AE1-4C6B-9279-3AE6A349AA51}
 	EndGlobalSection
 EndGlobal

@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Numerics;
 using ExtendedNumerics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace TestBigRational
 {
-	[TestClass]
+	[TestFixture(Category = "Arithmetic")]
 	public class TestFractionArithmetic
 	{
 		public TestContext TestContext { get { return m_testContext; } set { m_testContext = value; } }
 		private TestContext m_testContext;
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestAddition()
 		{
 			Fraction oneThird = new Fraction(1, 3);
@@ -34,7 +34,7 @@ namespace TestBigRational
 			Assert.AreEqual(expected271Thirds, result271Thirds);
 		}
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestSubtraction()
 		{
 			Fraction oneHalf = new Fraction(1, 2);
@@ -50,7 +50,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueNegativeTwoThirds, resultNegativeTwoThirds);
 		}
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestImproperSubtraction()
 		{
 			Fraction oneHalf = new Fraction(1, 2);
@@ -63,7 +63,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueOneThird, resultOneThird);
 		}
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestMultiplication()
 		{
 			Fraction oneHalf = new Fraction(1, 2);
@@ -79,7 +79,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueNegativeFourTwentyFifths, resultNegativeFourTwentyFifths);
 		}
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestDivision()
 		{
 			Fraction oneHalf = new Fraction(1, 2);
@@ -102,7 +102,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
 		}
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestPow()
 		{
 			// (4/5)^2 == 16/25
@@ -114,7 +114,7 @@ namespace TestBigRational
 			Assert.AreEqual(expected, result);
 		}
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestBitShifting()
 		{
 			BigInteger a = new BigInteger(255); // two to the power of 8

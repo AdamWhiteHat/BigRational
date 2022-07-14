@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Numerics;
 using ExtendedNumerics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace TestBigRational
 {
-	[TestClass]
+	[TestFixture(Category = "Core")]
 	public class TestBigRational
 	{
 		public TestContext TestContext { get { return m_testContext; } set { m_testContext = value; } }
 		private TestContext m_testContext;
 
-		[TestMethod, TestCategory("Core")]
+		[Test]
 		public void TestConstruction()
 		{
 			BigRational result1 = new BigRational(BigInteger.Zero, new Fraction(182, 26));
@@ -26,7 +26,7 @@ namespace TestBigRational
 			Assert.AreEqual(expected2, result2);
 		}
 
-		[TestMethod, TestCategory("Core")]
+		[Test]
 		public void TestExpandImproperFraction()
 		{
 			BigRational threeAndOneThird = new BigRational(3, 1, 3);
@@ -51,7 +51,7 @@ namespace TestBigRational
 			Assert.AreEqual(expected7over1, result7);
 		}
 
-		[TestMethod, TestCategory("Core")]
+		[Test]
 		public void TestMullersRecurrenceConvergesOnFive()
 		{
 			// Set an upper limit to the number of iterations to be tried
@@ -91,7 +91,7 @@ namespace TestBigRational
 			Assert.IsTrue(count == 70);
 		}
 
-		[TestMethod, TestCategory("Core")]
+		[Test]
 		public void TestGetHashCode()
 		{
 			BigRational testA1 = new BigRational(0, 1, 31);
@@ -100,7 +100,7 @@ namespace TestBigRational
 			Assert.AreNotEqual(testA1.GetHashCode(), testA2.GetHashCode());
 		}
 
-		[TestMethod, TestCategory("Core")]
+		[Test]
 		public void TestCompare()
 		{
 			BigRational toCompareAgainst = new BigRational(0, 3, 5);

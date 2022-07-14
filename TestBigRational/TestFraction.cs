@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Numerics;
 using ExtendedNumerics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace TestBigRational
 {
-	[TestClass]
+	[TestFixture(Category = "Core")]
 	public class TestFraction
 	{
 		public TestContext TestContext { get { return m_testContext; } set { m_testContext = value; } }
 		private TestContext m_testContext;
 
-		[TestMethod, TestCategory("Core")]
+		[Test]
 		public void TestSimplify()
 		{
 			Fraction eighteenTwos = new Fraction(18, 2);
@@ -33,7 +33,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueReducedNegative, reducedNegative);
 		}
 
-		[TestMethod, TestCategory("Core")]
+		[Test]
 		public void TestNormalizeSign()
 		{
 			Fraction noChange1 = new Fraction(3, 11);
@@ -49,7 +49,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueNormalized, normalized);
 		}
 
-		[TestMethod, TestCategory("Core")]
+		[Test]
 		public void TestReduceToProperFraction()
 		{
 			BigRational reducedNegative = Fraction.ReduceToProperFraction(new Fraction(-3, 2));
@@ -65,7 +65,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueNoChange, noChange);
 		}
 
-		[TestMethod, TestCategory("Core")]
+		[Test]
 		public void TestGetHashCode()
 		{
 			/*
@@ -82,7 +82,7 @@ namespace TestBigRational
 			Assert.AreNotEqual(testB1.GetHashCode(), testB2.GetHashCode());
 		}
 
-		[TestMethod, TestCategory("Core")]
+		[Test]
 		public void TestCompare()
 		{
 			Fraction toCompareAgainst = new Fraction(3, 5);

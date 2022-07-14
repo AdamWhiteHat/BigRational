@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Numerics;
 using ExtendedNumerics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace TestBigRational
 {
-	[TestClass]
+	[TestFixture(Category = "Arithmetic")]
 	public class TestBigRationalArithmetic
 	{
 		public TestContext TestContext { get { return m_testContext; } set { m_testContext = value; } }
 		private TestContext m_testContext;
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestAddition()
 		{
 			// 3/2 + 10/8 == 201/2
@@ -43,7 +43,7 @@ namespace TestBigRational
 			Assert.AreEqual(expected3and4, result4);
 		}
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestAddingNegative()
 		{
 			var low = new BigRational(-7);
@@ -60,7 +60,7 @@ namespace TestBigRational
 			Assert.AreEqual(new BigRational(1), subtractHightLow, $"{high} + {low} = {subtractHightLow}");
 		}
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestSubtraction()
 		{
 			BigRational sevenTwoths = new BigRational(3, 1, 2);
@@ -72,7 +72,7 @@ namespace TestBigRational
 			Assert.AreEqual(expected, result);
 		}
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestMultiplication()
 		{
 			BigRational sevenTwoths = new BigRational(BigInteger.Zero, new Fraction(7, 2));
@@ -84,7 +84,7 @@ namespace TestBigRational
 			Assert.AreEqual(expected, result);
 		}
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestDivisionNegative()
 		{
 			BigRational expected = BigRational.One;
@@ -93,7 +93,7 @@ namespace TestBigRational
 			Assert.AreEqual(expected, result);
 		}
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestDivision()
 		{
 			BigRational sevenTwoths = new BigRational(BigInteger.Zero, new Fraction(7, 2));
@@ -105,7 +105,7 @@ namespace TestBigRational
 			Assert.AreEqual(expected, result);
 		}
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestPow()
 		{
 			BigRational nineFifths = new BigRational(1, 4, 5);
@@ -116,7 +116,7 @@ namespace TestBigRational
 			Assert.AreEqual(expected, result);
 		}
 
-		[TestMethod, TestCategory("Arithmetic")]
+		[Test]
 		public void TestMidPoint()
 		{
 			var low = (BigRational)(-7);

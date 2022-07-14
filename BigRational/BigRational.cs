@@ -335,47 +335,47 @@ namespace ExtendedNumerics
 
 		#region Conversion
 
-		public static explicit operator BigRational(byte value)
+		public static implicit operator BigRational(byte value)
 		{
 			return new BigRational((BigInteger)value);
 		}
 
-		public static explicit operator BigRational(SByte value)
+		public static implicit operator BigRational(SByte value)
 		{
 			return new BigRational((BigInteger)value);
 		}
 
-		public static explicit operator BigRational(Int16 value)
+		public static implicit operator BigRational(Int16 value)
 		{
 			return new BigRational((BigInteger)value);
 		}
 
-		public static explicit operator BigRational(UInt16 value)
+		public static implicit operator BigRational(UInt16 value)
 		{
 			return new BigRational((BigInteger)value);
 		}
 
-		public static explicit operator BigRational(Int32 value)
+		public static implicit operator BigRational(Int32 value)
 		{
 			return new BigRational((BigInteger)value);
 		}
 
-		public static explicit operator BigRational(UInt32 value)
+		public static implicit operator BigRational(UInt32 value)
 		{
 			return new BigRational((BigInteger)value);
 		}
 
-		public static explicit operator BigRational(Int64 value)
+		public static implicit operator BigRational(Int64 value)
 		{
 			return new BigRational((BigInteger)value);
 		}
 
-		public static explicit operator BigRational(UInt64 value)
+		public static implicit operator BigRational(UInt64 value)
 		{
 			return new BigRational((BigInteger)value);
 		}
 
-		public static explicit operator BigRational(BigInteger value)
+		public static implicit operator BigRational(BigInteger value)
 		{
 			return new BigRational(value);
 		}

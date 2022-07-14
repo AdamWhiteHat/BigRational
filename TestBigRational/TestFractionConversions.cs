@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Numerics;
 using ExtendedNumerics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace TestBigRational
 {
-	[TestClass]
+	[TestFixture(Category = "Conversions")]
 	public class TestFractionConversions
 	{
 		public TestContext TestContext { get { return m_testContext; } set { m_testContext = value; } }
 		private TestContext m_testContext;
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestConvertFromFloat()
 		{
 			float negativeOneHalf = -1f / 2f;
@@ -30,7 +30,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue2, result2);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestConvertToDouble()
 		{
 			Fraction oneSixteenth = new Fraction(1, 16);
@@ -46,7 +46,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestConvertFromDouble()
 		{
 			double fifteenSixteenths = 0.9375d;
@@ -62,7 +62,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueNegativeOneThird, resultNeg13);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestConvertToDecimal()
 		{
 			Fraction oneSixteenth = new Fraction(1, 16);
@@ -78,7 +78,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestConvertFromDecimal()
 		{
 			// decimal converts best with a fixed number of decimal points
@@ -95,7 +95,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueNegativeOneThird, resultNeg1128);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestCastZeroFromDouble()
 		{
 			double zero = 0;
@@ -105,7 +105,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue, result);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestCastZeroFromDecimal()
 		{
 			decimal zero = 0;

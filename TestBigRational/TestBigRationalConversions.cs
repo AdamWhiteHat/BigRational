@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using ExtendedNumerics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace TestBigRational
 {
-	[TestClass]
+	[TestFixture(Category = "Conversions")]
 	public class TestBigRationalConversions
 	{
 		public TestContext TestContext { get { return m_testContext; } set { m_testContext = value; } }
 		private TestContext m_testContext;
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestConvertFromDecimalPointFloat()
 		{
 			float negativeOneAndOneHalf = -3f / 2f;
@@ -29,7 +29,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue2, result2);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestConvertFromDecimalPointDouble()
 		{
 			double fifteenSixteenths = 0.9375d;
@@ -40,7 +40,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue, result);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestConvertFromWholeNumberDouble()
 		{
 			double seven = 7.0d;
@@ -55,7 +55,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue, result2);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestConvertFromNegativeMixedDouble()
 		{
 			double negativeOneAndOneThird = -4d / 3d;
@@ -66,7 +66,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue, result);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestConvertFromDecimalPointDecimal()
 		{
 			decimal fifteenSixteenths = 0.9375m;
@@ -77,7 +77,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue, result);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestConvertFromWholeNumberDecimal()
 		{
 			decimal seven = 7.0m;
@@ -92,7 +92,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue, result2);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestConvertFromNegativeMixedDecimal()
 		{
 			// Note that decimal works best with a fixed number of decimal points
@@ -105,7 +105,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue, result);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestCastZeroFromFloat()
 		{
 			float zero = 0;
@@ -115,7 +115,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue, result);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestCastZeroFromDouble()
 		{
 			double zero = 0;
@@ -125,7 +125,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue, result);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestCastZeroFromDecimal()
 		{
 			decimal zero = 0;
@@ -135,7 +135,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue, result);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestParseWholeNumber()
 		{
 			string toParse = "3";
@@ -146,7 +146,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue, result);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestParseFraction()
 		{
 			string toParse = "1/3";
@@ -157,7 +157,7 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValue, result);
 		}
 
-		[TestMethod, TestCategory("Conversions")]
+		[Test]
 		public void TestParseMixedNumber()
 		{
 			string toParse = "-1 + 1/3";
