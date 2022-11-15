@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using ExtendedNumerics.Internal;
 
 namespace ExtendedNumerics
 {
@@ -338,6 +339,24 @@ namespace ExtendedNumerics
 			}
 
 			return result;
+		}
+
+		public static Fraction Sqrt(Fraction value)
+		{
+			BigInteger num = value.Numerator.SquareRoot();
+			BigInteger denom = value.Denominator.SquareRoot();
+
+			BigRational result = new BigRational(num, denom);
+			return Simplify(result);
+		}
+
+		public static Fraction NthRoot(Fraction value, int root)
+		{
+			BigInteger num = value.Numerator.NthRoot(root);
+			BigInteger denom = value.Denominator.NthRoot(root);
+
+			BigRational result = new BigRational(num, denom);
+			return Simplify(result);
 		}
 
 		public static double Log(Fraction fraction)

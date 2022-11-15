@@ -219,6 +219,20 @@ namespace ExtendedNumerics
 			return new BigRational(fractPow);
 		}
 
+		public static BigRational Sqrt(BigRational value)
+		{
+			Fraction input = value.GetImproperFraction();
+			Fraction result = Fraction.Sqrt(input);
+			return Fraction.ReduceToProperFraction(result);
+		}
+
+		public static BigRational NthRoot(BigRational value, int root)
+		{
+			Fraction input = value.GetImproperFraction();
+			Fraction result = Fraction.NthRoot(input, root);
+			return Fraction.ReduceToProperFraction(result);
+		}
+
 		public static double Log(BigRational rational)
 		{
 			return Fraction.Log(rational.GetImproperFraction());
@@ -385,6 +399,17 @@ namespace ExtendedNumerics
 		{
 			return new BigRational(value);
 		}
+
+		/*
+		public static explicit operator BigInteger(BigRational value)
+		{
+			if (value.FractionalPart != Fraction.Zero)
+			{
+				throw new InvalidCastException("Value is not an integer value. This conversion would lost precision.");
+			}
+			return value.WholePart;
+		}
+		*/
 
 		public static explicit operator BigRational(float value)
 		{

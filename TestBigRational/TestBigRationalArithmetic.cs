@@ -117,6 +117,30 @@ namespace TestBigRational
 		}
 
 		[Test]
+		public void TestSqrt()
+		{
+			BigRational fourNinths = new BigRational(0, 4, 9); // sqrt(4/9) == 2/3
+
+			BigRational expected = new BigRational(0, 2, 3);
+
+			BigRational result = BigRational.Sqrt(fourNinths);
+
+			Assert.AreEqual(expected, result);
+		}
+
+		[Test]
+		public void TestNthRoot()
+		{
+			BigRational twentyTwoOverThreeOneTwoFive = new BigRational(0, 32, 3125); // 5#(32/3125) = 2/5
+
+			BigRational expected = new BigRational(0, 2, 5);
+
+			BigRational result = BigRational.NthRoot(twentyTwoOverThreeOneTwoFive, 5);
+
+			Assert.AreEqual(expected, result);
+		}
+
+		[Test]
 		public void TestMidPoint()
 		{
 			var low = (BigRational)(-7);

@@ -115,6 +115,50 @@ namespace TestBigRational
 		}
 
 		[Test]
+		public void TestSqrt()
+		{
+			Fraction oneOverSixteen = new Fraction(1, 16); //  2#(1/16) = 1/4
+			Fraction twentyFive = new Fraction(25); // sqrt(25) == 5			
+			Fraction fourNinths = new Fraction(4, 9); // sqrt(4/9) == 2/3
+
+			Fraction expected1 = new Fraction(1, 4);
+			Fraction expected2 = new Fraction(5);
+			Fraction expected3 = new Fraction(2, 3);
+
+			Fraction result1 = Fraction.Sqrt(oneOverSixteen);
+			Fraction result2 = Fraction.Sqrt(twentyFive);
+			Fraction result3 = Fraction.Sqrt(fourNinths);
+
+			Assert.AreEqual(expected1, result1);
+			Assert.AreEqual(expected2, result2);
+			Assert.AreEqual(expected3, result3);
+		}
+
+		[Test]
+		public void TestNthRoot()
+		{
+			Fraction twoOneEightSeven = new Fraction(2187);// 7#2187 = 3
+			Fraction oneOverEightyOne = new Fraction(1, 81); // 4#(1/81) = 1/3
+			Fraction twentySevenOverSixtyFour = new Fraction(27, 64); // 3#(27/64) = 3/4
+			Fraction twentyTwoOverThreeOneTwoFive = new Fraction(32, 3125); // 5#(32/3125) = 2/5
+
+			Fraction expected1 = new Fraction(3);
+			Fraction expected2 = new Fraction(1, 3);
+			Fraction expected3 = new Fraction(3, 4);
+			Fraction expected4 = new Fraction(2, 5);
+
+			Fraction result1 = Fraction.NthRoot(twoOneEightSeven, 7);
+			Fraction result2 = Fraction.NthRoot(oneOverEightyOne, 4);
+			Fraction result3 = Fraction.NthRoot(twentySevenOverSixtyFour, 3);
+			Fraction result4 = Fraction.NthRoot(twentyTwoOverThreeOneTwoFive, 5);
+
+			Assert.AreEqual(expected1, result1);
+			Assert.AreEqual(expected2, result2);
+			Assert.AreEqual(expected3, result3);
+			Assert.AreEqual(expected4, result4);
+		}
+
+		[Test]
 		public void TestBitShifting()
 		{
 			BigInteger a = new BigInteger(255); // two to the power of 8
