@@ -430,7 +430,7 @@ namespace ExtendedNumerics
 		{
 			double fract = (double)value.FractionalPart;
 			double whole = (double)value.WholePart;
-			double result = whole + (fract * value.Sign);
+			double result = whole + (fract * (value.Sign == 0 ? 1 : value.Sign));
 			return result;
 		}
 
@@ -438,7 +438,7 @@ namespace ExtendedNumerics
 		{
 			decimal fract = (decimal)value.FractionalPart;
 			decimal whole = (decimal)value.WholePart;
-			decimal result = whole + (fract * value.Sign);
+			decimal result = whole + (fract * (value.Sign == 0 ? 1 : value.Sign));
 			return result;
 		}
 

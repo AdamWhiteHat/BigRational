@@ -106,6 +106,66 @@ namespace TestBigRational
 		}
 
 		[Test]
+		public void TestConvertToDouble()
+		{
+			BigRational oneSixteenth = new BigRational(1, 16);
+			BigRational negativeOneThird = new BigRational(-1, 3);
+			BigRational improperThirteenFourths = new BigRational(13, 4);
+			BigRational improperNegativeNineFifths = new BigRational(-9, 5);
+			BigRational largeRational = new BigRational(
+				BigInteger.Parse("36979593578080793436251350559911534471745439536857510606701399088382738"),
+				BigInteger.Parse("2226645766662654219495625670010961737131540370393163559325615188894568125"));
+
+			double expectedValueOneSixteenth = 0.0625d;
+			double expectedValueNegativeOneThird = -1d / 3d;
+			double expectedValueImproperThirteenFourths = 3.25d;
+			double expectedValueImproperNegativeNineFifths = -1.8d;
+			double expectedValueLargeRational = 0.016607757790547271d;
+
+			double resultOneSixteenth = (double)oneSixteenth;
+			double resultNegativeOneThird = (double)negativeOneThird;
+			double resultImproperThirteenFourths = (double)improperThirteenFourths;
+			double resultImproperNegativeNineFifths = (double)improperNegativeNineFifths;
+			double resultLargeRational = (double)largeRational;
+
+			Assert.AreEqual(expectedValueOneSixteenth, resultOneSixteenth);
+			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
+			Assert.AreEqual(expectedValueImproperThirteenFourths, resultImproperThirteenFourths);
+			Assert.AreEqual(expectedValueImproperNegativeNineFifths, resultImproperNegativeNineFifths);
+			Assert.AreEqual(expectedValueLargeRational, resultLargeRational);
+		}
+
+		[Test]
+		public void TestConvertToDecimal()
+		{
+			BigRational oneSixteenth = new BigRational(1, 16);
+			BigRational negativeOneThird = new BigRational(-1, 3);
+			BigRational improperThirteenFourths = new BigRational(13, 4);
+			BigRational improperNegativeNineFifths = new BigRational(-9, 5);
+			BigRational largeRational = new BigRational(
+							BigInteger.Parse("36979593578080793436251350559911534471745439536857510606701399088382738"),
+							BigInteger.Parse("2226645766662654219495625670010961737131540370393163559325615188894568125"));
+
+			decimal expectedValueOneSixteenth = 0.0625m;
+			decimal expectedValueNegativeOneThird = -1m / 3m;
+			decimal expectedValueImproperThirteenFourths = 3.25m;
+			decimal expectedValueImproperNegativeNineFifths = -1.8m;
+			decimal expectedValueLargeFraction = 0.0166077577905472695920433411m;
+
+			decimal resultOneSixteenth = (decimal)oneSixteenth;
+			decimal resultNegativeOneThird = (decimal)negativeOneThird;
+			decimal resultImproperThirteenFourths = (decimal)improperThirteenFourths;
+			decimal resultImproperNegativeNineFifths = (decimal)improperNegativeNineFifths;
+			decimal resultLargeFraction = (decimal)largeRational;
+
+			Assert.AreEqual(expectedValueOneSixteenth, resultOneSixteenth);
+			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
+			Assert.AreEqual(expectedValueImproperThirteenFourths, resultImproperThirteenFourths);
+			Assert.AreEqual(expectedValueImproperNegativeNineFifths, resultImproperNegativeNineFifths);
+			Assert.AreEqual(expectedValueLargeFraction, resultLargeFraction);
+		}
+
+		[Test]
 		public void TestCastZeroFromFloat()
 		{
 			float zero = 0;
