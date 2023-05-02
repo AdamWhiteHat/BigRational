@@ -470,11 +470,6 @@ namespace ExtendedNumerics
 			return new Fraction(value);
 		}
 
-		public static implicit operator BigRational(Fraction value)
-		{
-			return new BigRational(BigInteger.Zero, value);
-		}
-
 		public static implicit operator Fraction(byte value)
 		{
 			return new Fraction((BigInteger)value);
@@ -528,6 +523,16 @@ namespace ExtendedNumerics
 		public static explicit operator Fraction(decimal value)
 		{
 			return new Fraction(value);
+		}
+
+		public static implicit operator BigRational(Fraction value)
+		{
+			return new BigRational(BigInteger.Zero, value);
+		}
+
+		public static explicit operator BigInteger(Fraction value)
+		{
+			return BigInteger.Divide(value.Numerator, value.Denominator);
 		}
 
 		public static explicit operator double(Fraction value)
