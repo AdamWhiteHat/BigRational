@@ -226,10 +226,20 @@ namespace ExtendedNumerics
 			return Fraction.ReduceToProperFraction(result);
 		}
 
-		public static BigRational NthRoot(BigRational value, int root)
+		/// <summary>
+		/// Returns the Nth root of a number up to a desired precision.
+		/// The precision parameter is given in terms of the minimum number of correct decimal places.
+		/// </summary>
+		/// <param name="value">The value to take the Nth root of.</param>
+		/// <param name="root">The Nth root to find of value. Also called the index.</param>
+		/// <param name="precision">The minimum number of correct decimal places to return if the answer is not a rational number.</param>
+		/// <returns>BigRational</returns>
+		/// <exception cref="System.Exception">Root must be greater than or equal to 1</exception>
+		/// <exception cref="System.Exception">Value must be a positive integer</exception>
+		public static BigRational NthRoot(BigRational value, int root, int precision = 30)
 		{
 			Fraction input = value.GetImproperFraction();
-			Fraction result = Fraction.NthRoot(input, root);
+			Fraction result = Fraction.NthRoot(input, root, precision);
 			return Fraction.ReduceToProperFraction(result);
 		}
 

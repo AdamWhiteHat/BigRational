@@ -135,7 +135,7 @@ namespace TestBigRational
 		}
 
 		[Test]
-		public void TestNthRoot()
+		public void TestNthRoot001()
 		{
 			Fraction twoOneEightSeven = new Fraction(2187);// 7#2187 = 3
 			Fraction oneOverEightyOne = new Fraction(1, 81); // 4#(1/81) = 1/3
@@ -156,6 +156,38 @@ namespace TestBigRational
 			Assert.AreEqual(expected2, result2);
 			Assert.AreEqual(expected3, result3);
 			Assert.AreEqual(expected4, result4);
+		}
+
+
+		[Test]
+		public void TestNthRoot002()
+		{
+			Fraction cubeRootOf50_Expected = new Fraction(15313185253378309, 4156637981795142);
+			Fraction cubeRootOf100_Expected = new Fraction(7336085559573722, 1580511721858759);
+			Fraction sqrRootOf2_Expected = new Fraction(2470433131948081, 1746860020068409);
+			Fraction sqrRootOf65_Expected = new Fraction(2368403439540328, 293764292023553);
+			Fraction cubeRootOf65_Expected = new Fraction(4726945758417767, 1175644906474928);
+			Fraction cubeRootOf125_Expected = new Fraction(5, 1);
+			Fraction sqrtRootOf100_Expected = new Fraction(10, 1);
+			Fraction sqrtRootOf4_Expected = new Fraction(2, 1);
+
+			Fraction cubeRootOf50_Result = Fraction.NthRoot(50, 3);
+			Fraction cubeRootOf100_Result = Fraction.NthRoot(100, 3);
+			Fraction sqrRootOf2_Result = Fraction.NthRoot(2, 2);
+			Fraction sqrRootOf65_Result = Fraction.NthRoot(65, 2);
+			Fraction cubeRootOf65_Result = Fraction.NthRoot(65, 3);
+			Fraction cubeRootOf125_Result = Fraction.NthRoot(125, 3);
+			Fraction sqrtRootOf100_Result = Fraction.NthRoot(100, 2);
+			Fraction sqrtRootOf4_Result = Fraction.NthRoot(4, 2);
+
+			Assert.AreEqual(cubeRootOf50_Expected, cubeRootOf50_Result);
+			Assert.AreEqual(cubeRootOf100_Expected, cubeRootOf100_Result);
+			Assert.AreEqual(sqrRootOf2_Expected, sqrRootOf2_Result);
+			Assert.AreEqual(sqrRootOf65_Expected, sqrRootOf65_Result);
+			Assert.AreEqual(cubeRootOf65_Expected, cubeRootOf65_Result);
+			Assert.AreEqual(cubeRootOf125_Expected, cubeRootOf125_Result);
+			Assert.AreEqual(sqrtRootOf100_Expected, sqrtRootOf100_Result);
+			Assert.AreEqual(sqrtRootOf4_Expected, sqrtRootOf4_Result);
 		}
 
 		[Test]

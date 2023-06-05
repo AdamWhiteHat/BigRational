@@ -350,13 +350,67 @@ namespace ExtendedNumerics
 			return Simplify(result);
 		}
 
-		public static Fraction NthRoot(Fraction value, int root)
+		/// <summary>
+		/// Returns the Nth root of a Fraction up to a desired precision.
+		/// The precision parameter is given in terms of the minimum number of correct decimal places.
+		/// </summary>
+		/// <param name="value">The value to take the Nth root of.</param>
+		/// <param name="root">The Nth root to find of value. Also called the index.</param>
+		/// <param name="precision">The minimum number of correct decimal places to return if the answer is not a .</param>
+		/// <returns>Fraction.</returns>
+		/// <exception cref="System.Exception">Root must be greater than or equal to 1</exception>
+		/// <exception cref="System.Exception">Value must be a positive integer</exception>
+		public static Fraction NthRoot(Fraction value, int root, int precision = 30)
 		{
-			BigInteger num = value.Numerator.NthRoot(root);
-			BigInteger denom = value.Denominator.NthRoot(root);
+			Fraction deviationBound = new Fraction(1, BigInteger.Pow(10, precision));
 
-			BigRational result = new BigRational(num, denom);
-			return Simplify(result);
+			if (root < 1) throw new Exception("Root must be greater than or equal to 1");
+			if (value.Sign == -1) throw new Exception("Value must be a positive integer");
+			if (value == One || value == Zero || root == 1) { return value; }
+
+			Fraction lowerbound = Zero;
+			Fraction upperbound = new Fraction(value);
+			if (upperbound < One)
+			{
+				upperbound = One;
+			}
+			Fraction mediant;
+
+			while (true)
+			{
+				mediant = Simplify(Mediant(lowerbound, upperbound));
+
+				Fraction testPow = Simplify(Pow(mediant, root));
+
+				if (testPow > value) upperbound = mediant;
+				if (testPow < value) lowerbound = mediant;
+				if (testPow == value)
+				{
+					lowerbound = mediant;
+					break;
+				}
+				if ((upperbound - lowerbound) <= deviationBound)
+				{
+					break;
+				}
+			}
+
+			return lowerbound;
+		}
+
+		/// <summary>
+		/// Returns a fraction half way between the left and the right parameter.
+		/// The mediant of two fractions is defined as the sum of the numerators
+		/// divided by the sum of the denominators, and is often used when generating
+		/// the Farey sequence or a Stern–Brocot tree.
+		/// </summary>
+		/// <returns>The Fraction mid-way between the left Fraction and right Fraction.</returns>
+		public static Fraction Mediant(Fraction left, Fraction right)
+		{
+			return new Fraction(
+					BigInteger.Add(left.Numerator, right.Numerator),
+					 BigInteger.Add(left.Denominator, right.Denominator)
+				);
 		}
 
 		public static double Log(Fraction fraction)
