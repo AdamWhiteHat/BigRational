@@ -7,13 +7,16 @@ using System.Threading.Tasks;
 
 namespace ExtendedNumerics.Internal
 {
+	/// <summary>
+	/// ExtensionMethods Helper Class
+	/// </summary>
 	public static class ExtensionMethods
 	{
 		/// <summary>
 		/// Fast square root algorithm.
-		/// It can calculate the square root of numbers with 33,000 digits in < 90 ms,
-		/// 66,000 digits in < 400 ms,
-		/// and 100,000 digits in < 900 ms.
+		/// It can calculate the square root of numbers with 33,000 digits in &lt; 90 ms,
+		/// 66,000 digits in &lt; 400 ms,
+		/// and 100,000 digits in &lt; 900 ms.
 		/// The previous implementation would have taken tens of minutes or more.
 		/// Credit for this algorithm goes to: Ryan Scott White.
 		/// This code was taken from his GitHub, with only minor refactoring changes and
