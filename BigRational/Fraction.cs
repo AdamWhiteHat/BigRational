@@ -481,13 +481,9 @@ namespace ExtendedNumerics
 		/// </summary>
 		/// <param name="value">The base value to square root.</param>
 		/// <returns>The square root of the specified value.</returns>
-		public static Fraction Sqrt(Fraction value)
+		public static Fraction Sqrt(Fraction value, int precision = 30)
 		{
-			BigInteger num = value.Numerator.SquareRoot();
-			BigInteger denom = value.Denominator.SquareRoot();
-
-			BigRational result = new BigRational(num, denom);
-			return Simplify(result);
+			return NthRoot(value, 2, precision);
 		}
 
 		/// <summary>

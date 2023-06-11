@@ -117,7 +117,7 @@ namespace TestBigRational
 		}
 
 		[Test]
-		public void TestSqrt()
+		public void TestSqrt001()
 		{
 			BigRational fourNinths = new BigRational(0, 4, 9); // sqrt(4/9) == 2/3
 
@@ -126,6 +126,27 @@ namespace TestBigRational
 			BigRational result = BigRational.Sqrt(fourNinths);
 
 			Assert.AreEqual(expected, result);
+		}
+
+		[Test]
+		public void TestSqrt002()
+		{
+			double n = 160000000000d;
+			double d = 249.999d;
+			double q = n / d;
+			double expected = Math.Sqrt(q); // 25298.271877941387183714739055
+
+			BigRational a = new BigRational(BigInteger.Parse("160000000000"));
+			BigRational b = new BigRational(BigInteger.Parse("249"), new Fraction(0.999));
+			BigRational c = BigRational.Divide(a, b);
+			BigRational result = BigRational.Sqrt(c);
+
+			TestContext.WriteLine($"Expected: {expected}");
+			TestContext.WriteLine($"Actual: {(double)result}");
+			TestContext.WriteLine($"Actual: {(decimal)result}");
+			TestContext.WriteLine($"Actual: {result}");
+
+			Assert.AreEqual(expected, (double)result, 0.000000000002d);
 		}
 
 		[Test]
