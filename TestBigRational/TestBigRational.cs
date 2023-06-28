@@ -115,15 +115,15 @@ namespace TestBigRational
 			int expected_Smaller = 1;
 			int expected_Negative = 1;
 
-			int result_Same = BigRational.Compare(toCompareAgainst, same);
-			int result_Larger = BigRational.Compare(toCompareAgainst, larger);
-			int result_Smaller = BigRational.Compare(toCompareAgainst, smaller);
-			int resultl_Negative = BigRational.Compare(toCompareAgainst, negative);
+			int actual_Same = BigRational.Compare(toCompareAgainst, same);
+			int actual_Larger = BigRational.Compare(toCompareAgainst, larger);
+			int actual_Smaller = BigRational.Compare(toCompareAgainst, smaller);
+			int actual_Negative = BigRational.Compare(toCompareAgainst, negative);
 
-			Assert.AreEqual(expected_Same, result_Same);
-			Assert.AreEqual(expected_Larger, result_Larger);
-			Assert.AreEqual(expected_Smaller, result_Smaller);
-			Assert.AreEqual(expected_Negative, resultl_Negative);
+			Assert.AreEqual(expected_Same, actual_Same, $"Same: BigRational.Compare({toCompareAgainst}, {same}) == {expected_Same} (expected) ; Actual: {actual_Same}");
+			Assert.AreEqual(expected_Larger, actual_Larger, $"Larger: BigRational.Compare({toCompareAgainst}, {larger}) == {expected_Larger} (expected) ; Actual: {actual_Larger}");
+			Assert.AreEqual(expected_Smaller, actual_Smaller, $"Smaller: BigRational.Compare({toCompareAgainst}, {smaller}) == {expected_Smaller} (expected) ; Actual: {actual_Smaller}");
+			Assert.AreEqual(expected_Negative, actual_Negative, $"Negative: BigRational.Compare({toCompareAgainst}, {negative}) == {expected_Negative} (expected) ; Actual: {actual_Negative}");
 		}
 	}
 }

@@ -33,7 +33,7 @@ namespace ExtendedNumerics
 		/// a negative one (-1) if the value is negative,
 		/// and zero (0) if the value is zero.
 		/// </summary>		
-		public int Sign { get { return NormalizeSign(this).WholePart.Sign; } }
+		public int Sign { get { NormalizeSign(); return (WholePart != 0) ? WholePart.Sign : FractionalPart.Sign; } }
 
 		/// <summary>Indicates whether the value of the current instance is zero (0).</summary>
 		/// <value><c>true</c> if this instance is zero; otherwise, <c>false</c>.</value>
@@ -415,6 +415,10 @@ namespace ExtendedNumerics
 		public static BigRational Negate(BigRational rational)
 		{
 			BigRational input = BigRational.Reduce(rational);
+			if (input.WholePart == 0)
+			{
+				return new BigRational(input.WholePart, Fraction.Negate(input.FractionalPart));
+			}
 			return new BigRational(BigInteger.Negate(input.WholePart), input.FractionalPart);
 		}
 
@@ -657,8 +661,8 @@ namespace ExtendedNumerics
 
 			if (leftRed.WholePart == rightRed.WholePart)
 			{
-				Fraction leftFrac = (leftRed.Sign == -1) ? Fraction.Negate(leftRed.FractionalPart) : leftRed.FractionalPart;
-				Fraction rightFrac = (rightRed.Sign == -1) ? Fraction.Negate(rightRed.FractionalPart) : rightRed.FractionalPart;
+				Fraction leftFrac = leftRed.GetImproperFraction();
+				Fraction rightFrac = right.GetImproperFraction();
 				return Fraction.Compare(leftFrac, rightFrac);
 			}
 			else
@@ -842,6 +846,10 @@ namespace ExtendedNumerics
 			double fract = (double)value.FractionalPart;
 			double whole = (double)value.WholePart;
 			double result = whole + (fract * (value.Sign == 0 ? 1 : value.Sign));
+			if (value.WholePart == 0)
+			{
+				result = fract;
+			}
 			return result;
 		}
 
@@ -855,6 +863,10 @@ namespace ExtendedNumerics
 			decimal fract = (decimal)value.FractionalPart;
 			decimal whole = (decimal)value.WholePart;
 			decimal result = whole + (fract * (value.Sign == 0 ? 1 : value.Sign));
+			if (value.WholePart == 0)
+			{
+				result = fract;
+			}
 			return result;
 		}
 

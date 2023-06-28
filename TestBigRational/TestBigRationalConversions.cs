@@ -128,11 +128,11 @@ namespace TestBigRational
 			double resultImproperNegativeNineFifths = (double)improperNegativeNineFifths;
 			double resultLargeRational = (double)largeRational;
 
-			Assert.AreEqual(expectedValueOneSixteenth, resultOneSixteenth);
-			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
-			Assert.AreEqual(expectedValueImproperThirteenFourths, resultImproperThirteenFourths);
-			Assert.AreEqual(expectedValueImproperNegativeNineFifths, resultImproperNegativeNineFifths);
-			Assert.AreEqual(expectedValueLargeRational, resultLargeRational);
+			Assert.AreEqual(expectedValueOneSixteenth, resultOneSixteenth, "1/16");
+			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird, "-1/3");
+			Assert.AreEqual(expectedValueImproperThirteenFourths, resultImproperThirteenFourths, "13/4");
+			Assert.AreEqual(expectedValueImproperNegativeNineFifths, resultImproperNegativeNineFifths, "-9/5");
+			Assert.AreEqual(expectedValueLargeRational, resultLargeRational, "(a large fraction)");
 		}
 
 		[Test]
@@ -158,11 +158,11 @@ namespace TestBigRational
 			decimal resultImproperNegativeNineFifths = (decimal)improperNegativeNineFifths;
 			decimal resultLargeFraction = (decimal)largeRational;
 
-			Assert.AreEqual(expectedValueOneSixteenth, resultOneSixteenth);
-			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
-			Assert.AreEqual(expectedValueImproperThirteenFourths, resultImproperThirteenFourths);
-			Assert.AreEqual(expectedValueImproperNegativeNineFifths, resultImproperNegativeNineFifths);
-			Assert.AreEqual(expectedValueLargeFraction, resultLargeFraction);
+			Assert.AreEqual(expectedValueOneSixteenth, resultOneSixteenth, "1/16");
+			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird, "-1/3");
+			Assert.AreEqual(expectedValueImproperThirteenFourths, resultImproperThirteenFourths, "13/4");
+			Assert.AreEqual(expectedValueImproperNegativeNineFifths, resultImproperNegativeNineFifths, "-9/5");
+			Assert.AreEqual(expectedValueLargeFraction, resultLargeFraction, "(a large fraction)");
 		}
 
 		[Test]
