@@ -142,5 +142,33 @@ namespace TestBigRational
 
 			Assert.AreEqual(expectedValue, result);
 		}
+
+		[Test]
+		public void TestUnaryPlusOperator()
+		{
+			Fraction before = -5;
+			Fraction after = +(before);
+
+			TestContext.WriteLine($"+({before}) = {after}");
+
+			string result = after.ToString();
+			string expectedValue = "-5";
+
+			Assert.AreEqual(expectedValue, result, "The unary + operator is expected to return the value of its operand.");
+		}
+
+		[Test]
+		public void TestUnaryMinusOperator()
+		{
+			Fraction before = 5;
+			Fraction after = -(before);
+
+			TestContext.WriteLine($"-({before}) = {after}");
+
+			string result = after.ToString();
+			string expectedValue = "-5";
+
+			Assert.AreEqual(expectedValue, result, "The unary - operator is expected to compute the numeric negation of its operand.");
+		}
 	}
 }

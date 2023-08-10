@@ -684,32 +684,32 @@ namespace ExtendedNumerics
 		public static Fraction operator %(Fraction dividend, Fraction divisor) => Remainder(dividend, divisor);
 
 		/// <summary>
-		/// Forces a specified <see cref="T:ExtendedNumerics.Fraction" /> value to be positive.
+		/// Returns the value of the <see cref="ExtendedNumerics.Fraction"/> operand. (The sign of the operand is unchanged.)
 		/// </summary>
-		/// <param name="fraction">An positive integer value.</param>
-		/// <returns>The value of the specified instance as a positive value.</returns>
-		public static Fraction operator +(Fraction fraction) => Abs(fraction);
+		/// <param name="value">The value to return.</param>
+		/// <returns>The value of the value operand.</returns>
+		public static Fraction operator +(Fraction value) => value;
 
 		/// <summary>
 		/// Negates a specified <see cref="T:ExtendedNumerics.Fraction" /> value.
 		/// </summary>
-		/// <param name="fraction">The value to negate.</param>
+		/// <param name="value">The value to negate.</param>
 		/// <returns>The result of the value parameter multiplied by negative one (-1).</returns>
-		public static Fraction operator -(Fraction fraction) => Negate(fraction);
+		public static Fraction operator -(Fraction value) => Negate(value);
 
 		/// <summary>
 		/// Increments a <see cref="T:ExtendedNumerics.Fraction" /> value by 1.
 		/// </summary>
-		/// <param name="fraction">The value to increment.</param>
+		/// <param name="value">The value to increment.</param>
 		/// <returns>The value of the value parameter incremented by 1.</returns>
-		public static Fraction operator ++(Fraction fraction) => Add(fraction, Fraction.One);
+		public static Fraction operator ++(Fraction value) => Add(value, Fraction.One);
 
 		/// <summary>
 		/// Decrements a <see cref="T:ExtendedNumerics.Fraction" /> value by 1.
 		/// </summary>
-		/// <param name="fraction">The value to decrement.</param>
+		/// <param name="value">The value to decrement.</param>
 		/// <returns>The value of the value parameter decremented by 1.</returns>
-		public static Fraction operator --(Fraction fraction) => Subtract(fraction, Fraction.One);
+		public static Fraction operator --(Fraction value) => Subtract(value, Fraction.One);
 
 		#endregion
 

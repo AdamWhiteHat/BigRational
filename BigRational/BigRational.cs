@@ -549,32 +549,32 @@ namespace ExtendedNumerics
 		#region Unitary Operator Overloads
 
 		/// <summary>
-		/// Forces a specified <see cref="ExtendedNumerics.BigRational" /> value to be positive.
+		/// Returns the value of the <see cref="ExtendedNumerics.BigRational"/> operand. (The sign of the operand is unchanged.)
 		/// </summary>
-		/// <param name="rational">An positive integer value.</param>
-		/// <returns>The value of the specified instance as a positive value.</returns>
-		public static BigRational operator +(BigRational rational) => Abs(rational);
+		/// <param name="value">The value to return.</param>
+		/// <returns>The value of the value operand.</returns>
+		public static BigRational operator +(BigRational value) => value;
 
 		/// <summary>
 		/// Negates a specified <see cref="ExtendedNumerics.BigRational"/> value.
 		/// </summary>
-		/// <param name="rational">The value to negate.</param>
+		/// <param name="value">The value to negate.</param>
 		/// <returns>The result of the value parameter multiplied by negative one (-1).</returns>
-		public static BigRational operator -(BigRational rational) => Negate(rational);
+		public static BigRational operator -(BigRational value) => Negate(value);
 
 		/// <summary>
 		/// Increments a <see cref="ExtendedNumerics.BigRational"/> value by 1.
 		/// </summary>
-		/// <param name="rational">The value to increment.</param>
+		/// <param name="value">The value to increment.</param>
 		/// <returns>The value of the value parameter incremented by 1.</returns>
-		public static BigRational operator ++(BigRational rational) => Add(rational, BigRational.One);
+		public static BigRational operator ++(BigRational value) => Add(value, BigRational.One);
 
 		/// <summary>
 		/// Decrements a <see cref="ExtendedNumerics.BigRational"/> value by 1.
 		/// </summary>
-		/// <param name="rational">The value to decrement.</param>
+		/// <param name="value">The value to decrement.</param>
 		/// <returns>The value of the value parameter decremented by 1.</returns>
-		public static BigRational operator --(BigRational rational) => Subtract(rational, BigRational.One);
+		public static BigRational operator --(BigRational value) => Subtract(value, BigRational.One);
 
 		#endregion
 
