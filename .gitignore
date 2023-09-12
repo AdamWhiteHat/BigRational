@@ -244,3 +244,5 @@ ModelManifest.xml
 
 *.nuspec
 *.bak
+/Directory.Build.props
+/Directory.Build.targets
