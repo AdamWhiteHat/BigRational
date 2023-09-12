@@ -162,5 +162,32 @@ namespace ExtendedNumerics.Internal
 			remainder = source - BigInteger.Pow(lowerbound, root);
 			return lowerbound;
 		}
+
+		/// <summary>
+		/// Raises the specified <see cref="T:System.Numerics.BigInteger" /> base value to an integer exponent.
+		/// Uses the exponentiation by squaring approach.
+		/// </summary>
+		/// <param name="base">The base.</param>
+		/// <param name="exponent">The exponent.</param>
+		/// <returns>The power of the base raised to the exponent.</returns>
+		public static BigInteger Pow(BigInteger @base, BigInteger exponent)
+		{
+			BigInteger b = BigInteger.Abs(@base);
+			BigInteger exp = BigInteger.Abs(exponent);
+			BigInteger result = BigInteger.One;
+			while (exp > 0)
+			{
+				if ((exp & 1) == 1) // If exponent is odd: (x & 1 -> x % 2)
+				{
+					result = (result * b);
+					exp -= 1;
+					if (exp == 0) { break; }
+				}
+
+				b = (b * b); // Square
+				exp >>= 1; // Divide by two: x >> 1 -> x / 2;
+			}
+			return result;
+		}
 	}
 }

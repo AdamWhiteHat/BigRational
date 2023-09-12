@@ -434,46 +434,51 @@ namespace ExtendedNumerics
 		}
 
 		/// <summary>
-		///  Raises the specified <see cref="T:ExtendedNumerics.Fraction" /> base value to the specified exponent.
+		///  Raises the specified <see cref="T:ExtendedNumerics.Fraction" /> base value to an integer exponent.
 		/// </summary>
-		/// <param name="value">The value.</param>
+		/// <param name="base">The base.</param>
 		/// <param name="exponent">The exponent.</param>
-		/// <returns>The power of the base to the exponent.</returns>
+		/// <returns>The power of the base raised to the exponent.</returns>
 		/// <exception cref="System.ArgumentException">Cannot raise zero to a negative power - value</exception>
-		public static Fraction Pow(Fraction value, BigInteger exponent)
+		public static Fraction Pow(Fraction @base, BigInteger exponent)
 		{
-			if (exponent.Sign == 0)
-			{
-				return Fraction.One;
-			}
+			if (exponent.Sign == 0) { return Fraction.One; }
+			if (@base.Sign == 0) { return Fraction.Zero; }
+			if (exponent == 1) { return @base; }
+			if (@base == 1) { return Fraction.One; }
 
-			Fraction inputValue;
-			BigInteger inputExponent;
+			Fraction inputValue = new Fraction(@base);
+			BigInteger inputExponent = exponent;
 
+			// Handle negative values of the exponent: n^(-e) -> (1/n)^e
 			if (exponent.Sign < 0)
 			{
-				if (value == Fraction.Zero)
+				if (@base == Fraction.Zero)
 				{
-					throw new ArgumentException("Cannot raise zero to a negative power", nameof(value));
+					throw new ArgumentException("Cannot raise zero to a negative power", nameof(@base));
 				}
-				// n^(-e) -> (1/n)^e
-				inputValue = Reciprocal(value);
+
+				inputValue = Fraction.Reciprocal(@base);
 				inputExponent = BigInteger.Negate(exponent);
 			}
-			else
-			{
-				inputValue = new Fraction(value);
-				inputExponent = exponent;
-			}
 
-			Fraction result = inputValue;
-			while (inputExponent > BigInteger.One)
-			{
-				result = Multiply(result, inputValue);
-				inputExponent--;
-			}
+			// (a/b)^m = (a^m / b^m)
+			return new Fraction(Internal.ExtensionMethods.Pow(@base.Numerator, exponent), ExtensionMethods.Pow(@base.Denominator, exponent));
+		}
 
-			return result;
+		/// <summary>
+		/// Raises the specified <see cref="T:ExtendedNumerics.Fraction" /> base value to <see cref="T:ExtendedNumerics.Fraction" /> exponent.
+		/// </summary>
+		/// <param name="base">The base.</param>
+		/// <param name="exponent">The exponent.</param>
+		/// <returns>The power of the base raised to the exponent.</returns>
+		public static Fraction Pow(Fraction @base, Fraction exponent)
+		{
+			// (a/b)^(m/n) -> n#(a^m) / n#(b^m), where n#m is the nth root of m function
+			return Fraction.Divide(
+				NthRoot(Pow(@base.Numerator, exponent.Numerator), exponent.Denominator),
+				NthRoot(Pow(@base.Denominator, exponent.Numerator), exponent.Denominator)
+			);
 		}
 
 		/// <summary>
@@ -494,21 +499,20 @@ namespace ExtendedNumerics
 		/// <param name="root">The Nth root to find of value. Also called the index.</param>
 		/// <param name="precision">The minimum number of correct decimal places to return if the answer is not a .</param>
 		/// <returns>Fraction.</returns>
-		/// <exception cref="System.Exception">Root must be greater than or equal to 1</exception>
 		/// <exception cref="System.Exception">Value must be a positive integer</exception>
-		public static Fraction NthRoot(Fraction value, int root, int precision = 30)
+		public static Fraction NthRoot(Fraction value, BigInteger root, int precision = 30)
 		{
 			Fraction deviationBound = new Fraction(1, BigInteger.Pow(10, precision));
 
-			if (root < 1) throw new Exception("Root must be greater than or equal to 1");
+			//if (root < 1) throw new Exception("Root must be greater than or equal to 1");
 			if (value.Sign == -1) throw new Exception("Value must be a positive integer");
-			if (value == One || value == Zero || root == 1) { return value; }
+			if (value == Fraction.One || value == Fraction.Zero || root == 1) { return value; }
 
-			Fraction lowerbound = Zero;
+			Fraction lowerbound = Fraction.Zero;
 			Fraction upperbound = new Fraction(value);
-			if (upperbound < One)
+			if (upperbound < Fraction.One)
 			{
-				upperbound = One;
+				upperbound = Fraction.One;
 			}
 			Fraction mediant;
 
