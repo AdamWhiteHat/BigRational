@@ -214,7 +214,7 @@ namespace ExtendedNumerics
 			if (!CheckForWholeValues(value))
 			{
 				int sign = Math.Sign(value);
-				int exponent = value.ToString(CultureInfo.InvariantCulture)
+				int exponent = value.ToString(CultureInfo.CurrentCulture)
 										.TrimEnd('0')
 										.SkipWhile(c => c != '.').Skip(1)
 										.Count();
