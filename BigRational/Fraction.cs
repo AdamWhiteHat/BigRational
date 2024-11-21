@@ -19,7 +19,7 @@ namespace ExtendedNumerics
 	/// <seealso cref="IComparable{Fraction}" />
 	/// <seealso cref="IEquatable{Fraction}" />
 	/// <seealso cref="IEqualityComparer{Fraction}" />
-	public class Fraction : IComparable, IComparable<Fraction>, IEquatable<Fraction>, IEqualityComparer<Fraction>
+	public struct Fraction : IComparable, IComparable<Fraction>, IEquatable<Fraction>, IEqualityComparer<Fraction>
 	{
 
 		#region Properties
@@ -49,30 +49,22 @@ namespace ExtendedNumerics
 		#region Static Properties
 
 		/// <summary>Gets a value that represents the number zero (0).</summary>
-		public static Fraction Zero = null;
+		public static Fraction Zero = new Fraction(BigInteger.Zero, BigInteger.One);
 
 		/// <summary>Gets a value that represents the number one (1).</summary>
-		public static Fraction One = null;
+		public static Fraction One = new Fraction(BigInteger.One, BigInteger.One);
 
 		/// <summary>Gets a value that represents the number minus one (-1).</summary>
-		public static Fraction MinusOne = null;
+		public static Fraction MinusOne = new Fraction(BigInteger.MinusOne, BigInteger.One);
 
 		/// <summary>Gets a value that represents the number one half (1/2).</summary>
-		public static Fraction OneHalf = null;
+		public static Fraction OneHalf = new Fraction(BigInteger.One, new BigInteger(2));
 
 		#endregion
 
 		#endregion
 
 		#region Constructors
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Fraction"/> class.
-		/// </summary>
-		public Fraction()
-			: this(BigInteger.Zero, BigInteger.One)
-		{
-		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Fraction"/> class.
@@ -117,8 +109,8 @@ namespace ExtendedNumerics
 		/// </summary>
 		/// <param name="value">The value.</param>
 		public Fraction(float value)
+			: this(value, 7)
 		{
-			Initialize(value, 7);
 		}
 
 		/// <summary>
@@ -126,8 +118,8 @@ namespace ExtendedNumerics
 		/// </summary>
 		/// <param name="value">The value.</param>
 		public Fraction(double value)
+			: this(value, 13)
 		{
-			Initialize(value, 13);
 		}
 
 		/// <summary>
@@ -143,7 +135,12 @@ namespace ExtendedNumerics
 				throw new ArgumentException("invalid decimal", "value");
 			}
 
-			if (!CheckForWholeValues((double)value))
+			Tuple<BigInteger, BigInteger> result = CheckForWholeValues((double)value);
+			if (result != null)
+			{
+				Numerator = result.Item1;
+				Denominator = result.Item2;
+			}
 			{
 				// build up the numerator
 				ulong ul = (((ulong)(uint)bits[2]) << 32) | ((ulong)(uint)bits[1]);  // (hi    << 32) | (mid)
@@ -166,52 +163,16 @@ namespace ExtendedNumerics
 			}
 		}
 
-		/// <summary>
-		/// Initializes static members of the <see cref="Fraction"/> class.
-		/// </summary>
-		static Fraction()
+		private Fraction(double value, int precision)
 		{
-			Zero = new Fraction(BigInteger.Zero, BigInteger.One);
-			One = new Fraction(BigInteger.One, BigInteger.One);
-			MinusOne = new Fraction(BigInteger.MinusOne, BigInteger.One);
-			OneHalf = new Fraction(BigInteger.One, new BigInteger(2));
-		}
 
-		/// <summary>
-		/// Converts the string representation of a number to its <see cref="ExtendedNumerics.Fraction"/> equivalent.
-		/// </summary>
-		/// <param name="value">A string that contains the number to convert.</param>
-		/// <returns> A value that is equivalent to the number specified in the value parameter.</returns>
-		/// <exception cref="System.ArgumentException">Argument cannot be null, empty or whitespace.</exception>
-		/// <exception cref="System.ArgumentException">String should either be an integer (e.g. '34') or a fraction (e.g. '7/12').</exception>
-		public static Fraction Parse(string value)
-		{
-			if (string.IsNullOrWhiteSpace(value))
+			Tuple<BigInteger, BigInteger> result = CheckForWholeValues(value);
+			if (result != null)
 			{
-				throw new ArgumentException("Argument cannot be null, empty or whitespace.");
+				Numerator = result.Item1;
+				Denominator = result.Item2;
 			}
-
-			string[] parts = value.Trim().Split('/');
-
-			if (parts.Length == 1)
-			{
-				return new Fraction(BigInteger.Parse(parts[0]));
-			}
-
-			if (parts.Length > 2)
-			{
-				throw new ArgumentException("String should either be an integer (e.g. '34') or a fraction (e.g. '7/12').");
-			}
-
-			BigInteger num = BigInteger.Parse(parts[0]);
-			BigInteger denom = BigInteger.Parse(parts[1]);
-
-			return new Fraction(num, denom);
-		}
-
-		private void Initialize(double value, int precision)
-		{
-			if (!CheckForWholeValues(value))
+			else
 			{
 				int sign = Math.Sign(value);
 				int exponent = value.ToString(CultureInfo.CurrentCulture)
@@ -259,7 +220,39 @@ namespace ExtendedNumerics
 			}
 		}
 
-		private bool CheckForWholeValues(double value)
+		/// <summary>
+		/// Converts the string representation of a number to its <see cref="ExtendedNumerics.Fraction"/> equivalent.
+		/// </summary>
+		/// <param name="value">A string that contains the number to convert.</param>
+		/// <returns> A value that is equivalent to the number specified in the value parameter.</returns>
+		/// <exception cref="System.ArgumentException">Argument cannot be null, empty or whitespace.</exception>
+		/// <exception cref="System.ArgumentException">String should either be an integer (e.g. '34') or a fraction (e.g. '7/12').</exception>
+		public static Fraction Parse(string value)
+		{
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				throw new ArgumentException("Argument cannot be null, empty or whitespace.");
+			}
+
+			string[] parts = value.Trim().Split('/');
+
+			if (parts.Length == 1)
+			{
+				return new Fraction(BigInteger.Parse(parts[0]));
+			}
+
+			if (parts.Length > 2)
+			{
+				throw new ArgumentException("String should either be an integer (e.g. '34') or a fraction (e.g. '7/12').");
+			}
+
+			BigInteger num = BigInteger.Parse(parts[0]);
+			BigInteger denom = BigInteger.Parse(parts[1]);
+
+			return new Fraction(num, denom);
+		}
+
+		private static Tuple<BigInteger, BigInteger> CheckForWholeValues(double value)
 		{
 			if (double.IsNaN(value))
 			{
@@ -272,29 +265,21 @@ namespace ExtendedNumerics
 
 			if (value == 0)
 			{
-				Numerator = BigInteger.Zero;
-				Denominator = BigInteger.One;
-				return true;
+				return new Tuple<BigInteger, BigInteger>(BigInteger.Zero, BigInteger.One);
 			}
 			else if (value == 1)
 			{
-				Numerator = BigInteger.One;
-				Denominator = BigInteger.One;
-				return true;
+				return new Tuple<BigInteger, BigInteger>(BigInteger.One, BigInteger.One);
 			}
 			else if (value == -1)
 			{
-				Numerator = BigInteger.MinusOne;
-				Denominator = BigInteger.One;
-				return true;
+				return new Tuple<BigInteger, BigInteger>(BigInteger.MinusOne, BigInteger.One);
 			}
 			else if (value % 1 == 0)
 			{
-				Numerator = (BigInteger)value;
-				Denominator = BigInteger.One;
-				return true;
+				return new Tuple<BigInteger, BigInteger>((BigInteger)value, BigInteger.One);
 			}
-			return false;
+			return null;
 		}
 
 		#endregion

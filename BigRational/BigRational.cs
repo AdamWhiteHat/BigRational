@@ -16,7 +16,7 @@ namespace ExtendedNumerics
 	/// <seealso cref="IComparable" />
 	/// <seealso cref="IComparable{BigRational}" />
 	/// <seealso cref="IEquatable{BigRational}" />
-	public class BigRational : IComparable, IComparable<BigRational>, IEquatable<BigRational>
+	public struct BigRational : IComparable, IComparable<BigRational>, IEquatable<BigRational>
 	{
 
 		#region Properties
@@ -42,27 +42,19 @@ namespace ExtendedNumerics
 		#region Static Properties
 
 		/// <summary>Gets a value that represents the number one (1).</summary>
-		public static BigRational One = null;
+		public static BigRational One = new BigRational(BigInteger.One);
 
 		/// <summary>Gets a value that represents the number zero (0).</summary>
-		public static BigRational Zero = null;
+		public static BigRational Zero = new BigRational(BigInteger.Zero);
 
 		/// <summary>Gets a value that represents the number negative one (-1).</summary>
-		public static BigRational MinusOne = null;
+		public static BigRational MinusOne = new BigRational(BigInteger.MinusOne);
 
 		#endregion
 
 		#endregion
 
 		#region Constructors
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ExtendedNumerics.BigRational"/> class set to zero (0).
-		/// </summary>
-		public BigRational()
-			: this(BigInteger.Zero, Fraction.Zero)
-		{
-		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ExtendedNumerics.BigRational"/> class using a 32-bit signed integer value.
@@ -137,7 +129,13 @@ namespace ExtendedNumerics
 		/// <param name="value">A single-precision floating-point value.</param>
 		public BigRational(float value)
 		{
-			if (!CheckForWholeValues(value))
+			Tuple<BigInteger, Fraction> result = CheckForWholeValues((double)value);
+			if (result != null)
+			{
+				WholePart = result.Item1;
+				FractionalPart = result.Item2;
+			}
+			else
 			{
 				WholePart = (BigInteger)Math.Truncate(value);
 				float fract = Math.Abs(value) % 1;
@@ -153,7 +151,13 @@ namespace ExtendedNumerics
 		/// <param name="value">A double-precision floating-point value.</param>
 		public BigRational(double value)
 		{
-			if (!CheckForWholeValues(value))
+			Tuple<BigInteger, Fraction> result = CheckForWholeValues(value);
+			if (result != null)
+			{
+				WholePart = result.Item1;
+				FractionalPart = result.Item2;
+			}
+			else
 			{
 				WholePart = (BigInteger)Math.Truncate(value);
 				double fract = Math.Abs(value) % 1;
@@ -169,23 +173,19 @@ namespace ExtendedNumerics
 		/// <param name="value">A 128-bit base-10 floating point decimal number.</param>
 		public BigRational(decimal value)
 		{
-			if (!CheckForWholeValues((double)value))
+			Tuple<BigInteger, Fraction> result = CheckForWholeValues((double)value);
+			if (result != null)
+			{
+				WholePart = result.Item1;
+				FractionalPart = result.Item2;
+			}
+			else
 			{
 				WholePart = (BigInteger)Math.Truncate(value);
 				decimal fract = Math.Abs(value) % 1;
 				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
 				NormalizeSign();
 			}
-		}
-
-		/// <summary>
-		/// Initializes static members of the <see cref="ExtendedNumerics.BigRational"/> class.
-		/// </summary>
-		static BigRational()
-		{
-			One = new BigRational(BigInteger.One);
-			Zero = new BigRational(BigInteger.Zero);
-			MinusOne = new BigRational(BigInteger.MinusOne);
 		}
 
 		/// <summary>
@@ -196,7 +196,7 @@ namespace ExtendedNumerics
 		/// </summary>
 		/// <exception cref="System.ArgumentException">Value is not a number - value</exception>
 		/// <exception cref="System.ArgumentException">Cannot represent infinity - value</exception>
-		private bool CheckForWholeValues(double value)
+		private static Tuple<BigInteger, Fraction> CheckForWholeValues(double value)
 		{
 			if (double.IsNaN(value))
 			{
@@ -209,23 +209,17 @@ namespace ExtendedNumerics
 
 			if (value == 0)
 			{
-				WholePart = BigInteger.Zero;
-				FractionalPart = Fraction.Zero;
-				return true;
+				return new Tuple<BigInteger, Fraction>(BigInteger.Zero, Fraction.Zero);
 			}
 			else if (value == 1)
 			{
-				WholePart = BigInteger.One;
-				FractionalPart = Fraction.Zero;
-				return true;
+				return new Tuple<BigInteger, Fraction>(BigInteger.One, Fraction.Zero);
 			}
 			else if (value == -1)
 			{
-				WholePart = BigInteger.MinusOne;
-				FractionalPart = Fraction.Zero;
-				return true;
+				return new Tuple<BigInteger, Fraction>(BigInteger.MinusOne, Fraction.Zero);
 			}
-			return false;
+			return null;
 		}
 
 		#endregion

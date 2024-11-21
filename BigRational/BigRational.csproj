@@ -26,9 +26,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<MajorVersion Condition=" '$(MajorVersion)' == '' ">2023</MajorVersion>
-		<MinorVersion Condition=" '$(MinorVersion)' == '' ">1000</MinorVersion>
-		<PatchVersion Condition=" '$(PatchVersion)' == '' ">2</PatchVersion>
+		<MajorVersion Condition=" '$(MajorVersion)' == '' ">3000</MajorVersion>
+		<MinorVersion Condition=" '$(MinorVersion)' == '' ">0</MinorVersion>
+		<PatchVersion Condition=" '$(PatchVersion)' == '' ">1</PatchVersion>
 
 		<BuildTimestamp>$([System.DateTime]::Now.DayOfYear.ToString().PadLeft(3,'0'))</BuildTimestamp>
 
@@ -48,5 +48,15 @@
 			<PackagePath>\</PackagePath>
 		</None>
 	</ItemGroup>
+
+
+
+	<Target Name="UploadNugetPackage" AfterTargets="Pack" Condition="'$(Configuration)'=='Release'">
+
+		<Exec WorkingDirectory="$(PackageOutputPath)"
+			  Command="nuget push $(PackageId).$(PackageVersion).nupkg -source https://api.nuget.org/v3/index.json" />
+
+	</Target>
+
 
 </Project>
