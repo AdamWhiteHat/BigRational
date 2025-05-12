@@ -20,6 +20,7 @@
 		<PackageTags>math mathematics biginteger rational rational-numbers arbitrary-precision fractions numerics numerator denominator csharp</PackageTags>
 		<PackageProjectUrl>https://www.nuget.org/packages/ExtendedNumerics.BigRational</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/AdamWhiteHat/BigRational</RepositoryUrl>
+		<PackageIconUrl>https://raw.githubusercontent.com/AdamWhiteHat/BigRational/refs/heads/master/Rational.png</PackageIconUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
@@ -28,7 +29,7 @@
 	<PropertyGroup>
 		<MajorVersion Condition=" '$(MajorVersion)' == '' ">3000</MajorVersion>
 		<MinorVersion Condition=" '$(MinorVersion)' == '' ">0</MinorVersion>
-		<PatchVersion Condition=" '$(PatchVersion)' == '' ">1</PatchVersion>
+		<PatchVersion Condition=" '$(PatchVersion)' == '' ">2</PatchVersion>
 
 		<BuildTimestamp>$([System.DateTime]::Now.DayOfYear.ToString().PadLeft(3,'0'))</BuildTimestamp>
 
