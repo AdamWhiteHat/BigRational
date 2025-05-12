@@ -20,7 +20,7 @@
 		<PackageTags>math mathematics biginteger rational rational-numbers arbitrary-precision fractions numerics numerator denominator csharp</PackageTags>
 		<PackageProjectUrl>https://www.nuget.org/packages/ExtendedNumerics.BigRational</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/AdamWhiteHat/BigRational</RepositoryUrl>
-		<PackageIconUrl>https://raw.githubusercontent.com/AdamWhiteHat/BigRational/refs/heads/master/Rational.png</PackageIconUrl>
+		<PackageIcon>rational.png</PackageIcon>
 		<RepositoryType>git</RepositoryType>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
@@ -44,20 +44,20 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<None Remove="rational.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="rational.png" Link="rational.png" Pack="true" PackagePath="\">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Include="..\README.md">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
 	</ItemGroup>
-
-
-
-	<Target Name="UploadNugetPackage" AfterTargets="Pack" Condition="'$(Configuration)'=='Release'">
-
-		<Exec WorkingDirectory="$(PackageOutputPath)"
-			  Command="nuget push $(PackageId).$(PackageVersion).nupkg -source https://api.nuget.org/v3/index.json" />
-
-	</Target>
-
 
 </Project>
