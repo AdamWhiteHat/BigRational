@@ -4,6 +4,7 @@ Arbitrary precision rational number class
 
 Here is the class signature, so you can see what it supports, but suffice it to say it supports all the typical arithmetic operations one would expect from an arithmetic class library.
 
+```csharp
 public class BigRational : IComparable, IComparable<BigRational>, IEquatable<BigRational>
 {
 	// 
@@ -158,7 +159,7 @@ public class BigRational : IComparable, IComparable<BigRational>, IEquatable<Big
 	public String ToString(IFormatProvider provider);
 	public String ToString(String format, IFormatProvider provider);
 }
-
+```
 
 
   This library is also available on nuget: [https://www.nuget.org/packages/ExtendedNumerics.BigRational](https://www.nuget.org/packages/ExtendedNumerics.BigRational)
