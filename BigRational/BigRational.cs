@@ -33,7 +33,14 @@ namespace ExtendedNumerics
 		/// a negative one (-1) if the value is negative,
 		/// and zero (0) if the value is zero.
 		/// </summary>		
-		public int Sign { get { NormalizeSign(); return (WholePart != 0) ? WholePart.Sign : FractionalPart.Sign; } }
+		public int Sign
+		{
+			get
+			{
+				BigRational temp = BigRational.Reduce(this);
+				return (temp.WholePart != 0) ? temp.WholePart.Sign : temp.FractionalPart.Sign;
+			}
+		}
 
 		/// <summary>Indicates whether the value of the current instance is zero (0).</summary>
 		/// <value><c>true</c> if this instance is zero; otherwise, <c>false</c>.</value>
@@ -398,7 +405,7 @@ namespace ExtendedNumerics
 		public static BigRational Abs(BigRational rational)
 		{
 			BigRational input = BigRational.Reduce(rational);
-			return new BigRational(BigInteger.Abs(input.WholePart), input.FractionalPart);
+			return new BigRational(BigInteger.Abs(input.WholePart), Fraction.Abs(input.FractionalPart));
 		}
 
 		/// <summary>
@@ -1053,8 +1060,8 @@ namespace ExtendedNumerics
 		/// </summary>
 		public static BigRational Reduce(BigRational value)
 		{
-			BigRational input = NormalizeSign(value);
-			BigRational reduced = Fraction.ReduceToProperFraction(input.FractionalPart);
+			//BigRational input = NormalizeSign(value);
+			BigRational reduced = Fraction.ReduceToProperFraction(value.FractionalPart);
 			BigRational result = new BigRational(value.WholePart + reduced.WholePart, reduced.FractionalPart);
 			return result;
 		}
@@ -1077,12 +1084,58 @@ namespace ExtendedNumerics
 		/// </summary>
 		internal BigRational NormalizeSign()
 		{
-			FractionalPart = Fraction.NormalizeSign(FractionalPart);
-			if (WholePart > 0 && WholePart.Sign == 1 && FractionalPart.Sign == -1)
+			Fraction normalizedFract = Fraction.NormalizeSign(FractionalPart);
+
+			if (BigInteger.Abs(normalizedFract.Numerator) >= BigInteger.Abs(normalizedFract.Denominator))
 			{
-				WholePart = BigInteger.Negate(WholePart);
-				FractionalPart = Fraction.Negate(FractionalPart);
+				int fractSign = normalizedFract.Sign;
+
+				BigInteger quotient = normalizedFract.Numerator / normalizedFract.Denominator;
+				var remainder = normalizedFract.Numerator % normalizedFract.Denominator;
+
+				normalizedFract = new Fraction(remainder, normalizedFract.Denominator);
+				if (fractSign == -1)
+				{
+					normalizedFract = Fraction.Negate(normalizedFract);
+				}
+
+				int wholeSign = WholePart.Sign;
+
+				if (wholeSign == -1 && fractSign == 1)
+				{
+					BigInteger tempWhole = BigInteger.Abs(WholePart) + quotient;
+					WholePart = tempWhole * wholeSign;
+				}
+				else if (wholeSign == -1 && fractSign == -1)
+				{
+					WholePart = WholePart + quotient;
+				}
+				else if (wholeSign == 1 && fractSign == -1)
+				{
+					WholePart = WholePart + quotient;
+				}
+				else if (wholeSign == 1 && fractSign == 1)
+				{
+					WholePart = WholePart + quotient;
+				}
 			}
+
+			FractionalPart = normalizedFract;
+
+			if (!WholePart.IsZero && !FractionalPart.IsZero)
+			{
+				if (FractionalPart.Sign == -1)
+				{
+					Fraction minuend = new Fraction(WholePart);
+					Fraction result = minuend - FractionalPart;
+					BigRational mixedResult = Fraction.ReduceToProperFraction(result);
+
+					WholePart = mixedResult.WholePart;
+					FractionalPart = mixedResult.FractionalPart;
+					return this;
+				}
+			}
+
 			return this;
 		}
 

@@ -80,7 +80,7 @@ namespace TestBigRational
 		}
 
 		[Test]
-		public void TestDivision()
+		public void TestDivision001()
 		{
 			Fraction oneHalf = new Fraction(1, 2);
 			Fraction oneSixth = new Fraction(1, 6);
@@ -100,6 +100,155 @@ namespace TestBigRational
 			Assert.AreEqual(expectedValueNegativeThree, resultNegativeThree);
 			Assert.AreEqual(expectedValueOneThird, resultOneThird);
 			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
+		}
+
+		[Test]
+		public void TestDivision002()
+		{
+			// 1/2 ÷ 3/6 = 1
+			Fraction oneHalf = new Fraction(1, 2);
+			Fraction threeSixths = new Fraction(3, 6);
+
+			Fraction expectedValueOne = new Fraction(1, 1);
+
+			Fraction resultOne001 = Fraction.Divide(oneHalf, threeSixths);
+			Fraction resultOne002 = Fraction.Divide(threeSixths, oneHalf);
+
+			Assert.AreEqual(expectedValueOne, resultOne001, "1/2 ÷ 3/6 = 1/1");
+			Assert.AreEqual(expectedValueOne, resultOne002, "3/6 ÷ 1/2 = 1/1");
+		}
+
+		[Test]
+		public void TestDivision003()
+		{
+			// 0 ÷ 1/3 = 0
+			Fraction zero = new Fraction(0, 1);
+			Fraction oneThird = new Fraction(1, 3);
+
+			Fraction expected = new Fraction(0, 1);
+
+			Fraction result = Fraction.Divide(zero, oneThird);
+
+			Assert.AreEqual(expected, result, "0 ÷ 1/3 = 0/1");
+		}
+
+		[Test]
+		public void TestRemainder_BigInteger001()
+		{
+			// 7 % 4 = 3
+			Fraction expected = new Fraction(3, 1);
+			Fraction result = Fraction.Remainder(new BigInteger(7), new BigInteger(4));
+			Assert.AreEqual(expected, result, "7 % 4 = 3");
+		}
+
+		[Test]
+		public void TestRemainder_BigInteger002()
+		{
+			// 21 % 3 = 0
+			Fraction expected = new Fraction(0, 1);
+			Fraction result = Fraction.Remainder(new BigInteger(21), new BigInteger(3));
+			Assert.AreEqual(expected, result, "21 % 3 = 0");
+		}
+
+		[Test]
+		public void TestRemainder_BigInteger003()
+		{
+			// 21 % 2 = 1
+			Fraction expected = new Fraction(1, 1);
+			Fraction result = Fraction.Remainder(new BigInteger(21), new BigInteger(2));
+			Assert.AreEqual(expected, result, "21 % 2 = 1");
+		}
+
+		[Test]
+		public void TestRemainder_Fraction001()
+		{
+			// 2/3 % 1/6 = 0
+			Fraction twoThirds = new Fraction(2, 3);
+			Fraction oneSixth = new Fraction(1, 6);
+
+			Fraction expected = new Fraction(0, 1);
+
+			Fraction result = Fraction.Remainder(twoThirds, oneSixth);
+
+			Assert.AreEqual(expected, result, "2/3 ÷ 1/6 = 0/1");
+		}
+
+		[Test]
+		public void TestRemainder_Fraction002()
+		{
+			// 2/3 % 5/7 = 14/21
+			Fraction twoThirds = new Fraction(2, 3);
+			Fraction fiveSevenths = new Fraction(5, 7);
+
+			Fraction expected = new Fraction(14, 21);
+
+			Fraction result = Fraction.Remainder(twoThirds, fiveSevenths);
+
+			Assert.AreEqual(expected, result, "2/3 ÷ 5/7 = 14/21");
+		}
+
+		[Test]
+		public void TestDivRem_BigInteger001()
+		{
+			// 21 / 3 = 7 Remainder: 0
+
+			BigInteger expected = 7;
+			Fraction expectedRemainder = new Fraction(0, 1);
+
+			BigInteger actual = Fraction.DivRem(new BigInteger(21), new BigInteger(3), out Fraction actualRemainder);
+
+			Assert.AreEqual(expected, actual, "21 / 3 = 7");
+			Assert.AreEqual(expectedRemainder, actualRemainder, "21 % 3 = 0");
+		}
+
+		[Test]
+		public void TestDivRem_BigInteger002()
+		{
+			// 22 / 3 = 7 Remainder: 1
+
+			BigInteger expected = 7;
+			Fraction expectedRemainder = new Fraction(1, 1);
+
+			BigInteger actual = Fraction.DivRem(new BigInteger(22), new BigInteger(3), out Fraction actualRemainder);
+
+			Assert.AreEqual(expected, actual, "22 / 3 = 7");
+			Assert.AreEqual(expectedRemainder, actualRemainder, "22 % 3 = 1");
+		}
+
+		[Test]
+		public void TestDivRem_Fraction001()
+		{
+			// (13/15) / (12/14) = 182/180 = 91/90
+			// (13/15) % (12/14) = 2/210 = 1/105
+
+			Fraction A = new Fraction(13, 15);
+			Fraction B = new Fraction(12, 14);
+
+			Fraction expected = new Fraction(91, 90);
+			Fraction expectedRemainder = new Fraction(2, 210);
+
+			Fraction actual = Fraction.DivRem(A, B, out Fraction actualRemainder);
+
+			Assert.AreEqual(expected, actual, "(13/15) / (12/14) = 182/180 = 91/90");
+			Assert.AreEqual(expectedRemainder, actualRemainder, "(13/15) % (12/14) = 2/210 = 1/105");
+		}
+
+		[Test]
+		public void TestDivRem_Fraction002()
+		{
+			// (10/15) / (7/21) = 210/105 = 2/1
+			// (10/15) % (7/21) = 0/315  = 0/1
+
+			Fraction A = new Fraction(10, 15);
+			Fraction B = new Fraction(7, 21);
+
+			Fraction expected = new Fraction(2,1);
+			Fraction expectedRemainder = new Fraction(0, 1);
+
+			Fraction actual = Fraction.DivRem(A, B, out Fraction actualRemainder);
+
+			Assert.AreEqual(expected, actual, "(10/15) / (7/21) = 210/105 = 2/1");
+			Assert.AreEqual(expectedRemainder, actualRemainder, "(10/15) % (7/21) = 0/315  = 0/1");
 		}
 
 		[Test]

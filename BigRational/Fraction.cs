@@ -100,8 +100,16 @@ namespace ExtendedNumerics
 		/// <param name="denominator">The denominator.</param>
 		public Fraction(BigInteger numerator, BigInteger denominator)
 		{
-			Numerator = numerator;
-			Denominator = denominator;
+			if (numerator.IsZero || denominator.IsZero)
+			{
+				Numerator = 0;
+				Denominator = 1;
+			}
+			else
+			{
+				Numerator = numerator;
+				Denominator = denominator;
+			}
 		}
 
 		/// <summary>
@@ -331,6 +339,7 @@ namespace ExtendedNumerics
 		/// <exception cref="System.ArithmeticException">Multiply methods needs to simplify result. Please add this behavior to this method.</exception>
 		public static Fraction Multiply(Fraction multiplicand, Fraction multiplier)
 		{
+			// a/b * c/d == a*c / b*d
 			Fraction frac1 =
 			   new Fraction(
 				   BigInteger.Multiply(multiplicand.Numerator, multiplier.Numerator),
@@ -356,7 +365,11 @@ namespace ExtendedNumerics
 		/// <returns>The quotient.</returns>
 		public static Fraction Divide(Fraction dividend, Fraction divisor)
 		{
-			return Simplify(Multiply(dividend, Reciprocal(divisor)));
+			//return Simplify(Multiply(dividend, Reciprocal(divisor)));
+			// a/b / c/d  == (a*d)/(b*c)
+			BigInteger ad = dividend.Numerator * divisor.Denominator;
+			BigInteger bc = dividend.Denominator * divisor.Numerator;
+			return new Fraction(ad, bc);
 		}
 
 		/// <summary>
@@ -367,8 +380,9 @@ namespace ExtendedNumerics
 		/// <returns>The remainder.</returns>
 		public static Fraction Remainder(BigInteger dividend, BigInteger divisor)
 		{
-			BigInteger remainder = dividend % divisor;
-			return new Fraction(remainder, divisor);
+			//BigInteger remainder = dividend % divisor;
+			//return new Fraction(remainder, divisor);
+			return new Fraction(dividend % divisor, BigInteger.One);
 		}
 
 		/// <summary>
@@ -379,10 +393,16 @@ namespace ExtendedNumerics
 		/// <returns>The remainder.</returns>
 		public static Fraction Remainder(Fraction dividend, Fraction divisor)
 		{
-			return new Fraction(
-				BigInteger.Multiply(dividend.Numerator, divisor.Denominator) % BigInteger.Multiply(dividend.Denominator, divisor.Numerator),
-				BigInteger.Multiply(dividend.Denominator, divisor.Denominator)
-			);
+			//return new Fraction(
+			//	BigInteger.Multiply(dividend.Numerator, divisor.Denominator) % BigInteger.Multiply(dividend.Denominator, divisor.Numerator),
+			//	BigInteger.Multiply(dividend.Denominator, divisor.Denominator)
+			//);
+
+			// a/b / c/d  == (ad)/(bc) ; a/b % c/d  == (ad % bc)/bd
+			BigInteger ad = dividend.Numerator * divisor.Denominator;
+			BigInteger bc = dividend.Denominator * divisor.Numerator;
+			BigInteger bd = dividend.Denominator * divisor.Denominator;
+			return new Fraction((ad % bc), bd);
 		}
 
 		/// <summary>
@@ -411,10 +431,10 @@ namespace ExtendedNumerics
 		/// <returns>The quotient.</returns>
 		public static BigInteger DivRem(BigInteger dividend, BigInteger divisor, out Fraction remainder)
 		{
-			BigInteger remaind = new BigInteger(-1);
-			BigInteger quotient = BigInteger.DivRem(dividend, divisor, out remaind);
+			BigInteger rem = new BigInteger(-1);
+			BigInteger quotient = BigInteger.DivRem(dividend, divisor, out rem);
 
-			remainder = new Fraction(remaind, divisor);
+			remainder = new Fraction(rem, BigInteger.One);
 			return quotient;
 		}
 
@@ -1170,7 +1190,7 @@ namespace ExtendedNumerics
 
 			if (input.Numerator.IsZero)
 			{
-				return new BigRational(BigInteger.Zero, input);
+				return BigRational.Zero;
 			}
 			else if (input.Denominator.IsOne)
 			{
@@ -1233,20 +1253,12 @@ namespace ExtendedNumerics
 			BigInteger numer = value.Numerator;
 			BigInteger denom = value.Denominator;
 
-			if (numer.Sign == 1 && denom.Sign == 1)
+			if (numer.IsZero || denom.IsZero)
 			{
-				return value;
+				return Fraction.Zero;
 			}
-			else if (numer.Sign == -1 && denom.Sign == 1)
-			{
-				return value;
-			}
-			else if (numer.Sign == 1 && denom.Sign == -1)
-			{
-				numer = BigInteger.Negate(numer);
-				denom = BigInteger.Negate(denom);
-			}
-			else if (numer.Sign == -1 && denom.Sign == -1)
+
+			if (denom.Sign == -1)
 			{
 				numer = BigInteger.Negate(numer);
 				denom = BigInteger.Negate(denom);

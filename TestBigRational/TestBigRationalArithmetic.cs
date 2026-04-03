@@ -30,6 +30,11 @@ namespace TestBigRational
 			int expected3 = 1;
 			int expected4 = 0;
 
+			TestContext.WriteLine($"#1:	{value1.WholePart} + {value1.FractionalPart.Numerator}/{value1.FractionalPart.Denominator}	=	{value1}");
+			TestContext.WriteLine($"#2:	{value2.WholePart} + {value2.FractionalPart.Numerator}/{value2.FractionalPart.Denominator}	=	{value2}");
+			TestContext.WriteLine($"#3:	{value3.WholePart} + {value3.FractionalPart.Numerator}/{value3.FractionalPart.Denominator}	=	{value3}");
+			TestContext.WriteLine($"#4:	{value4.WholePart} + {value4.FractionalPart.Numerator}/{value4.FractionalPart.Denominator}	=	{value4}");
+
 			Assert.AreEqual(expected1, actual1, "#1");
 			Assert.AreEqual(expected2, actual2, "#2");
 			Assert.AreEqual(expected3, actual3, "#3");
@@ -63,9 +68,13 @@ namespace TestBigRational
 			int expected6 = 1;
 			int expected7 = 0;
 
-			TestContext.WriteLine($"#3: {value3.WholePart} + {value3.FractionalPart.Numerator} / {value3.FractionalPart.Denominator} = {value3}");
-			TestContext.WriteLine($"#4: {value4.WholePart} + {value4.FractionalPart.Numerator} / {value4.FractionalPart.Denominator} = {value4}");
-			TestContext.WriteLine($"#5: {value5.WholePart} + {value5.FractionalPart.Numerator} / {value5.FractionalPart.Denominator} = {value5}");
+			TestContext.WriteLine($"#1:	{value1.WholePart} + {value1.FractionalPart.Numerator}/{value1.FractionalPart.Denominator}	=	{value1}");
+			TestContext.WriteLine($"#2:	{value2.WholePart} + {value2.FractionalPart.Numerator}/{value2.FractionalPart.Denominator}	=	{value2}");
+			TestContext.WriteLine($"#3:	{value3.WholePart} + {value3.FractionalPart.Numerator}/{value3.FractionalPart.Denominator}	=	{value3}");
+			TestContext.WriteLine($"#4:	{value4.WholePart} + {value4.FractionalPart.Numerator}/{value4.FractionalPart.Denominator}	=	{value4}");
+			TestContext.WriteLine($"#5:	{value5.WholePart} + {value5.FractionalPart.Numerator}/{value5.FractionalPart.Denominator}	=	{value5}");
+			TestContext.WriteLine($"#6:	{value6.WholePart} + {value6.FractionalPart.Numerator}/{value6.FractionalPart.Denominator}	=	{value6}");
+			TestContext.WriteLine($"#7:	{value7.WholePart} + {value7.FractionalPart.Numerator}/{value7.FractionalPart.Denominator}	=	{value7}");
 
 			Assert.AreEqual(expected1, actual1, "#1");
 			Assert.AreEqual(expected2, actual2, "#2");
@@ -74,6 +83,57 @@ namespace TestBigRational
 			Assert.AreEqual(expected5, actual5, "#5");
 			Assert.AreEqual(expected6, actual6, "#6");
 			Assert.AreEqual(expected7, actual7, "#7");
+		}
+
+		[Test]
+		public void TestNormalizeSign003()
+		{
+			TestNormalizeReduceSign(testNumber: 1,				 -1, /* & */  1,   1, expectedSign: -1, -2);
+			TestNormalizeReduceSign(testNumber: 2,				  2, /* & */  7,  -2, expectedSign: -1, new BigRational(-1, 1, 2));
+			TestNormalizeReduceSign(testNumber: 3,				 -2, /* & */  1,   1, expectedSign: -1, -3);
+			TestNormalizeReduceSign(testNumber: 4,				  2, /* & */ -14,  -7, expectedSign: 1, 4);
+			TestNormalizeReduceSign(testNumber: 5,				  -3, /* & */  -1,  1, expectedSign: -1, -4);
+			TestNormalizeReduceSign(testNumber: 6,				  -3, /* & */ -15,  -5, expectedSign: -1, -6);
+			TestNormalizeReduceSign(testNumber: 7,				 -3, /* & */  0,  -2, expectedSign: -1, -3);
+			TestNormalizeReduceSign(testNumber: 8,				 -3, /* & */  2,   0, expectedSign: -1, -3);
+		}
+
+		private static void TestNormalizeReduceSign(int testNumber, BigInteger whole, BigInteger num, BigInteger denom, int expectedSign, BigRational expectedReducedValue)
+		{
+			BigRational value = new BigRational(whole, num, denom);
+
+			string prefix = $"Test #{testNumber}";
+
+			string sign = "+";
+			if (value.Sign == -1)
+			{
+				sign = "-";
+			}
+
+			TestContext.WriteLine($"	---	{prefix}	---");
+			TestContext.WriteLine($"{prefix}\t-\t Input:	{whole} + {num}/{denom}");
+			TestContext.WriteLine($"{prefix}\t-\tParsed:	{value.WholePart} {sign} {value.FractionalPart.Numerator}/{value.FractionalPart.Denominator}	= {value}");
+			TestContext.WriteLine($"{prefix}\t-\t Value:	{value}");
+			TestContext.WriteLine($"");
+
+			int actualSign = value.Sign;
+
+			BigRational actualNormalizeSign = BigRational.NormalizeSign(value);
+			int normalizedSign = actualNormalizeSign.Sign;
+			TestContext.WriteLine($"{prefix}\t-\t  Expected Sign:	{expectedSign}");
+			TestContext.WriteLine($"{prefix}\t-\tNormalized Sign:	{normalizedSign}");
+			TestContext.WriteLine($"{prefix}\t-\t    Actual Sign:	{actualSign}	=	({actualNormalizeSign.WholePart} + {actualNormalizeSign.FractionalPart.Numerator}/{actualNormalizeSign.FractionalPart.Denominator})");
+			TestContext.WriteLine($"");
+
+			BigRational actualReduced = BigRational.Reduce(value);
+			TestContext.WriteLine($"{prefix}\t-\t Expected Value:	{expectedReducedValue}");
+			TestContext.WriteLine($"{prefix}\t-\t   Actual Value:	{actualReduced}	=	({actualReduced.WholePart} + {actualReduced.FractionalPart.Numerator}/{actualReduced.FractionalPart.Denominator})");
+			TestContext.WriteLine($"");
+
+			Assert.AreEqual(expectedSign, actualSign, $"{prefix}: Sign");
+			Assert.AreEqual(expectedReducedValue, actualReduced, $"{prefix}: Reduced");
+
+			TestContext.WriteLine($"");
 		}
 
 		[Test]
@@ -191,8 +251,7 @@ namespace TestBigRational
 			Assert.AreEqual(expected_fraction, actual_fraction, "fraction");
 		}
 
-		[Test]
-		public void TestDivideByZero()
+		protected static void TestDivideByZero()
 		{
 			Assert.Throws(typeof(DivideByZeroException),
 				() =>

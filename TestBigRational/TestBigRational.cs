@@ -45,10 +45,10 @@ namespace TestBigRational
 			Fraction result7 = seven.GetImproperFraction();
 
 
-			Assert.AreEqual(expected313, result1);
-			Assert.AreEqual(expected18226, result2);
-			Assert.AreEqual(expectedNeg317, result3);
-			Assert.AreEqual(expected7over1, result7);
+			Assert.AreEqual(expected313, result1, $"{threeAndOneThird}");
+			Assert.AreEqual(expected18226, result2, $"{oneEightyTwoTwentySixths}");
+			Assert.AreEqual(expectedNeg317, result3, $"{negativeThreeAndOneSeventh}");
+			Assert.AreEqual(expected7over1, result7, $"{seven}");
 		}
 
 		[Test]
