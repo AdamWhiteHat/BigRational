@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace TestBigRational
 {
 	[TestFixture(Category = "Misc")]
-	public class TestBigRationalMisc
+	public class TestMixedFractionMisc
 	{
 		public TestContext TestContext { get { return m_testContext; } set { m_testContext = value; } }
 		private TestContext m_testContext;
@@ -19,15 +19,15 @@ namespace TestBigRational
 			int _iterations = 1000;
 			int _count = 1000;
 
-			List<BigRational> testSetLower = new List<BigRational>(_count);
-			List<BigRational> testSetUpper = new List<BigRational>(_count);
+			List<MixedFraction> testSetLower = new List<MixedFraction>(_count);
+			List<MixedFraction> testSetUpper = new List<MixedFraction>(_count);
 
 			Stopwatch timer = Stopwatch.StartNew();
 
 			for (int i = 0; i < _count; ++i)
 			{
-				testSetLower.Add((BigRational)i);
-				testSetUpper.Add((BigRational)(i + 1));
+				testSetLower.Add((MixedFraction)i);
+				testSetUpper.Add((MixedFraction)(i + 1));
 			}
 			for (int iteration = 0; iteration < _iterations; ++iteration)
 			{
@@ -35,7 +35,7 @@ namespace TestBigRational
 				{
 					// Get pairs of number, take half way between them, and check it
 					// is less than the high end and greater than the lower end
-					BigRational newValue = (testSetLower[i] + testSetUpper[i]) / (BigRational)2;
+					MixedFraction newValue = (testSetLower[i] + testSetUpper[i]) / (MixedFraction)2;
 					Assert.IsTrue(newValue > testSetLower[i]);
 					Assert.IsTrue(newValue < testSetUpper[i]);
 					testSetUpper[i] = newValue;

@@ -3,52 +3,62 @@ using System.Linq;
 using System.Numerics;
 using System.Globalization;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using ExtendedNumerics.Internal;
 
 namespace ExtendedNumerics
 {
 	/// <summary>
-	/// Represents an arbitrarily large mixed fraction.
-	/// If you want an arbitrarily large rational number, <see cref="Fraction" />.
+	/// Represents an arbitrarily large rational number, stored as an improper fraction.
 	/// Implements the <see cref="IComparable" />
 	/// Implements the <see cref="IComparable{BigRational}" />
 	/// Implements the <see cref="IEquatable{BigRational}" />
+	/// Implements the <see cref="IEqualityComparer{BigRational}" />
 	/// </summary>
 	/// <seealso cref="IComparable" />
 	/// <seealso cref="IComparable{BigRational}" />
 	/// <seealso cref="IEquatable{BigRational}" />
-	public struct BigRational : IComparable, IComparable<BigRational>, IEquatable<BigRational>
+	/// <seealso cref="IEqualityComparer{BigRational}" />
+	public struct BigRational : IComparable, IComparable<BigRational>, IEquatable<BigRational>, IEqualityComparer<BigRational>
 	{
 
 		#region Properties
 
-		/// <summary>The whole-number (non-fractional) integer value.</summary>
-		public BigInteger WholePart { get; private set; }
+		/// <summary>The numerator.</summary>
+		public BigInteger Numerator { get; private set; }
 
-		/// <summary>The fractional part of the value.</summary>		
-		public Fraction FractionalPart { get; private set; }
+		/// <summary>The denominator.</summary>
+		public BigInteger Denominator { get; private set; }
 
 		/// <summary>
 		/// Gets the sign of the number.
 		/// Returns a positive one (1) if the value is positive,
 		/// a negative one (-1) if the value is negative,
 		/// and zero (0) if the value is zero.
-		/// </summary>		
-		public int Sign { get { NormalizeSign(); return (WholePart != 0) ? WholePart.Sign : FractionalPart.Sign; } }
+		/// </summary>
+		public int Sign { get { return BigRational.NormalizeSign(this).Numerator.Sign; } }
 
 		/// <summary>Indicates whether the value of the current instance is zero (0).</summary>
 		/// <value><c>true</c> if this instance is zero; otherwise, <c>false</c>.</value>
-		public bool IsZero { get { return (WholePart.IsZero && FractionalPart.IsZero); } }
+		public bool IsZero { get { return (this == BigRational.Zero); } }
+
+		/// <summary>Indicates whether the value of the current instance is one (1).</summary>
+		/// <value><c>true</c> if this instance is one; otherwise, <c>false</c>.</value>
+		public bool IsOne { get { return (this == BigRational.One); } }
 
 		#region Static Properties
 
-		/// <summary>Gets a value that represents the number one (1).</summary>
-		public static BigRational One = new BigRational(BigInteger.One);
-
 		/// <summary>Gets a value that represents the number zero (0).</summary>
-		public static BigRational Zero = new BigRational(BigInteger.Zero);
+		public static BigRational Zero = new BigRational(BigInteger.Zero, BigInteger.One);
 
-		/// <summary>Gets a value that represents the number negative one (-1).</summary>
-		public static BigRational MinusOne = new BigRational(BigInteger.MinusOne);
+		/// <summary>Gets a value that represents the number one (1).</summary>
+		public static BigRational One = new BigRational(BigInteger.One, BigInteger.One);
+
+		/// <summary>Gets a value that represents the number minus one (-1).</summary>
+		public static BigRational MinusOne = new BigRational(BigInteger.MinusOne, BigInteger.One);
+
+		/// <summary>Gets a value that represents the number one half (1/2).</summary>
+		public static BigRational OneHalf = new BigRational(BigInteger.One, new BigInteger(2));
 
 		#endregion
 
@@ -57,146 +67,205 @@ namespace ExtendedNumerics
 		#region Constructors
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ExtendedNumerics.BigRational"/> class using a 32-bit signed integer value.
+		/// Initializes a new instance of the <see cref="BigRational"/> class.
 		/// </summary>
-		/// <param name="value">A 32-bit signed integer.</param>
+		/// <param name="fraction">The fraction.</param>
+		public BigRational(BigRational fraction)
+			: this(fraction.Numerator, fraction.Denominator)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="BigRational"/> class.
+		/// </summary>
+		/// <param name="value">The value.</param>
 		public BigRational(int value)
-			: this((BigInteger)value, Fraction.Zero)
+			: this((BigInteger)value, BigInteger.One)
 		{
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ExtendedNumerics.BigRational"/> class using
-		///  an arbitrarily large signed integer.
+		/// Initializes a new instance of the <see cref="BigRational"/> class.
 		/// </summary>
-		/// <param name="value">An arbitrarily large signed integer.</param>
+		/// <param name="value">The value.</param>
 		public BigRational(BigInteger value)
-			: this(value, Fraction.Zero)
+			: this(value, BigInteger.One)
 		{
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ExtendedNumerics.BigRational"/> class using
-		/// an arbitrarily large rational number.
+		/// Initializes a new instance of the <see cref="BigRational"/> class.
 		/// </summary>
-		/// <param name="fraction">An arbitrarily large rational number (as a Fraction).</param>
-		public BigRational(Fraction fraction)
-			: this(BigInteger.Zero, fraction)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ExtendedNumerics.BigRational"/> class using
-		/// an arbitrarily large signed integer and an arbitrarily large rational number.
-		/// </summary>
-		/// <param name="whole">An arbitrarily large signed integer whole number.</param>
-		/// <param name="fraction">An arbitrarily large rational number (as a Fraction).</param>
-		public BigRational(BigInteger whole, Fraction fraction)
-			: this(whole, fraction.Numerator, fraction.Denominator)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ExtendedNumerics.BigRational"/> class using
-		///  an arbitrarily large signed integer numerator and denominator.
-		/// </summary>
-		/// <param name="numerator">An arbitrarily large signed integer numerator.</param>
-		/// <param name="denominator">An arbitrarily large signed integer denominator.</param>
+		/// <param name="numerator">The numerator.</param>
+		/// <param name="denominator">The denominator.</param>
 		public BigRational(BigInteger numerator, BigInteger denominator)
-			: this(new Fraction(numerator, denominator))
 		{
+			if (denominator.IsZero)
+			{
+				throw new DivideByZeroException($"{nameof(denominator)} cannot be zero.");
+			}
+
+			Denominator = denominator;
+
+			if (numerator.IsZero)
+			{
+				Numerator = BigInteger.Zero;
+			}
+			else
+			{
+				Numerator = numerator;
+			}
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ExtendedNumerics.BigRational"/> class using
-		///  an arbitrarily large signed integer whole number value,
-		///  a numerator and a denominator.
+		/// Initializes a new instance of the <see cref="BigRational"/> class.
 		/// </summary>
-		/// <param name="whole">An arbitrarily large signed integer whole number.</param>
-		/// <param name="numerator">An arbitrarily large signed integer numerator.</param>
-		/// <param name="denominator">An arbitrarily large signed integer denominator.</param>
-		public BigRational(BigInteger whole, BigInteger numerator, BigInteger denominator)
-		{
-			WholePart = whole;
-			FractionalPart = new Fraction(numerator, denominator);
-			NormalizeSign();
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ExtendedNumerics.BigRational"/> class using
-		/// a single-precision floating-point value.
-		/// </summary>
-		/// <param name="value">A single-precision floating-point value.</param>
+		/// <param name="value">The value.</param>
 		public BigRational(float value)
+			: this(value, 7)
 		{
-			Tuple<BigInteger, Fraction> result = CheckForWholeValues((double)value);
-			if (result != null)
-			{
-				WholePart = result.Item1;
-				FractionalPart = result.Item2;
-			}
-			else
-			{
-				WholePart = (BigInteger)Math.Truncate(value);
-				float fract = Math.Abs(value) % 1;
-				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
-				NormalizeSign();
-			}
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ExtendedNumerics.BigRational"/> class using
-		/// A double-precision floating-point value.
+		/// Initializes a new instance of the <see cref="BigRational"/> class.
 		/// </summary>
-		/// <param name="value">A double-precision floating-point value.</param>
+		/// <param name="value">The value.</param>
 		public BigRational(double value)
+			: this(value, 13)
 		{
-			Tuple<BigInteger, Fraction> result = CheckForWholeValues(value);
-			if (result != null)
-			{
-				WholePart = result.Item1;
-				FractionalPart = result.Item2;
-			}
-			else
-			{
-				WholePart = (BigInteger)Math.Truncate(value);
-				double fract = Math.Abs(value) % 1;
-				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
-				NormalizeSign();
-			}
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ExtendedNumerics.BigRational"/> class using
-		/// a 128-bit base-10 floating point decimal number.
+		/// Initializes a new instance of the <see cref="BigRational"/> class.
 		/// </summary>
-		/// <param name="value">A 128-bit base-10 floating point decimal number.</param>
+		/// <param name="value">The value.</param>
+		/// <exception cref="System.ArgumentException">invalid decimal - value</exception>
 		public BigRational(decimal value)
 		{
-			Tuple<BigInteger, Fraction> result = CheckForWholeValues((double)value);
+			int[] bits = decimal.GetBits(value);
+			if (bits == null || bits.Length != 4 || (bits[3] & ~(DecimalSignMask | DecimalScaleMask)) != 0 || (bits[3] & DecimalScaleMask) > (28 << 16))
+			{
+				throw new ArgumentException("invalid decimal", "value");
+			}
+
+			Tuple<BigInteger, BigInteger> result = CheckForWholeValues((double)value);
 			if (result != null)
 			{
-				WholePart = result.Item1;
-				FractionalPart = result.Item2;
+				Numerator = result.Item1;
+				Denominator = result.Item2;
+			}
+			{
+				// build up the numerator
+				ulong ul = (((ulong)(uint)bits[2]) << 32) | ((ulong)(uint)bits[1]);  // (hi    << 32) | (mid)
+				BigInteger numerator = (new BigInteger(ul) << 32) | (uint)bits[0];   // (hiMid << 32) | (low)
+
+				bool isNegative = (bits[3] & DecimalSignMask) != 0;
+				if (isNegative)
+				{
+					numerator = BigInteger.Negate(numerator);
+				}
+
+				// build up the denominator
+				int scale = (bits[3] & DecimalScaleMask) >> 16;     // 0-28, power of 10 to divide numerator by
+				BigInteger denominator = BigInteger.Pow(10, scale);
+
+				BigRational notReduced = new BigRational(numerator, denominator);
+				BigRational reduced = Simplify(notReduced);
+				Numerator = reduced.Numerator;
+				Denominator = reduced.Denominator;
+			}
+		}
+
+		private BigRational(double value, int precision)
+		{
+
+			Tuple<BigInteger, BigInteger> result = CheckForWholeValues(value);
+			if (result != null)
+			{
+				Numerator = result.Item1;
+				Denominator = result.Item2;
 			}
 			else
 			{
-				WholePart = (BigInteger)Math.Truncate(value);
-				decimal fract = Math.Abs(value) % 1;
-				FractionalPart = (fract == 0) ? Fraction.Zero : new Fraction(fract);
-				NormalizeSign();
+				int sign = Math.Sign(value);
+				int exponent = value.ToString(CultureInfo.CurrentCulture)
+										.TrimEnd('0')
+										.SkipWhile(c => c != '.').Skip(1)
+										.Count();
+
+				double oneOver = Math.Round(1 / Math.Abs(value), precision);
+
+				bool isWholeNumber = false;
+				BigInteger denom;
+
+				if (precision == 7)
+				{
+					float floatVal = (float)oneOver;
+					isWholeNumber = (floatVal % 1 == 0);
+					denom = (BigInteger)floatVal;
+				}
+				else
+				{
+					isWholeNumber = (oneOver % 1 == 0);
+					denom = (BigInteger)oneOver;
+				}
+
+				if (isWholeNumber)
+				{
+					Numerator = sign;
+					Denominator = denom;
+					return;
+				}
+
+				if (exponent > 0)
+				{
+					double pow = value * Math.Pow(10, exponent);
+					BigRational notReduced = new BigRational((BigInteger)pow, BigInteger.Pow(10, (int)exponent));
+					BigRational reduced = Simplify(notReduced);
+					Numerator = reduced.Numerator;
+					Denominator = reduced.Denominator;
+				}
+				else
+				{
+					Numerator = new BigInteger(value);
+					Denominator = BigInteger.One;
+				}
 			}
 		}
 
 		/// <summary>
-		/// Checks the value of a <see cref="Double"/> for 0, 1 or -1,
-		/// setting the internal state and returning true if it is,
-		/// throws an exception if it is NaN or +- Infinity,
-		/// and returns false otherwise.
+		/// Converts the string representation of a number to its <see cref="ExtendedNumerics.BigRational"/> equivalent.
 		/// </summary>
-		/// <exception cref="System.ArgumentException">Value is not a number - value</exception>
-		/// <exception cref="System.ArgumentException">Cannot represent infinity - value</exception>
-		private static Tuple<BigInteger, Fraction> CheckForWholeValues(double value)
+		/// <param name="value">A string that contains the number to convert.</param>
+		/// <returns> A value that is equivalent to the number specified in the value parameter.</returns>
+		/// <exception cref="System.ArgumentException">Argument cannot be null, empty or whitespace.</exception>
+		/// <exception cref="System.ArgumentException">String should either be an integer (e.g. '34') or a fraction (e.g. '7/12').</exception>
+		public static BigRational Parse(string value)
+		{
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				throw new ArgumentException("Argument cannot be null, empty or whitespace.");
+			}
+
+			string[] parts = value.Trim().Split('/');
+
+			if (parts.Length == 1)
+			{
+				return new BigRational(BigInteger.Parse(parts[0]));
+			}
+
+			if (parts.Length > 2)
+			{
+				throw new ArgumentException("String should either be an integer (e.g. '34') or a fraction (e.g. '7/12').");
+			}
+
+			BigInteger num = BigInteger.Parse(parts[0]);
+			BigInteger denom = BigInteger.Parse(parts[1]);
+
+			return new BigRational(num, denom);
+		}
+
+		private static Tuple<BigInteger, BigInteger> CheckForWholeValues(double value)
 		{
 			if (double.IsNaN(value))
 			{
@@ -209,15 +278,19 @@ namespace ExtendedNumerics
 
 			if (value == 0)
 			{
-				return new Tuple<BigInteger, Fraction>(BigInteger.Zero, Fraction.Zero);
+				return new Tuple<BigInteger, BigInteger>(BigInteger.Zero, BigInteger.One);
 			}
 			else if (value == 1)
 			{
-				return new Tuple<BigInteger, Fraction>(BigInteger.One, Fraction.Zero);
+				return new Tuple<BigInteger, BigInteger>(BigInteger.One, BigInteger.One);
 			}
 			else if (value == -1)
 			{
-				return new Tuple<BigInteger, Fraction>(BigInteger.MinusOne, Fraction.Zero);
+				return new Tuple<BigInteger, BigInteger>(BigInteger.MinusOne, BigInteger.One);
+			}
+			else if (value % 1 == 0)
+			{
+				return new Tuple<BigInteger, BigInteger>((BigInteger)value, BigInteger.One);
 			}
 			return null;
 		}
@@ -227,128 +300,199 @@ namespace ExtendedNumerics
 		#region Arithmetic Methods
 
 		/// <summary>
-		/// Adds two <see cref="ExtendedNumerics.BigRational"/> values and returns the sum.
+		/// Adds two <see cref="BigRational"/> values and returns the sum.
 		/// </summary>
 		/// <param name="augend">The augend.</param>
 		/// <param name="addend">The addend.</param>
 		/// <returns>The sum.</returns>
 		public static BigRational Add(BigRational augend, BigRational addend)
 		{
-			Fraction fracAugend = augend.GetImproperFraction();
-			Fraction fracAddend = addend.GetImproperFraction();
-
-			BigRational result = Add(fracAugend, fracAddend);
-			BigRational reduced = BigRational.Reduce(result);
-			return reduced;
+			// a/b + c/d  == (ad + bc)/bd
+			return new BigRational(
+					BigInteger.Add(
+						BigInteger.Multiply(augend.Numerator, addend.Denominator),
+						BigInteger.Multiply(augend.Denominator, addend.Numerator)
+					),
+					BigInteger.Multiply(augend.Denominator, addend.Denominator)
+				);
 		}
 
 		/// <summary>
-		/// Subtracts two <see cref="ExtendedNumerics.BigRational"/> values and returns the difference.
+		/// Subtracts two <see cref="BigRational"/> values and returns the difference.
 		/// </summary>
 		/// <param name="minuend">The minuend.</param>
 		/// <param name="subtrahend">The subtrahend.</param>
 		/// <returns>The difference.</returns>
 		public static BigRational Subtract(BigRational minuend, BigRational subtrahend)
 		{
-			Fraction fracMinuend = minuend.GetImproperFraction();
-			Fraction fracSubtrahend = subtrahend.GetImproperFraction();
-
-			BigRational result = Subtract(fracMinuend, fracSubtrahend);
-			BigRational reduced = BigRational.Reduce(result);
-			return reduced;
+			// a/b - c/d  == (ad - bc)/bd
+			return new BigRational(
+					BigInteger.Subtract(
+						BigInteger.Multiply(minuend.Numerator, subtrahend.Denominator),
+						BigInteger.Multiply(minuend.Denominator, subtrahend.Numerator)
+					),
+					BigInteger.Multiply(minuend.Denominator, subtrahend.Denominator)
+				);
 		}
 
 		/// <summary>
-		/// Multiplies two <see cref="ExtendedNumerics.BigRational"/> values and returns the product.
+		/// Multiplies two <see cref="BigRational"/> values and returns the product.
 		/// </summary>
 		/// <param name="multiplicand">The multiplicand.</param>
 		/// <param name="multiplier">The multiplier.</param>
 		/// <returns>The product.</returns>
+		/// <exception cref="System.ArithmeticException">Multiply methods needs to simplify result. Please add this behavior to this method.</exception>
 		public static BigRational Multiply(BigRational multiplicand, BigRational multiplier)
 		{
-			Fraction fracMultiplicand = multiplicand.GetImproperFraction();
-			Fraction fracMultiplier = multiplier.GetImproperFraction();
+			// a/b * c/d == a*c / b*d
+			BigRational frac1 =
+			   new BigRational(
+				   BigInteger.Multiply(multiplicand.Numerator, multiplier.Numerator),
+				   BigInteger.Multiply(multiplicand.Denominator, multiplier.Denominator)
+			   );
 
-			BigRational result = Fraction.ReduceToProperFraction(Fraction.Multiply(fracMultiplicand, fracMultiplier));
-			BigRational reduced = BigRational.Reduce(result);
-			return reduced;
+			BigRational frac2 = Simplify(frac1);
+
+			if (frac1 != frac2)
+			{
+				throw new ArithmeticException("Multiply methods needs to simplify result. Please add this behavior to this method.");
+			}
+
+
+			return frac1;
 		}
 
 		/// <summary>
-		/// Divides two <see cref="BigInteger"/> values and returns the quotient.
-		/// </summary>
-		/// <param name="dividend">The dividend.</param>
-		/// <param name="divisor">The divisor.</param>
-		/// <returns>The quotient.</returns>
-		public static BigRational Divide(BigInteger dividend, BigInteger divisor)
-		{
-			BigInteger remainder = new BigInteger(-1);
-			BigInteger quotient = BigInteger.DivRem(dividend, divisor, out remainder);
-
-			BigRational result = new BigRational(
-					quotient,
-					new Fraction(remainder, divisor)
-				);
-
-			return result;
-		}
-
-		/// <summary>
-		/// Divides two <see cref="ExtendedNumerics.BigRational"/> values and returns the quotient.
+		/// Divides two <see cref="Fraction"/> values and returns the quotient.
 		/// </summary>
 		/// <param name="dividend">The dividend.</param>
 		/// <param name="divisor">The divisor.</param>
 		/// <returns>The quotient.</returns>
 		public static BigRational Divide(BigRational dividend, BigRational divisor)
 		{
-			// a/b / c/d  == (ad)/(bc)			
-			Fraction l = dividend.GetImproperFraction();
-			Fraction r = divisor.GetImproperFraction();
-
-			BigInteger ad = BigInteger.Multiply(l.Numerator, r.Denominator);
-			BigInteger bc = BigInteger.Multiply(l.Denominator, r.Numerator);
-
-			Fraction newFraction = new Fraction(ad, bc);
-			BigRational result = Fraction.ReduceToProperFraction(newFraction);
-			return result;
+			//return Simplify(Multiply(dividend, Reciprocal(divisor)));
+			// a/b / c/d  == (a*d)/(b*c)
+			BigInteger ad = dividend.Numerator * divisor.Denominator;
+			BigInteger bc = dividend.Denominator * divisor.Numerator;
+			return new BigRational(ad, bc);
 		}
 
 		/// <summary>
-		/// Divides two <see cref="ExtendedNumerics.BigRational"/> values and returns the remainder.
+		/// Divides two <see cref="T:ExtendedNumerics.BigRational" /> numbers and returns the remainder.
 		/// </summary>
 		/// <param name="dividend">The dividend.</param>
 		/// <param name="divisor">The divisor.</param>
 		/// <returns>The remainder.</returns>
 		public static BigRational Remainder(BigInteger dividend, BigInteger divisor)
 		{
-			BigInteger remainder = (dividend % divisor);
-			return new BigRational(BigInteger.Zero, new Fraction(remainder, divisor));
+			//BigInteger remainder = dividend % divisor;
+			//return new BigRational(remainder, divisor);
+			return new BigRational(dividend % divisor, BigInteger.One);
 		}
 
 		/// <summary>
-		/// Divides two <see cref="ExtendedNumerics.BigRational"/> values and returns the remainder (modulus).
+		/// Divides two <see cref="T:ExtendedNumerics.BigRational" /> numbers and returns the remainder.
 		/// </summary>
-		/// <param name="number">The dividend.</param>
-		/// <param name="mod">The divisor.</param>
-		/// <returns>The remainder (modulus).</returns>
-		public static BigRational Mod(BigRational number, BigRational mod)
+		/// <param name="dividend">The dividend.</param>
+		/// <param name="divisor">The divisor.</param>
+		/// <returns>The remainder.</returns>
+		public static BigRational Remainder(BigRational dividend, BigRational divisor)
 		{
-			Fraction num = number.GetImproperFraction();
-			Fraction modulus = mod.GetImproperFraction();
+			//return new BigRational(
+			//	BigInteger.Multiply(dividend.Numerator, divisor.Denominator) % BigInteger.Multiply(dividend.Denominator, divisor.Numerator),
+			//	BigInteger.Multiply(dividend.Denominator, divisor.Denominator)
+			//);
 
-			return new BigRational(Fraction.Remainder(num, modulus));
+			// a/b / c/d  == (ad)/(bc) ; a/b % c/d  == (ad % bc)/bd
+			BigInteger ad = dividend.Numerator * divisor.Denominator;
+			BigInteger bc = dividend.Denominator * divisor.Numerator;
+			BigInteger bd = dividend.Denominator * divisor.Denominator;
+			return new BigRational((ad % bc), bd);
 		}
 
 		/// <summary>
-		/// Raises the specified <see cref="ExtendedNumerics.BigRational"/> base value to the specified exponent.
+		/// Divides two <see cref="T:ExtendedNumerics.BigRational" /> numbers and returns the quotient and the remainder.
 		/// </summary>
-		/// <param name="baseValue">The base value.</param>
+		/// <param name="dividend">The dividend.</param>
+		/// <param name="divisor">The divisor.</param>
+		/// <param name="remainder">The remainder.</param>
+		/// <returns>The quotient.</returns>
+		public static BigRational DivRem(BigRational dividend, BigRational divisor, out BigRational remainder)
+		{
+			// a/b / c/d  == (ad)/(bc) ; a/b % c/d  == (ad % bc)/bd
+			BigInteger ad = dividend.Numerator * divisor.Denominator;
+			BigInteger bc = dividend.Denominator * divisor.Numerator;
+			BigInteger bd = dividend.Denominator * divisor.Denominator;
+			remainder = new BigRational((ad % bc), bd);
+			return new BigRational(ad, bc);
+		}
+
+		/// <summary>
+		/// Divides two <see cref="T:ExtendedNumerics.BigRational" /> numbers and returns the quotient and the remainder.
+		/// </summary>
+		/// <param name="dividend">The dividend.</param>
+		/// <param name="divisor">The divisor.</param>
+		/// <param name="remainder">The remainder.</param>
+		/// <returns>The quotient.</returns>
+		public static BigInteger DivRem(BigInteger dividend, BigInteger divisor, out BigRational remainder)
+		{
+			BigInteger rem = new BigInteger(-1);
+			BigInteger quotient = BigInteger.DivRem(dividend, divisor, out rem);
+
+			remainder = new BigRational(rem, BigInteger.One);
+			return quotient;
+		}
+
+		/// <summary>
+		///  Raises the specified <see cref="T:ExtendedNumerics.BigRational" /> base value to an integer exponent.
+		/// </summary>
+		/// <param name="base">The base.</param>
 		/// <param name="exponent">The exponent.</param>
-		/// <returns>The result of raising the base value to the exponent power.</returns>
-		public static BigRational Pow(BigRational baseValue, BigInteger exponent)
+		/// <returns>The power of the base raised to the exponent.</returns>
+		/// <exception cref="System.ArgumentException">Cannot raise zero to a negative power - value</exception>
+		public static BigRational Pow(BigRational @base, BigInteger exponent)
 		{
-			Fraction fractPow = Fraction.Pow(baseValue.GetImproperFraction(), exponent);
-			return new BigRational(fractPow);
+			if (exponent.Sign == 0)
+			{ return BigRational.One; }
+			if (@base.Sign == 0)
+			{ return BigRational.Zero; }
+			if (exponent == 1)
+			{ return @base; }
+			if (@base == 1)
+			{ return BigRational.One; }
+
+			BigRational inputValue = new BigRational(@base);
+			BigInteger inputExponent = exponent;
+
+			// Handle negative values of the exponent: n^(-e) -> (1/n)^e
+			if (exponent.Sign < 0)
+			{
+				if (@base == BigRational.Zero)
+				{
+					throw new ArgumentException("Cannot raise zero to a negative power", nameof(@base));
+				}
+
+				inputValue = BigRational.Reciprocal(@base);
+				inputExponent = BigInteger.Negate(exponent);
+			}
+
+			// (a/b)^m = (a^m / b^m)
+			return new BigRational(Internal.ExtensionMethods.Pow(@base.Numerator, exponent), ExtensionMethods.Pow(@base.Denominator, exponent));
+		}
+
+		/// <summary>
+		/// Raises the specified <see cref="T:ExtendedNumerics.BigRational" /> base value to <see cref="T:ExtendedNumerics.BigRational" /> exponent.
+		/// </summary>
+		/// <param name="base">The base.</param>
+		/// <param name="exponent">The exponent.</param>
+		/// <returns>The power of the base raised to the exponent.</returns>
+		public static BigRational Pow(BigRational @base, BigRational exponent)
+		{
+			// (a/b)^(m/n) -> n#(a^m) / n#(b^m), where n#m is the nth root of m function
+			return BigRational.Divide(
+				NthRoot(Pow(@base.Numerator, exponent.Numerator), exponent.Denominator),
+				NthRoot(Pow(@base.Denominator, exponent.Numerator), exponent.Denominator)
+			);
 		}
 
 		/// <summary>
@@ -356,108 +500,120 @@ namespace ExtendedNumerics
 		/// </summary>
 		/// <param name="value">The base value to square root.</param>
 		/// <returns>The square root of the specified value.</returns>
-		public static BigRational Sqrt(BigRational value)
+		public static BigRational Sqrt(BigRational value, int precision = 30)
 		{
-			Fraction input = value.GetImproperFraction();
-			Fraction result = Fraction.Sqrt(input);
-			return Fraction.ReduceToProperFraction(result);
+			return NthRoot(value, 2, precision);
 		}
 
 		/// <summary>
-		/// Returns the Nth root of a number up to a desired precision.
+		/// Returns the Nth root of a fraction up to a desired precision.
 		/// The precision parameter is given in terms of the minimum number of correct decimal places.
 		/// </summary>
 		/// <param name="value">The value to take the Nth root of.</param>
 		/// <param name="root">The Nth root to find of value. Also called the index.</param>
-		/// <param name="precision">The minimum number of correct decimal places to return if the answer is not a rational number.</param>
-		/// <returns>The Nth root of the specified value.</returns>
-		/// <exception cref="System.Exception">Root must be greater than or equal to 1</exception>
+		/// <param name="precision">The minimum number of correct decimal places to return if the answer is not a .</param>
+		/// <returns>BigRational.</returns>
 		/// <exception cref="System.Exception">Value must be a positive integer</exception>
-		public static BigRational NthRoot(BigRational value, int root, int precision = 30)
+		public static BigRational NthRoot(BigRational value, BigInteger root, int precision = 30)
 		{
-			Fraction input = value.GetImproperFraction();
-			Fraction result = Fraction.NthRoot(input, root, precision);
-			return Fraction.ReduceToProperFraction(result);
+			BigRational deviationBound = new BigRational(1, BigInteger.Pow(10, precision));
+
+			//if (root < 1) throw new Exception("Root must be greater than or equal to 1");
+			if (value.Sign == -1)
+				throw new Exception("Value must be a positive integer");
+			if (value == BigRational.One || value == BigRational.Zero || root == 1)
+			{ return value; }
+
+			BigRational lowerbound = BigRational.Zero;
+			BigRational upperbound = new BigRational(value);
+			if (upperbound < BigRational.One)
+			{
+				upperbound = BigRational.One;
+			}
+			BigRational mediant;
+
+			while (true)
+			{
+				mediant = Simplify(Mediant(lowerbound, upperbound));
+
+				BigRational testPow = Simplify(Pow(mediant, root));
+
+				if (testPow > value)
+					upperbound = mediant;
+				if (testPow < value)
+					lowerbound = mediant;
+				if (testPow == value)
+				{
+					lowerbound = mediant;
+					break;
+				}
+				if ((upperbound - lowerbound) <= deviationBound)
+				{
+					break;
+				}
+			}
+
+			return lowerbound;
+		}
+
+		/// <summary>
+		/// Returns a fraction half way between the left and the right parameter.
+		/// The mediant of two fractions is defined as the sum of the numerators
+		/// divided by the sum of the denominators, and is often used when generating
+		/// the Farey sequence or a Stern–Brocot tree.
+		/// </summary>
+		/// <returns>The Fraction mid-way between the left BigRational and right BigRational.</returns>
+		public static BigRational Mediant(BigRational left, BigRational right)
+		{
+			return new BigRational(
+					BigInteger.Add(left.Numerator, right.Numerator),
+					 BigInteger.Add(left.Denominator, right.Denominator)
+				);
 		}
 
 		/// <summary>
 		/// Returns the natural (base e) logarithm of a specified number.
 		/// </summary>
-		/// <param name="rational">The number whose logarithm is to be found.</param>
-		/// <returns>The natural (base e) logarithm of the specifed value.</returns>
-		public static double Log(BigRational rational)
+		/// <param name="fraction">The number whose logarithm is to be found.</param>
+		/// <returns>The natural (base e) logarithm of the specified value.</returns>
+		public static double Log(BigRational fraction)
 		{
-			return Fraction.Log(rational.GetImproperFraction());
+			double a = BigInteger.Log(fraction.Numerator);
+			double b = BigInteger.Log(fraction.Denominator);
+			return (a - b);
 		}
 
 		/// <summary>
-		/// Returns the absolute value of a <see cref="ExtendedNumerics.BigRational"/> value.
+		/// Returns the Reciprocal of the specified <see cref="ExtendedNumerics.BigRational"/>
+		/// by swapping the numerator and the denominator.
 		/// </summary>
-		/// <param name="rational">A value to get the absolute value of.</param>
-		/// <returns>The absolute value of value of the specified number.</returns>
-		public static BigRational Abs(BigRational rational)
+		/// <param name="fraction">The fraction.</param>
+		/// <returns>The reciprocal.</returns>
+		public static BigRational Reciprocal(BigRational fraction)
 		{
-			BigRational input = BigRational.Reduce(rational);
-			return new BigRational(BigInteger.Abs(input.WholePart), input.FractionalPart);
+			BigRational result = new BigRational(fraction.Denominator, fraction.Numerator);
+			BigRational simplified = BigRational.Simplify(result);
+			return simplified;
+		}
+
+		/// <summary>
+		/// Returns the absolute value of a <see cref="ExtendedNumerics.BigRational"/>.
+		/// </summary>
+		/// <param name="fraction">A value to get the absolute value of.</param>
+		/// <returns>The absolute value of value of the specified number.</returns>
+		public static BigRational Abs(BigRational fraction)
+		{
+			return (fraction.Numerator.Sign < 0 ? new BigRational(BigInteger.Abs(fraction.Numerator), fraction.Denominator) : fraction);
 		}
 
 		/// <summary>
 		/// Negates the specified value.
 		/// </summary>
-		/// <param name="rational">The number to negate the value of.</param>
+		/// <param name="fraction">The number to negate the value of.</param>
 		/// <returns>The result of the specified value multiplied by negative one (-1).</returns>
-		public static BigRational Negate(BigRational rational)
+		public static BigRational Negate(BigRational fraction)
 		{
-			BigRational input = BigRational.Reduce(rational);
-			if (input.WholePart == 0)
-			{
-				return new BigRational(input.WholePart, Fraction.Negate(input.FractionalPart));
-			}
-			return new BigRational(BigInteger.Negate(input.WholePart), input.FractionalPart);
-		}
-
-		/// <summary>
-		/// Adds two <see cref="ExtendedNumerics.Fraction"/> numbers and returns the sum as a <see cref="ExtendedNumerics.BigRational"/>.
-		/// </summary>
-		/// <param name="augend">The augend.</param>
-		/// <param name="addend">The addend.</param>
-		/// <returns>The sum.</returns>
-		public static BigRational Add(Fraction augend, Fraction addend)
-		{
-			return new BigRational(BigInteger.Zero, Fraction.Add(augend, addend));
-		}
-
-		/// <summary>
-		/// Subtracts two <see cref="ExtendedNumerics.Fraction"/> numbers and returns the difference as a <see cref="ExtendedNumerics.BigRational"/>.
-		/// </summary>
-		/// <param name="minuend">The minuend.</param>
-		/// <param name="subtrahend">The subtrahend.</param>
-		/// <returns>The difference.</returns>
-		public static BigRational Subtract(Fraction minuend, Fraction subtrahend)
-		{
-			return new BigRational(BigInteger.Zero, Fraction.Subtract(minuend, subtrahend));
-		}
-
-		/// <summary>
-		/// Multiplies two <see cref="ExtendedNumerics.Fraction"/> numbers and returns the product as a <see cref="ExtendedNumerics.BigRational"/>.
-		/// </summary>
-		/// <param name="multiplicand">The multiplicand.</param>
-		/// <param name="multiplier">The multiplier.</param>
-		/// <returns>The product.</returns>
-		public static BigRational Multiply(Fraction multiplicand, Fraction multiplier)
-		{
-			return new BigRational(BigInteger.Zero, Fraction.Multiply(multiplicand, multiplier));
-		}
-
-		/// <summary>
-		/// Divides two <see cref="ExtendedNumerics.Fraction"/> numbers and returns the quotient as a <see cref="ExtendedNumerics.BigRational"/>.
-		/// </summary>
-		/// <param name="dividend">The dividend.</param>
-		/// <param name="divisor">The divisor.</param>
-		/// <returns>The quotient.</returns>
-		public static BigRational Divide(Fraction dividend, Fraction divisor)
-		{
-			return new BigRational(BigInteger.Zero, Fraction.Divide(dividend, divisor));
+			return new BigRational(BigInteger.Negate(fraction.Numerator), fraction.Denominator);
 		}
 
 		#region GCD & LCM
@@ -470,10 +626,7 @@ namespace ExtendedNumerics
 		/// <returns>The least common denominator of left and right.</returns>
 		public static BigRational LeastCommonDenominator(BigRational left, BigRational right)
 		{
-			Fraction leftFrac = left.GetImproperFraction();
-			Fraction rightFrac = right.GetImproperFraction();
-
-			return BigRational.Reduce(new BigRational(Fraction.LeastCommonDenominator(leftFrac, rightFrac)));
+			return new BigRational((left.Denominator * right.Denominator), BigInteger.GreatestCommonDivisor(left.Denominator, right.Denominator));
 		}
 
 		/// <summary>
@@ -484,10 +637,26 @@ namespace ExtendedNumerics
 		/// <returns>The greatest common divisor of left and right.</returns>
 		public static BigRational GreatestCommonDivisor(BigRational left, BigRational right)
 		{
-			Fraction leftFrac = left.GetImproperFraction();
-			Fraction rightFrac = right.GetImproperFraction();
+			BigRational leftFrac = BigRational.Simplify(left);
+			BigRational rightFrac = BigRational.Simplify(right);
 
-			return BigRational.Reduce(new BigRational(Fraction.GreatestCommonDivisor(leftFrac, rightFrac)));
+			BigInteger gcd = BigInteger.GreatestCommonDivisor(left.Numerator, right.Numerator);
+			BigInteger lcm = LCM(left.Denominator, right.Denominator);
+
+			return new BigRational(gcd, lcm);
+		}
+
+		/// <summary>
+		/// Finds the least common denominator of two <see cref="System.Numerics.BigInteger"/> values.
+		/// </summary>
+		/// <param name="left">The first value.</param>
+		/// <param name="right">The second value.</param>
+		/// <returns>The least common denominator of left and right.</returns>
+		private static BigInteger LCM(BigInteger left, BigInteger right)
+		{
+			BigInteger absValue1 = BigInteger.Abs(left);
+			BigInteger absValue2 = BigInteger.Abs(right);
+			return (absValue1 * absValue2) / BigInteger.GreatestCommonDivisor(absValue1, absValue2);
 		}
 
 		#endregion
@@ -496,10 +665,8 @@ namespace ExtendedNumerics
 
 		#region Arithmetic Operators
 
-		#region Binary Operator Overloads
-
 		/// <summary>
-		/// Adds two <see cref="BigRational"/> values and returns the sum.
+		/// Adds two <see cref="T:ExtendedNumerics.BigRational" /> values and returns the sum.
 		/// </summary>
 		/// <param name="augend">The augend.</param>
 		/// <param name="addend">The addend.</param>
@@ -507,7 +674,7 @@ namespace ExtendedNumerics
 		public static BigRational operator +(BigRational augend, BigRational addend) => Add(augend, addend);
 
 		/// <summary>
-		/// Subtracts two <see cref="BigRational"/> values and returns the difference.
+		/// Subtracts two <see cref="T:ExtendedNumerics.BigRational" /> values and returns the difference.
 		/// </summary>
 		/// <param name="minuend">The minuend.</param>
 		/// <param name="subtrahend">The subtrahend.</param>
@@ -515,7 +682,7 @@ namespace ExtendedNumerics
 		public static BigRational operator -(BigRational minuend, BigRational subtrahend) => Subtract(minuend, subtrahend);
 
 		/// <summary>
-		/// Multiplies two <see cref="BigRational"/> values and returns the product.
+		/// Multiplies two <see cref="T:ExtendedNumerics.BigRational" /> values and returns the product.
 		/// </summary>
 		/// <param name="multiplicand">The multiplicand.</param>
 		/// <param name="multiplier">The multiplier.</param>
@@ -523,7 +690,7 @@ namespace ExtendedNumerics
 		public static BigRational operator *(BigRational multiplicand, BigRational multiplier) => Multiply(multiplicand, multiplier);
 
 		/// <summary>
-		/// Divides two <see cref="BigRational"/> values and returns the quotient.
+		/// Divides two <see cref="T:ExtendedNumerics.BigRational" /> values and returns the quotient.
 		/// </summary>
 		/// <param name="dividend">The dividend.</param>
 		/// <param name="divisor">The divisor.</param>
@@ -531,16 +698,12 @@ namespace ExtendedNumerics
 		public static BigRational operator /(BigRational dividend, BigRational divisor) => Divide(dividend, divisor);
 
 		/// <summary>
-		/// Divides two <see cref="BigRational"/> values and returns the remainder/modulus.
+		/// Divides two <see cref="T:ExtendedNumerics.BigRational" /> values and returns the remainder/modulus.
 		/// </summary>
 		/// <param name="dividend">The dividend.</param>
 		/// <param name="divisor">The divisor.</param>
 		/// <returns>The remainder that results from the division.</returns>
-		public static BigRational operator %(BigRational dividend, BigRational divisor) => Mod(dividend, divisor);
-
-		#endregion
-
-		#region Unitary Operator Overloads
+		public static BigRational operator %(BigRational dividend, BigRational divisor) => Remainder(dividend, divisor);
 
 		/// <summary>
 		/// Returns the value of the <see cref="ExtendedNumerics.BigRational"/> operand. (The sign of the operand is unchanged.)
@@ -550,21 +713,21 @@ namespace ExtendedNumerics
 		public static BigRational operator +(BigRational value) => value;
 
 		/// <summary>
-		/// Negates a specified <see cref="ExtendedNumerics.BigRational"/> value.
+		/// Negates a specified <see cref="T:ExtendedNumerics.BigRational" /> value.
 		/// </summary>
 		/// <param name="value">The value to negate.</param>
 		/// <returns>The result of the value parameter multiplied by negative one (-1).</returns>
 		public static BigRational operator -(BigRational value) => Negate(value);
 
 		/// <summary>
-		/// Increments a <see cref="ExtendedNumerics.BigRational"/> value by 1.
+		/// Increments a <see cref="T:ExtendedNumerics.BigRational" /> value by 1.
 		/// </summary>
 		/// <param name="value">The value to increment.</param>
 		/// <returns>The value of the value parameter incremented by 1.</returns>
 		public static BigRational operator ++(BigRational value) => Add(value, BigRational.One);
 
 		/// <summary>
-		/// Decrements a <see cref="ExtendedNumerics.BigRational"/> value by 1.
+		/// Decrements a <see cref="T:ExtendedNumerics.BigRational" /> value by 1.
 		/// </summary>
 		/// <param name="value">The value to decrement.</param>
 		/// <returns>The value of the value parameter decremented by 1.</returns>
@@ -572,63 +735,70 @@ namespace ExtendedNumerics
 
 		#endregion
 
-		#endregion
-
 		#region Comparison Operators
 
 		/// <summary>
 		/// Returns a value that indicates whether the values of two
-		/// <see cref="ExtendedNumerics.BigRational"/> objects are equal.
+		/// <see cref="T:ExtendedNumerics.BigRational" /> objects are equal.
 		/// </summary>
 		/// <param name="left">The first value to compare.</param>
 		/// <param name="right">The second value to compare.</param>
-		/// <returns><c>true</c>  if the left and right parameters have the same value; otherwise, <c>false</c>.</returns>
-		public static bool operator ==(BigRational left, BigRational right) { return Compare(left, right) == 0; }
+		/// <returns>
+		/// <c>true</c>  if the left and right parameters have the same value; otherwise, <c>false</c>.
+		/// </returns>
+		public static bool operator ==(BigRational left, BigRational right) => Compare(left, right) == 0;
 
 		/// <summary>
-		/// Returns a value that indicates whether two <see cref="ExtendedNumerics.BigRational"/> 
+		/// Returns a value that indicates whether two <see cref="T:ExtendedNumerics.BigRational" />
 		/// objects have different values.
 		/// </summary>
 		/// <param name="left">The first value to compare.</param>
 		/// <param name="right">The second value to compare.</param>
-		/// <returns><c>true</c>  if left and right are not equal; otherwise, <c>false</c>.</returns>
-		public static bool operator !=(BigRational left, BigRational right) { return Compare(left, right) != 0; }
+		/// <returns>
+		/// <c>true</c>  if left and right are not equal; otherwise, <c>false</c>.
+		/// </returns>
+		public static bool operator !=(BigRational left, BigRational right) => Compare(left, right) != 0;
 
 		/// <summary>
-		/// Returns a value that indicates whether a <see cref="ExtendedNumerics.BigRational"/> value is
-		/// less than another <see cref="ExtendedNumerics.BigRational"/> value.
+		/// Returns a value that indicates whether a <see cref="T:ExtendedNumerics.BigRational" /> value is
+		/// less than another <see cref="T:ExtendedNumerics.BigRational" /> value.
 		/// </summary>
 		/// <param name="left">The first value to compare.</param>
 		/// <param name="right">The second value to compare.</param>
-		/// <value><c>true</c> if left is less than right; otherwise, <c>false</c>.</value>
-		public static bool operator <(BigRational left, BigRational right) { return Compare(left, right) < 0; }
+		/// <value>
+		/// <c>true</c> if left is less than right; otherwise, <c>false</c>.
+		/// </value>
+		public static bool operator <(BigRational left, BigRational right) => Compare(left, right) < 0;
 
 		/// <summary>
-		/// Returns a value that indicates whether a <see cref="ExtendedNumerics.BigRational"/> value is
-		/// less than or equal to another <see cref="ExtendedNumerics.BigRational"/> value.
+		/// Returns a value that indicates whether a <see cref="T:ExtendedNumerics.BigRational" /> value is
+		/// less than or equal to another <see cref="T:ExtendedNumerics.BigRational" /> value.
 		/// </summary>
 		/// <param name="left">The first value to compare.</param>
 		/// <param name="right">The second value to compare.</param>
-		/// <value><c>true</c> if left is less than or equal to right; otherwise, <c>false</c>.</value>
-		public static bool operator <=(BigRational left, BigRational right) { return Compare(left, right) <= 0; }
+		/// <value>
+		/// <c>true</c> if left is less than or equal to right; otherwise, <c>false</c>.
+		/// </value>
+		public static bool operator <=(BigRational left, BigRational right) => Compare(left, right) <= 0;
 
 		/// <summary>
-		/// Returns a value that indicates whether a <see cref="ExtendedNumerics.BigRational"/> value is
-		/// greater than another <see cref="ExtendedNumerics.BigRational"/> value.
+		/// Returns a value that indicates whether a <see cref="T:ExtendedNumerics.BigRational" /> value is
+		/// greater than another <see cref="T:ExtendedNumerics.BigRational" /> value.
 		/// </summary>
 		/// <param name="left">The first value to compare.</param>
 		/// <param name="right">The second value to compare.</param>
-		/// <value><c>true</c> if left is greater than right; otherwise, <c>false</c>.</value>
-		public static bool operator >(BigRational left, BigRational right) { return Compare(left, right) > 0; }
+		/// <value>
+		/// <c>true</c> if left is greater than right; otherwise, <c>false</c>.
+		/// </value>
+		public static bool operator >(BigRational left, BigRational right) => Compare(left, right) > 0;
 
 		/// <summary>
-		/// Returns a value that indicates whether a<see cref="ExtendedNumerics.BigRational"/> value is
-		/// greater than or equal to another <see cref="ExtendedNumerics.BigRational"/> value.
+		/// Implements the &gt;= operator.
 		/// </summary>
-		/// <param name="left">The first value to compare.</param>
-		/// <param name="right">The second value to compare.</param>
-		/// <value><c>true</c> if left is greater than or equal to right; otherwise, <c>false</c>.</value>
-		public static bool operator >=(BigRational left, BigRational right) { return Compare(left, right) >= 0; }
+		/// <param name="left">The left.</param>
+		/// <param name="right">The right.</param>
+		/// <returns>The result of the operator.</returns>
+		public static bool operator >=(BigRational left, BigRational right) => Compare(left, right) >= 0;
 
 		#endregion
 
@@ -650,19 +820,9 @@ namespace ExtendedNumerics
 		/// </returns>
 		public static int Compare(BigRational left, BigRational right)
 		{
-			BigRational leftRed = BigRational.Reduce(left);
-			BigRational rightRed = BigRational.Reduce(right);
-
-			if (leftRed.WholePart == rightRed.WholePart)
-			{
-				Fraction leftFrac = leftRed.GetImproperFraction();
-				Fraction rightFrac = right.GetImproperFraction();
-				return Fraction.Compare(leftFrac, rightFrac);
-			}
-			else
-			{
-				return BigInteger.Compare(leftRed.WholePart, rightRed.WholePart);
-			}
+			var l = BigInteger.Multiply(left.Numerator, right.Denominator);
+			var r = BigInteger.Multiply(right.Numerator, left.Denominator);
+			return BigInteger.Compare(l, r);
 		}
 
 		/// <summary>
@@ -682,8 +842,10 @@ namespace ExtendedNumerics
 		/// <exception cref="System.ArgumentException">Argument must be of type BigRational</exception>
 		int IComparable.CompareTo(Object obj)
 		{
-			if (obj == null) { return 1; }
-			if (!(obj is BigRational)) { throw new ArgumentException($"Argument must be of type {nameof(BigRational)}", nameof(obj)); }
+			if (obj == null)
+			{ return 1; }
+			if (!(obj is BigRational))
+			{ throw new ArgumentException($"Argument must be of type {nameof(BigRational)}", nameof(obj)); }
 			return Compare(this, (BigRational)obj);
 		}
 
@@ -707,92 +869,12 @@ namespace ExtendedNumerics
 
 		#endregion
 
-		#region Conversion
+		#region Conversion Operators
 
 		/// <summary>
-		/// Performs an implicit conversion from <see cref="System.Byte"/> to <see cref="ExtendedNumerics.BigRational"/>.
+		/// Performs an implicit conversion from <see cref="BigInteger"/> to <see cref="BigRational"/>.
 		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="ExtendedNumerics.BigRational"/>.</param>
-		/// <returns>The result of the conversion.</returns>
-		public static implicit operator BigRational(byte value)
-		{
-			return new BigRational((BigInteger)value);
-		}
-
-		/// <summary>
-		/// Performs an implicit conversion from <see cref="SByte"/> to <see cref="ExtendedNumerics.BigRational"/>.
-		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="ExtendedNumerics.BigRational"/>.</param>
-		/// <returns>The result of the conversion.</returns>
-		public static implicit operator BigRational(SByte value)
-		{
-			return new BigRational((BigInteger)value);
-		}
-
-		/// <summary>
-		/// Performs an implicit conversion from <see cref="Int16"/> to <see cref="ExtendedNumerics.BigRational"/>.
-		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="ExtendedNumerics.BigRational"/>.</param>
-		/// <returns>The result of the conversion.</returns>
-		public static implicit operator BigRational(Int16 value)
-		{
-			return new BigRational((BigInteger)value);
-		}
-
-		/// <summary>
-		/// Performs an implicit conversion from <see cref="UInt16"/> to <see cref="ExtendedNumerics.BigRational"/>.
-		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="ExtendedNumerics.BigRational"/>.</param>
-		/// <returns>The result of the conversion.</returns>
-		public static implicit operator BigRational(UInt16 value)
-		{
-			return new BigRational((BigInteger)value);
-		}
-
-		/// <summary>
-		/// Performs an implicit conversion from <see cref="Int32"/> to <see cref="ExtendedNumerics.BigRational"/>.
-		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="ExtendedNumerics.BigRational"/>.</param>
-		/// <returns>The result of the conversion.</returns>
-		public static implicit operator BigRational(Int32 value)
-		{
-			return new BigRational((BigInteger)value);
-		}
-
-		/// <summary>
-		/// Performs an implicit conversion from <see cref="UInt32"/> to <see cref="ExtendedNumerics.BigRational"/>.
-		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="ExtendedNumerics.BigRational"/>.</param>
-		/// <returns>The result of the conversion.</returns>
-		public static implicit operator BigRational(UInt32 value)
-		{
-			return new BigRational((BigInteger)value);
-		}
-
-		/// <summary>
-		/// Performs an implicit conversion from <see cref="Int64"/> to <see cref="ExtendedNumerics.BigRational"/>.
-		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="ExtendedNumerics.BigRational"/>.</param>
-		/// <returns>The result of the conversion.</returns>
-		public static implicit operator BigRational(Int64 value)
-		{
-			return new BigRational((BigInteger)value);
-		}
-
-		/// <summary>
-		/// Performs an implicit conversion from <see cref="UInt64"/> to <see cref="ExtendedNumerics.BigRational"/>.
-		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="ExtendedNumerics.BigRational"/>.</param>
-		/// <returns>The result of the conversion.</returns>
-		public static implicit operator BigRational(UInt64 value)
-		{
-			return new BigRational((BigInteger)value);
-		}
-
-		/// <summary>
-		/// Performs an implicit conversion from <see cref="BigInteger"/> to <see cref="ExtendedNumerics.BigRational"/>.
-		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="ExtendedNumerics.BigRational"/>.</param>
+		/// <param name="value">The value.</param>
 		/// <returns>The result of the conversion.</returns>
 		public static implicit operator BigRational(BigInteger value)
 		{
@@ -800,20 +882,99 @@ namespace ExtendedNumerics
 		}
 
 		/// <summary>
-		/// Performs an explicit conversion from <see cref="System.Single"/> to <see cref="ExtendedNumerics.BigRational"/>.
+		/// Performs an implicit conversion from <see cref="System.Byte"/> to <see cref="BigRational"/>.
 		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="ExtendedNumerics.BigRational"/>.</param>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static implicit operator BigRational(byte value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
+		/// <summary>
+		/// Performs an implicit conversion from <see cref="SByte"/> to <see cref="BigRational"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static implicit operator BigRational(SByte value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
+		/// <summary>
+		/// Performs an implicit conversion from <see cref="Int16"/> to <see cref="BigRational"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static implicit operator BigRational(Int16 value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
+		/// <summary>
+		/// Performs an implicit conversion from <see cref="UInt16"/> to <see cref="BigRational"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static implicit operator BigRational(UInt16 value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
+		/// <summary>
+		/// Performs an implicit conversion from <see cref="Int32"/> to <see cref="BigRational"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static implicit operator BigRational(Int32 value)
+		{
+			return new BigRational(value);
+		}
+
+		/// <summary>
+		/// Performs an implicit conversion from <see cref="UInt32"/> to <see cref="BigRational"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static implicit operator BigRational(UInt32 value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
+		/// <summary>
+		/// Performs an implicit conversion from <see cref="Int64"/> to <see cref="BigRational"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static implicit operator BigRational(Int64 value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
+		/// <summary>
+		/// Performs an implicit conversion from <see cref="UInt64"/> to <see cref="BigRational"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static implicit operator BigRational(UInt64 value)
+		{
+			return new BigRational((BigInteger)value);
+		}
+
+		/// <summary>
+		/// Performs an explicit conversion from <see cref="System.Single"/> to <see cref="BigRational"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
 		/// <returns>The result of the conversion.</returns>
 		public static explicit operator BigRational(float value)
 		{
 			return new BigRational(value);
 		}
 
-
 		/// <summary>
-		/// Performs an explicit conversion from <see cref="System.Double"/> to <see cref="ExtendedNumerics.BigRational"/>.
+		/// Performs an explicit conversion from <see cref="System.Double"/> to <see cref="BigRational"/>.
 		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="ExtendedNumerics.BigRational"/>.</param>
+		/// <param name="value">The value.</param>
 		/// <returns>The result of the conversion.</returns>
 		public static explicit operator BigRational(double value)
 		{
@@ -821,9 +982,9 @@ namespace ExtendedNumerics
 		}
 
 		/// <summary>
-		/// Performs an explicit conversion from <see cref="System.Decimal"/> to <see cref="ExtendedNumerics.BigRational"/>.
+		/// Performs an explicit conversion from <see cref="System.Decimal"/> to <see cref="BigRational"/>.
 		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="ExtendedNumerics.BigRational"/>.</param>
+		/// <param name="value">The value.</param>
 		/// <returns>The result of the conversion.</returns>
 		public static explicit operator BigRational(decimal value)
 		{
@@ -831,143 +992,148 @@ namespace ExtendedNumerics
 		}
 
 		/// <summary>
-		/// Performs an explicit conversion from <see cref="ExtendedNumerics.BigRational"/> to <see cref="System.Double"/>.
+		/// Performs an implicit conversion from <see cref="BigRational"/> to <see cref="MixedFraction"/>.
 		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="System.Double"/>.</param>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static implicit operator MixedFraction(BigRational value)
+		{
+			return new MixedFraction(BigInteger.Zero, value);
+		}
+
+		/// <summary>
+		/// Performs an explicit conversion from <see cref="BigRational"/> to <see cref="BigInteger"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static explicit operator BigInteger(BigRational value)
+		{
+			return BigInteger.Divide(value.Numerator, value.Denominator);
+		}
+
+		/// <summary>
+		/// Performs an explicit conversion from <see cref="BigRational"/> to <see cref="System.Double"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
 		/// <returns>The result of the conversion.</returns>
 		public static explicit operator double(BigRational value)
 		{
-			double fract = (double)value.FractionalPart;
-			double whole = (double)value.WholePart;
-			double result = whole + (fract * (value.Sign == 0 ? 1 : value.Sign));
-			if (value.WholePart == 0)
+			if (IsInRangeDouble(value.Numerator) && IsInRangeDouble(value.Denominator))
 			{
-				result = fract;
-			}
-			return result;
-		}
-
-		/// <summary>
-		/// Performs an explicit conversion from <see cref="ExtendedNumerics.BigRational"/> to <see cref="System.Decimal"/>.
-		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="System.Decimal"/>.</param>
-		/// <returns>The result of the conversion.</returns>
-		public static explicit operator decimal(BigRational value)
-		{
-			decimal fract = (decimal)value.FractionalPart;
-			decimal whole = (decimal)value.WholePart;
-			decimal result = whole + (fract * (value.Sign == 0 ? 1 : value.Sign));
-			if (value.WholePart == 0)
-			{
-				result = fract;
-			}
-			return result;
-		}
-
-		/// <summary>
-		/// Performs an implicit conversion from <see cref="ExtendedNumerics.BigRational"/> to <see cref="ExtendedNumerics.Fraction"/>.
-		/// </summary>
-		/// <param name="value">The value to convert to a <see cref="ExtendedNumerics.Fraction"/>.</param>
-		/// <returns>The result of the conversion.</returns>
-		public static implicit operator Fraction(BigRational value)
-		{
-			return Fraction.Simplify(new Fraction(
-					BigInteger.Add(value.FractionalPart.Numerator, BigInteger.Multiply(value.WholePart, value.FractionalPart.Denominator)),
-					value.FractionalPart.Denominator
-				));
-		}
-
-		/// <summary>
-		/// Converts the string representation of a number to its <see cref="ExtendedNumerics.BigRational"/> equivalent.
-		/// </summary>
-		/// <param name="value">A string that contains the number to convert.</param>
-		/// <returns> A value that is equivalent to the number specified in the value parameter.</returns>
-		/// <exception cref="System.ArgumentException">Argument cannot be null, empty or whitespace.</exception>
-		/// <exception cref="System.ArgumentException">Invalid string given for number.</exception>
-		/// <exception cref="System.ArgumentException">Invalid string given for numerator.</exception>
-		/// <exception cref="System.ArgumentException">Invalid string given for whole number.</exception>
-		/// <exception cref="System.ArgumentException">Invalid fraction given as string to parse.</exception>
-		/// <exception cref="System.ArgumentException">Invalid string given for denominator.</exception>
-		public static BigRational Parse(string value)
-		{
-			if (string.IsNullOrWhiteSpace(value))
-			{
-				throw new ArgumentException("Argument cannot be null, empty or whitespace.");
+				return (double)value.Numerator / (double)value.Denominator;
 			}
 
-			string[] parts = value.Trim().Split('/');
-			if (parts.Length == 1)
+			BigInteger scaledup = BigInteger.Multiply(value.Numerator, _doublePrecision) / value.Denominator;
+			if (scaledup.IsZero)
 			{
-				BigInteger whole;
-				if (!BigInteger.TryParse(parts[0], out whole))
+				return 0d; // underflow. throw exception here instead?
+			}
+
+			bool isDone = false;
+			double result = 0;
+			int scale = _doubleMaxScale;
+			while (scale > 0)
+			{
+				if (!isDone)
 				{
-					throw new ArgumentException("Invalid string given for number.");
-				}
-				return new BigRational(whole);
-			}
-			else if (parts.Length == 2)
-			{
-				BigInteger whole = BigInteger.Zero, numerator, denominator;
-
-				string[] firstParts = parts[0].Trim().Split(new char[] { '+', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-				if (firstParts.Length == 1)
-				{
-					if (!BigInteger.TryParse(parts[0].Trim(), out numerator))
+					if (IsInRangeDouble(scaledup))
 					{
-						throw new ArgumentException("Invalid string given for numerator.");
+						result = (double)scaledup;
+						isDone = true;
+					}
+					else
+					{
+						scaledup = scaledup / 10;
 					}
 				}
-				else if (firstParts.Length == 2)
-				{
-					if (!BigInteger.TryParse(firstParts[0].Trim(), out whole))
-					{
-						throw new ArgumentException("Invalid string given for whole number.");
-					}
-					if (!BigInteger.TryParse(firstParts[1].Trim(), out numerator))
-					{
-						throw new ArgumentException("Invalid string given for numerator.");
-					}
-				}
-				else
-				{
-					throw new ArgumentException("Invalid fraction given as string to parse.");
-				}
 
-				if (!BigInteger.TryParse(parts[1].Trim(), out denominator))
-				{
-					throw new ArgumentException("Invalid string given for denominator.");
-				}
-				return new BigRational(whole, numerator, denominator);
+				result = result / 10;
+				scale--;
+			}
+
+			if (isDone)
+			{
+				return result;
 			}
 			else
 			{
-				throw new ArgumentException("Invalid fraction given as string to parse.");
+				return (value.Sign < 0) ? double.NegativeInfinity : double.PositiveInfinity;
 			}
+		}
+
+		/// <summary>
+		/// Performs an explicit conversion from <see cref="BigRational"/> to <see cref="System.Decimal"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		/// <exception cref="System.OverflowException">Value was either too large or too small for a decimal.</exception>
+		public static explicit operator decimal(BigRational value)
+		{
+			// The decimal value type represents decimal numbers ranging
+			// from +79,228,162,514,264,337,593,543,950,335 to -79,228,162,514,264,337,593,543,950,335
+			// the binary representation of a decimal value is of the form, ((-2^96 to 2^96) / 10^(0 to 28))
+			if (IsInRangeDecimal(value.Numerator) && IsInRangeDecimal(value.Denominator))
+			{
+				return (decimal)value.Numerator / (decimal)value.Denominator;
+			}
+
+			// scale the numerator to preserve the fraction part through the integer division
+			BigInteger denormalized = (value.Numerator * _decimalPrecision) / value.Denominator;
+			if (denormalized.IsZero)
+			{
+				return decimal.Zero; // underflow - fraction is too small to fit in a decimal
+			}
+			for (int scale = DecimalMaxScale; scale >= 0; scale--)
+			{
+				if (!IsInRangeDecimal(denormalized))
+				{
+					denormalized = denormalized / 10;
+				}
+				else
+				{
+					DecimalUInt32 dec = new DecimalUInt32();
+					dec.dec = (decimal)denormalized;
+					dec.flags = (dec.flags & ~DecimalScaleMask) | (scale << 16);
+					return dec.dec;
+				}
+			}
+			throw new OverflowException("Value was either too large or too small for a decimal.");
+		}
+
+		#region Private Members
+
+		private static bool IsInRangeDouble(BigInteger number)
+		{
+			return ((BigInteger)double.MinValue < number && number < (BigInteger)double.MaxValue);
+		}
+		private static readonly int _doubleMaxScale = 308;
+		private static readonly BigInteger _doublePrecision = BigInteger.Pow(10, _doubleMaxScale);
+		private static readonly BigInteger _decimalPrecision = BigInteger.Pow(10, DecimalMaxScale);
+		private static readonly BigInteger _decimalMaxValue = (BigInteger)decimal.MaxValue;
+		private static readonly BigInteger _decimalMinValue = (BigInteger)decimal.MinValue;
+		private const int DecimalScaleMask = 0x00FF0000;
+		private const int DecimalSignMask = unchecked((int)0x80000000);
+		private const int DecimalMaxScale = 28;
+
+		private static bool IsInRangeDecimal(BigInteger number)
+		{
+			return (_decimalMinValue <= number && number <= _decimalMaxValue);
+		}
+
+		[StructLayout(LayoutKind.Explicit)]
+		internal struct DecimalUInt32
+		{
+			[FieldOffset(0)]
+			public decimal dec;
+			[FieldOffset(0)]
+			public int flags;
 		}
 
 		#endregion
 
+		#endregion
+
 		#region Equality Methods
-
-		/// <summary>
-		/// Indicates whether the current object is equal to another object of the same type.
-		/// Satisfies the <see cref="IEquatable{BigRational}" /> interface implementation.
-		/// </summary>
-		/// <param name="other">An object to compare with this object.</param>
-		/// <returns><see langword="true" /> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false" />.</returns>
-		public bool Equals(BigRational other)
-		{
-			BigRational reducedThis = BigRational.Reduce(this);
-			BigRational reducedOther = BigRational.Reduce(other);
-
-			bool result = true;
-
-			result &= reducedThis.WholePart.Equals(reducedOther.WholePart);
-			result &= reducedThis.FractionalPart.Numerator.Equals(reducedOther.FractionalPart.Numerator);
-			result &= reducedThis.FractionalPart.Denominator.Equals(reducedOther.FractionalPart.Denominator);
-
-			return result;
-		}
 
 		/// <summary>
 		/// Determines whether the specified object is equal to the current object.
@@ -976,9 +1142,35 @@ namespace ExtendedNumerics
 		/// <returns><see langword="true" /> if the specified object  is equal to the current object; otherwise, <see langword="false" />.</returns>
 		public override bool Equals(Object obj)
 		{
-			if (obj == null) { return false; }
-			if (!(obj is BigRational)) { return false; }
-			return Equals((BigRational)obj);
+			if (obj == null)
+			{ return false; }
+			if (!(obj is BigRational))
+			{ return false; }
+			return Equals(this, (BigRational)obj);
+		}
+
+		/// <summary>
+		/// Indicates whether the current object is equal to another object of the same type.
+		/// </summary>
+		/// <param name="other">An object to compare with this object.</param>
+		/// <returns><see langword="true" /> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false" />.</returns>
+		public bool Equals(BigRational other)
+		{
+			return Equals(this, other);
+		}
+
+		/// <summary>
+		/// Indicates equality between two instances of <see cref="BigRational" />.
+		/// </summary>
+		/// <param name="left">The left instance.</param>
+		/// <param name="right">The right instance.</param>
+		/// <returns><c>true</c> if left is equal to right, <c>false</c> otherwise.</returns>
+		public bool Equals(BigRational left, BigRational right)
+		{
+			if (left.Denominator == right.Denominator)
+			{ return left.Numerator == right.Numerator; }
+			else
+			{ return (left.Numerator * right.Denominator) == (left.Denominator * right.Numerator); }
 		}
 
 		/// <summary>
@@ -987,18 +1179,17 @@ namespace ExtendedNumerics
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
 		public override int GetHashCode()
 		{
-			return CombineHashCodes(WholePart.GetHashCode(), FractionalPart.GetHashCode());
+			return GetHashCode(this);
 		}
 
 		/// <summary>
-		/// Combines two hash codes into one.
+		/// Returns a hash code for this instance.
 		/// </summary>
-		/// <param name="h1">The first hash.</param>
-		/// <param name="h2">The second hash.</param>
-		/// <returns>A new hashcode that represents the combination of the two specified hash codes.</returns>
-		internal static int CombineHashCodes(int h1, int h2)
+		/// <param name="fraction">The fraction.</param>
+		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
+		public int GetHashCode(BigRational fraction)
 		{
-			return (((h1 << 5) + h1) ^ h2);
+			return MixedFraction.CombineHashCodes(fraction.Numerator.GetHashCode(), fraction.Denominator.GetHashCode());
 		}
 
 		#endregion
@@ -1006,44 +1197,45 @@ namespace ExtendedNumerics
 		#region Transform Methods
 
 		/// <summary>
-		/// Returns the value of this instance as a <see cref="ExtendedNumerics.Fraction"/>
-		/// who's numerator may be larger than its denominator, called an improper fraction.
+		/// Converts a <see cref="ExtendedNumerics.BigRational"/> into reduced form
+		/// by dividing the numerator by the denominator and returning a <see cref="ExtendedNumerics.BigRational"/>
+		/// with the WholePart containing the quotient.
 		/// </summary>
-		/// <returns>A Fraction <see cref="ExtendedNumerics.Fraction"/> representation of this instance value.</returns>
-		public Fraction GetImproperFraction()
+		/// <param name="value">The fraction to reduce.</param>
+		/// <returns>A BigRational in a reduced fraction form.</returns>
+		public static MixedFraction ReduceToProperFraction(BigRational value)
 		{
-			BigRational input = NormalizeSign(this);
+			BigRational input = BigRational.Simplify(value);
 
-			if (input.WholePart == 0 && input.FractionalPart.Sign == 0)
+			if (input.Numerator.IsZero)
 			{
-				return Fraction.Zero;
+				return MixedFraction.Zero;
 			}
-
-			if (input.FractionalPart.Sign != 0 || input.FractionalPart.Denominator > 1)
+			else if (input.Denominator.IsOne)
 			{
-				if (input.WholePart.Sign != 0)
-				{
-					BigInteger whole = BigInteger.Multiply(input.WholePart, input.FractionalPart.Denominator);
-
-					BigInteger remainder = input.FractionalPart.Numerator;
-
-					if (input.WholePart.Sign == -1)
-					{
-						remainder = BigInteger.Negate(remainder);
-					}
-
-					BigInteger total = BigInteger.Add(whole, remainder);
-					Fraction newFractional = new Fraction(total, input.FractionalPart.Denominator);
-					return newFractional;
-				}
-				else
-				{
-					return input.FractionalPart;
-				}
+				return new MixedFraction(input.Numerator, BigRational.Zero);
 			}
 			else
 			{
-				return new Fraction(input.WholePart, BigInteger.One);
+				MixedFraction result;
+				if (BigInteger.Abs(input.Numerator) > BigInteger.Abs(input.Denominator))
+				{
+					int sign = input.Numerator.Sign;
+
+					BigInteger remainder = new BigInteger(-1);
+					BigInteger wholeUnits = BigInteger.DivRem(BigInteger.Abs(input.Numerator), input.Denominator, out remainder);
+					if (sign == -1)
+					{
+						wholeUnits = BigInteger.Negate(wholeUnits);
+					}
+					result = new MixedFraction(wholeUnits, new BigRational(remainder, input.Denominator));
+					return result;
+				}
+				else
+				{
+					result = new MixedFraction(BigInteger.Zero, input.Numerator, input.Denominator);
+					return result;
+				}
 			}
 		}
 
@@ -1051,39 +1243,55 @@ namespace ExtendedNumerics
 		/// Divides out any common divisors between the numerator and the denominator
 		/// and then normalizes the sign.
 		/// </summary>
-		public static BigRational Reduce(BigRational value)
+		public static BigRational Simplify(BigRational value)
 		{
 			BigRational input = NormalizeSign(value);
-			BigRational reduced = Fraction.ReduceToProperFraction(input.FractionalPart);
-			BigRational result = new BigRational(value.WholePart + reduced.WholePart, reduced.FractionalPart);
-			return result;
+
+			if (input.Numerator.IsZero || input.Numerator.IsOne || input.Numerator == BigInteger.MinusOne)
+			{
+				return new BigRational(input);
+			}
+
+			BigInteger num = input.Numerator;
+			BigInteger denom = input.Denominator;
+			BigInteger gcd = BigInteger.GreatestCommonDivisor(num, denom);
+			if (gcd > BigInteger.One)
+			{
+				return new BigRational(num / gcd, denom / gcd);
+			}
+
+			return new BigRational(input);
 		}
 
 		/// <summary>
 		/// Normalizes the sign of the specified value.
-		/// That is, it examines all parts of the number
-		/// (WholePart, FractionalPart Numerator and Denominator)
-		/// and accounts for any negative values found and removes them.
-		/// The resulting parity of the number is reflected in the
-		/// sign of the WholePart property.
+		/// That is, moves the negative value to the numerator.
 		/// </summary>
-		public static BigRational NormalizeSign(BigRational value)
+		internal static BigRational NormalizeSign(BigRational value)
 		{
-			return value.NormalizeSign();
-		}
+			BigInteger numer = value.Numerator;
+			BigInteger denom = value.Denominator;
 
-		/// <summary>
-		/// Internal method that normalizes the sign of the current instance.
-		/// </summary>
-		internal BigRational NormalizeSign()
-		{
-			FractionalPart = Fraction.NormalizeSign(FractionalPart);
-			if (WholePart > 0 && WholePart.Sign == 1 && FractionalPart.Sign == -1)
+			if (numer.Sign == 1 && denom.Sign == 1)
 			{
-				WholePart = BigInteger.Negate(WholePart);
-				FractionalPart = Fraction.Negate(FractionalPart);
+				return value;
 			}
-			return this;
+			else if (numer.Sign == -1 && denom.Sign == 1)
+			{
+				return value;
+			}
+			else if (numer.Sign == 1 && denom.Sign == -1)
+			{
+				numer = BigInteger.Negate(numer);
+				denom = BigInteger.Negate(denom);
+			}
+			else if (numer.Sign == -1 && denom.Sign == -1)
+			{
+				numer = BigInteger.Negate(numer);
+				denom = BigInteger.Negate(denom);
+			}
+
+			return new BigRational(numer, denom);
 		}
 
 		#endregion
@@ -1091,38 +1299,41 @@ namespace ExtendedNumerics
 		#region Overrides
 
 		/// <summary>
-		/// Converts the numeric value of the current <see cref="ExtendedNumerics.BigRational"/>
+		/// Converts the numeric value of the current <see cref="T:ExtendedNumerics.BigRational" />
 		/// instance into its equivalent string representation.
 		/// </summary>
-		/// <returns>The string representation of the current <see cref="ExtendedNumerics.BigRational"/> value.</returns>
+		/// <returns>
+		/// The string representation of the current <see cref="T:ExtendedNumerics.BigRational" /> value.
+		/// </returns>
 		public override string ToString()
 		{
 			return ToString(CultureInfo.CurrentCulture);
 		}
 
 		/// <summary>
-		/// Converts the numeric value of the current <see cref="ExtendedNumerics.BigRational"/>
-		/// instance into its equivalent string representation by using the specified format.
+		/// Converts the numeric value of the current <see cref="T:ExtendedNumerics.BigRational" />
+		/// instance into its equivalent string representation by using
+		/// the specified format.
 		/// </summary>
 		/// <param name="format">A standard or custom numeric format string.</param>
 		/// <returns>
-		/// The string representation of the current <see cref="ExtendedNumerics.BigRational"/> value
+		/// The string representation of the current <see cref="T:ExtendedNumerics.BigRational" /> value
 		/// in the format specified by the format parameter.
 		/// </returns>
 		public String ToString(String format)
 		{
-			return ToString(CultureInfo.CurrentCulture);
+			return ToString(format, CultureInfo.CurrentCulture);
 		}
 
 		/// <summary>
-		/// Converts the numeric value of the current <see cref="ExtendedNumerics.BigRational"/>
+		/// Converts the numeric value of the current <see cref="T:ExtendedNumerics.BigRational" />
 		/// instance into its equivalent string representation by using the specified
 		/// culture-specific formatting information.
 		/// </summary>
 		/// <param name="provider">An object that supplies culture-specific formatting information.</param>
 		/// <returns>
-		/// The string representation of the current <see cref="ExtendedNumerics.BigRational"/> value in
-		///	the format specified by the provider parameter.
+		/// The string representation of the current <see cref="T:ExtendedNumerics.BigRational" /> value in
+		/// the format specified by the provider parameter.
 		/// </returns>
 		public String ToString(IFormatProvider provider)
 		{
@@ -1130,14 +1341,13 @@ namespace ExtendedNumerics
 		}
 
 		/// <summary>
-		/// Converts the numeric value of the current <see cref="ExtendedNumerics.BigRational"/>
-		/// instance into its equivalent string representation by using the specified 
+		/// Converts the numeric value of the current <see cref="T:ExtendedNumerics.BigRational" />
+		/// instance into its equivalent string representation by using the specified
 		/// format and culture-specific format information.
 		/// </summary>
 		/// <param name="format">A standard or custom numeric format string.</param>
 		/// <param name="provider">An object that supplies culture-specific formatting information.</param>
-		/// <returns>
-		/// The string representation of the current <see cref="ExtendedNumerics.BigRational"/> value as
+		/// <returns>The string representation of the current <see cref="T:ExtendedNumerics.BigRational" /> value as
 		/// specified by the format and provider parameters.
 		/// </returns>
 		public String ToString(String format, IFormatProvider provider)
@@ -1149,33 +1359,24 @@ namespace ExtendedNumerics
 			}
 
 			string zeroString = numberFormatProvider.NativeDigits[0];
+			char zeroChar = zeroString.First();
 
-			BigRational input = BigRational.Reduce(this);
-
-			string whole = input.WholePart != 0 ? String.Format(provider, "{0}", input.WholePart.ToString(format, provider)) : string.Empty;
-			string fractional = input.FractionalPart.Numerator != 0 ? String.Format(provider, "{0}", input.FractionalPart.ToString(format, provider)) : string.Empty;
-			string join = string.Empty;
-
-			if (!string.IsNullOrWhiteSpace(whole) && !string.IsNullOrWhiteSpace(fractional))
-			{
-				if (input.WholePart.Sign < 0)
-				{
-					join = $" {numberFormatProvider.NegativeSign} ";
-				}
-				else
-				{
-					join = $" {numberFormatProvider.PositiveSign} ";
-				}
-			}
-
-			if (string.IsNullOrWhiteSpace(whole) && string.IsNullOrWhiteSpace(join) && string.IsNullOrWhiteSpace(fractional))
+			if (Numerator.IsZero)
 			{
 				return zeroString;
 			}
-
-			return string.Concat(whole, join, fractional);
+			else if (Denominator.IsOne)
+			{
+				return String.Format(provider, "{0}", Numerator.ToString(format, provider));
+			}
+			else
+			{
+				return String.Format(provider, "{0}/{1}", Numerator.ToString(format, provider), Denominator.ToString(format, provider));
+			}
 		}
 
 		#endregion
+
 	}
 }
+

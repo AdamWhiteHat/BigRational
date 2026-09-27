@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Numerics;
 using ExtendedNumerics;
 using NUnit.Framework;
@@ -14,95 +12,22 @@ namespace TestBigRational
 		private TestContext m_testContext;
 
 		[Test]
-		public void TestConvertFromDecimalPointFloat()
+		public void TestConvertFromFloat()
 		{
-			float negativeOneAndOneHalf = -3f / 2f;
+			float negativeOneHalf = -1f / 2f;
 			float oneThird = 1f / 3f;
 
-			BigRational expectedValue1 = new BigRational(-1, new Fraction(1, 2));
-			BigRational result1 = (BigRational)negativeOneAndOneHalf;
+			TestContext.WriteLine($"(float) -1/2 == {negativeOneHalf}");
+			TestContext.WriteLine($"(float)  1/3 == {oneThird}");
 
-			BigRational expectedValue2 = new BigRational(0, new Fraction(1, 3));
-			BigRational result2 = (BigRational)oneThird;
+			BigRational expectedValue1 = new BigRational(-1, 2);
+			BigRational result1 = (BigRational)negativeOneHalf;
+
+			MixedFraction expectedValue2 = new MixedFraction(0, new BigRational(1, 3));
+			MixedFraction result2 = (MixedFraction)oneThird;
 
 			Assert.AreEqual(expectedValue1, result1);
 			Assert.AreEqual(expectedValue2, result2);
-		}
-
-		[Test]
-		public void TestConvertFromDecimalPointDouble()
-		{
-			double fifteenSixteenths = 0.9375d;
-
-			BigRational expectedValue = new BigRational(BigInteger.Zero, new Fraction(15, 16));
-			BigRational result = (BigRational)fifteenSixteenths;
-
-			Assert.AreEqual(expectedValue, result);
-		}
-
-		[Test]
-		public void TestConvertFromWholeNumberDouble()
-		{
-			double seven = 7.0d;
-
-			BigRational expectedValue = new BigRational(7, new Fraction(0, 1));
-
-			BigRational result1 = new BigRational(seven);
-			BigRational result2 = (BigRational)seven;
-
-
-			Assert.AreEqual(expectedValue, result1);
-			Assert.AreEqual(expectedValue, result2);
-		}
-
-		[Test]
-		public void TestConvertFromNegativeMixedDouble()
-		{
-			double negativeOneAndOneThird = -4d / 3d;
-
-			BigRational expectedValue = new BigRational(-1, new Fraction(1, 3));
-			BigRational result = (BigRational)negativeOneAndOneThird;
-
-			Assert.AreEqual(expectedValue, result);
-		}
-
-		[Test]
-		public void TestConvertFromDecimalPointDecimal()
-		{
-			decimal fifteenSixteenths = 0.9375m;
-
-			BigRational expectedValue = new BigRational(BigInteger.Zero, new Fraction(15, 16));
-			BigRational result = (BigRational)fifteenSixteenths;
-
-			Assert.AreEqual(expectedValue, result);
-		}
-
-		[Test]
-		public void TestConvertFromWholeNumberDecimal()
-		{
-			decimal seven = 7.0m;
-
-			BigRational expectedValue = new BigRational(7, new Fraction(0, 1));
-
-			BigRational result1 = new BigRational(seven);
-			BigRational result2 = (BigRational)seven;
-
-
-			Assert.AreEqual(expectedValue, result1);
-			Assert.AreEqual(expectedValue, result2);
-		}
-
-		[Test]
-		public void TestConvertFromNegativeMixedDecimal()
-		{
-			// Note that decimal works best with a fixed number of decimal points
-			// This will fail if we use the same numbers as used with the double test
-			decimal negativeOneAndOneHundredAndTwentyEigth = -129m / 128m;
-
-			BigRational expectedValue = new BigRational(-1, new Fraction(1, 128));
-			BigRational result = (BigRational)negativeOneAndOneHundredAndTwentyEigth;
-
-			Assert.AreEqual(expectedValue, result);
 		}
 
 		[Test]
@@ -112,7 +37,7 @@ namespace TestBigRational
 			BigRational negativeOneThird = new BigRational(-1, 3);
 			BigRational improperThirteenFourths = new BigRational(13, 4);
 			BigRational improperNegativeNineFifths = new BigRational(-9, 5);
-			BigRational largeRational = new BigRational(
+			BigRational largeFraction = new BigRational(
 				BigInteger.Parse("36979593578080793436251350559911534471745439536857510606701399088382738"),
 				BigInteger.Parse("2226645766662654219495625670010961737131540370393163559325615188894568125"));
 
@@ -120,19 +45,35 @@ namespace TestBigRational
 			double expectedValueNegativeOneThird = -1d / 3d;
 			double expectedValueImproperThirteenFourths = 3.25d;
 			double expectedValueImproperNegativeNineFifths = -1.8d;
-			double expectedValueLargeRational = 0.016607757790547271d;
+			double expectedValueLargeFraction = 0.016607757790547271d;
 
 			double resultOneSixteenth = (double)oneSixteenth;
 			double resultNegativeOneThird = (double)negativeOneThird;
 			double resultImproperThirteenFourths = (double)improperThirteenFourths;
 			double resultImproperNegativeNineFifths = (double)improperNegativeNineFifths;
-			double resultLargeRational = (double)largeRational;
+			double resultLargeFraction = (double)largeFraction;
 
-			Assert.AreEqual(expectedValueOneSixteenth, resultOneSixteenth, "1/16");
-			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird, "-1/3");
-			Assert.AreEqual(expectedValueImproperThirteenFourths, resultImproperThirteenFourths, "13/4");
-			Assert.AreEqual(expectedValueImproperNegativeNineFifths, resultImproperNegativeNineFifths, "-9/5");
-			Assert.AreEqual(expectedValueLargeRational, resultLargeRational, "(a large fraction)");
+			Assert.AreEqual(expectedValueOneSixteenth, resultOneSixteenth);
+			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
+			Assert.AreEqual(expectedValueImproperThirteenFourths, resultImproperThirteenFourths);
+			Assert.AreEqual(expectedValueImproperNegativeNineFifths, resultImproperNegativeNineFifths);
+			Assert.AreEqual(expectedValueLargeFraction, resultLargeFraction);
+		}
+
+		[Test]
+		public void TestConvertFromDouble()
+		{
+			double fifteenSixteenths = 0.9375d;
+			double negativeOneThird = -1d / 3d;
+
+			BigRational expectedValueFifteenSixteenths = new BigRational(15, 16);
+			BigRational expectedValueNegativeOneThird = new BigRational(-1, 3);
+
+			BigRational result1516 = (BigRational)fifteenSixteenths;
+			BigRational resultNeg13 = (BigRational)negativeOneThird;
+
+			Assert.AreEqual(expectedValueFifteenSixteenths, result1516);
+			Assert.AreEqual(expectedValueNegativeOneThird, resultNeg13);
 		}
 
 		[Test]
@@ -142,9 +83,9 @@ namespace TestBigRational
 			BigRational negativeOneThird = new BigRational(-1, 3);
 			BigRational improperThirteenFourths = new BigRational(13, 4);
 			BigRational improperNegativeNineFifths = new BigRational(-9, 5);
-			BigRational largeRational = new BigRational(
-							BigInteger.Parse("36979593578080793436251350559911534471745439536857510606701399088382738"),
-							BigInteger.Parse("2226645766662654219495625670010961737131540370393163559325615188894568125"));
+			BigRational largeFraction = new BigRational(
+				BigInteger.Parse("36979593578080793436251350559911534471745439536857510606701399088382738"),
+				BigInteger.Parse("2226645766662654219495625670010961737131540370393163559325615188894568125"));
 
 			decimal expectedValueOneSixteenth = 0.0625m;
 			decimal expectedValueNegativeOneThird = -1m / 3m;
@@ -156,23 +97,30 @@ namespace TestBigRational
 			decimal resultNegativeOneThird = (decimal)negativeOneThird;
 			decimal resultImproperThirteenFourths = (decimal)improperThirteenFourths;
 			decimal resultImproperNegativeNineFifths = (decimal)improperNegativeNineFifths;
-			decimal resultLargeFraction = (decimal)largeRational;
+			decimal resultLargeFraction = (decimal)largeFraction;
 
-			Assert.AreEqual(expectedValueOneSixteenth, resultOneSixteenth, "1/16");
-			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird, "-1/3");
-			Assert.AreEqual(expectedValueImproperThirteenFourths, resultImproperThirteenFourths, "13/4");
-			Assert.AreEqual(expectedValueImproperNegativeNineFifths, resultImproperNegativeNineFifths, "-9/5");
-			Assert.AreEqual(expectedValueLargeFraction, resultLargeFraction, "(a large fraction)");
+			Assert.AreEqual(expectedValueOneSixteenth, resultOneSixteenth);
+			Assert.AreEqual(expectedValueNegativeOneThird, resultNegativeOneThird);
+			Assert.AreEqual(expectedValueImproperThirteenFourths, resultImproperThirteenFourths);
+			Assert.AreEqual(expectedValueImproperNegativeNineFifths, resultImproperNegativeNineFifths);
+			Assert.AreEqual(expectedValueLargeFraction, resultLargeFraction);
 		}
 
 		[Test]
-		public void TestCastZeroFromFloat()
+		public void TestConvertFromDecimal()
 		{
-			float zero = 0;
-			BigRational result = (BigRational)zero;
-			BigRational expectedValue = BigRational.Zero;
+			// decimal converts best with a fixed number of decimal points
+			decimal fifteenSixteenths = 0.9375m;
+			decimal negativeOneOneHundredAndTwentyEight = -1m / 128m;
 
-			Assert.AreEqual(expectedValue, result);
+			BigRational expectedValueFifteenSixteenths = new BigRational(15, 16);
+			BigRational expectedValueNegativeOneThird = new BigRational(-1, 128);
+
+			BigRational result1516 = (BigRational)fifteenSixteenths;
+			BigRational resultNeg1128 = (BigRational)negativeOneOneHundredAndTwentyEight;
+
+			Assert.AreEqual(expectedValueFifteenSixteenths, result1516);
+			Assert.AreEqual(expectedValueNegativeOneThird, resultNeg1128);
 		}
 
 		[Test]
@@ -194,40 +142,6 @@ namespace TestBigRational
 
 			Assert.AreEqual(expectedValue, result);
 		}
-
-		[Test]
-		public void TestParseWholeNumber()
-		{
-			string toParse = "3";
-
-			BigRational result = BigRational.Parse(toParse);
-			BigRational expectedValue = new BigRational(3, 0, 1);
-
-			Assert.AreEqual(expectedValue, result);
-		}
-
-		[Test]
-		public void TestParseFraction()
-		{
-			string toParse = "1/3";
-
-			BigRational result = BigRational.Parse(toParse);
-			BigRational expectedValue = new BigRational(0, 1, 3);
-
-			Assert.AreEqual(expectedValue, result);
-		}
-
-		[Test]
-		public void TestParseMixedNumber()
-		{
-			string toParse = "-1 + 1/3";
-
-			BigRational result = BigRational.Parse(toParse);
-			BigRational expectedValue = new BigRational(-1, 1, 3);
-
-			Assert.AreEqual(expectedValue, result);
-		}
-
 
 		[Test]
 		public void TestUnaryPlusOperator()
