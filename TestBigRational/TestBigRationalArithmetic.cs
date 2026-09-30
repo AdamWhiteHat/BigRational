@@ -308,6 +308,17 @@ namespace TestBigRational
 		}
 
 		[Test]
+		public void TestPow_Negative()
+		{
+			BigRational negativeSevenThirds = new BigRational(-7, 3);
+
+			Fraction expected = new Fraction(-16807,243);
+			Fraction result = BigRational.Pow(negativeSevenThirds, 5).GetImproperFraction();
+
+			Assert.AreEqual(expected, result);
+		}
+
+		[Test]
 		public void TestSqrt001()
 		{
 			BigRational fourNinths = new BigRational(0, 4, 9); // sqrt(4/9) == 2/3

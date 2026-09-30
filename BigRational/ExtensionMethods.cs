@@ -134,13 +134,18 @@ namespace ExtendedNumerics.Internal
 		/// <summary> Returns the Nth root of a BigInteger with remainder. The value must be a positive integer and the parameter root must be greater than or equal to 1.</summary>
 		public static BigInteger NthRoot(this BigInteger source, int root, out BigInteger remainder)
 		{
-			if (root < 1) throw new Exception("Root must be greater than or equal to 1");
-			if (source.Sign == -1) throw new Exception("Value must be a positive integer");
+			if (root < 1)
+				throw new Exception("Root must be greater than or equal to 1");
+			if (source.Sign == -1)
+				throw new Exception("Value must be a positive integer");
 
 			remainder = 0;
-			if (source == BigInteger.One) { return BigInteger.One; }
-			if (source == BigInteger.Zero) { return BigInteger.Zero; }
-			if (root == 1) { return source; }
+			if (source == BigInteger.One)
+			{ return BigInteger.One; }
+			if (source == BigInteger.Zero)
+			{ return BigInteger.Zero; }
+			if (root == 1)
+			{ return source; }
 
 			BigInteger upperbound = source;
 			BigInteger lowerbound = BigInteger.Zero;
@@ -150,14 +155,17 @@ namespace ExtendedNumerics.Internal
 				BigInteger nval = (upperbound + lowerbound) >> 1;
 				BigInteger testPow = BigInteger.Pow(nval, root);
 
-				if (testPow > source) upperbound = nval;
-				if (testPow < source) lowerbound = nval;
+				if (testPow > source)
+					upperbound = nval;
+				if (testPow < source)
+					lowerbound = nval;
 				if (testPow == source)
 				{
 					lowerbound = nval;
 					break;
 				}
-				if (lowerbound == upperbound - 1) break;
+				if (lowerbound == upperbound - 1)
+					break;
 			}
 			remainder = source - BigInteger.Pow(lowerbound, root);
 			return lowerbound;
@@ -172,7 +180,7 @@ namespace ExtendedNumerics.Internal
 		/// <returns>The power of the base raised to the exponent.</returns>
 		public static BigInteger Pow(BigInteger @base, BigInteger exponent)
 		{
-			BigInteger b = BigInteger.Abs(@base);
+			BigInteger b = @base;
 			BigInteger exp = BigInteger.Abs(exponent);
 			BigInteger result = BigInteger.One;
 			while (exp > 0)
@@ -181,7 +189,8 @@ namespace ExtendedNumerics.Internal
 				{
 					result = (result * b);
 					exp -= 1;
-					if (exp == 0) { break; }
+					if (exp == 0)
+					{ break; }
 				}
 
 				b = (b * b); // Square

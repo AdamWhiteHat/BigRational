@@ -54,8 +54,8 @@ namespace TestBigRational
 		[Test]
 		public void TestAbs()
 		{
-			var value = new BigRational(-1, 2);
-			var result = BigRational.Abs(value).GetImproperFraction();
+			BigRational value = new BigRational(-1, 2);
+			Fraction result = BigRational.Abs(value).GetImproperFraction();
 
 			TestContext.WriteLine($"{result.Numerator}/{result.Denominator}");
 
