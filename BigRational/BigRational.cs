@@ -398,7 +398,7 @@ namespace ExtendedNumerics
 		public static BigRational Abs(BigRational rational)
 		{
 			BigRational input = BigRational.Reduce(rational);
-			return new BigRational(BigInteger.Abs(input.WholePart), input.FractionalPart);
+			return new BigRational(BigInteger.Abs(input.WholePart), Fraction.Abs(input.FractionalPart));
 		}
 
 		/// <summary>

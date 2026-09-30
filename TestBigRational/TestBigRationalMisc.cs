@@ -49,5 +49,18 @@ namespace TestBigRational
 			// Write result.
 			TestContext.WriteLine($"Time elapsed: {HelperMethods.FormatTimeSpan(timeElapsed)}");
 		}
+
+
+		[Test]
+		public void TestAbs()
+		{
+			var value = new BigRational(-1, 2);
+			var result = BigRational.Abs(value).GetImproperFraction();
+
+			TestContext.WriteLine($"{result.Numerator}/{result.Denominator}");
+
+			Assert.AreEqual(1, result.Numerator.Sign, "Numerator should be positive");
+			Assert.AreEqual(1, result.Denominator.Sign, "Denominator should be positive");
+		}
 	}
 }
